@@ -25,13 +25,13 @@ class CustomUserMangaer(BaseUserManager):
 class User(AbstractBaseUser):
     phone = models.BigIntegerField(unique=True)
     email = models.EmailField(max_length=50)
-    created_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     USERNAME_FIELD = 'email'
     objects = CustomUserMangaer()
 
     def __str__(self):
-        return self.username
+        return self.email
 
 class UserProfile(models.Model):
     MEMBERSHIP_STATUS = [('regular', 'Regular'), ('premium', 'Premium')]
