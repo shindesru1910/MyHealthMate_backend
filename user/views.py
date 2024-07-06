@@ -21,8 +21,8 @@ def create_user(request):
         return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=403)
     
     try:
-        phone = request.POST.get('phone')
-        email = request.POST.get('email')
+        phone = request.POST['phone']
+        email = request.POST.get['email']
         
         if not phone or not email:
             return JsonResponse({'msg': 'Phone and email are required', 'status': 400}, status=400)
@@ -56,6 +56,23 @@ def get_user(request):
         return JsonResponse({'data':str(e),'status':500},status = 200)
     
 @csrf_exempt
+def update_user(request):
+    if request.method != 'POST':
+        return JsonResponse({'msg': 'Invalid Request','status':403},status = 200)
+    try:
+        id = request.POST['id']
+        phone = request.POST['phone']
+        email = request.POST['email']
+
+        user = User.objects.get(id = id)
+        user.phone = phone
+        user.email = email
+        user.save()
+        return JsonResponse({'msg':'Data has been updated successfully','status':200},status = 200)
+    except Exception as e:
+        return JsonResponse({'msg':str(e),'status':500},status = 200)
+    
+@csrf_exempt
 def delete_user(request):
     if request.method != 'POST':
         return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=403)
@@ -80,12 +97,12 @@ def create_doctor(request):
     
     try:
         # Retrieve data from POST request
-        first_name = request.POST.get('first_name')
-        last_name = request.POST.get('last_name')
-        specialty = request.POST.get('specialty')
-        contact_info = request.POST.get('contact_info')
-        reviews = request.POST.get('reviews')
-        location = request.POST.get('location')
+        first_name = request.POST['first_name']
+        last_name = request.POST['last_name']
+        specialty = request.POST['specialty']
+        contact_info = request.POST['contact_info']
+        reviews = request.POST['reviews']
+        location = request.POST['location']
 
         # Create a Doctor object and save it
         doctor_obj = Doctor(first_name=first_name, last_name=last_name, specialty=specialty, contact_info=contact_info, reviews=reviews, location=location)
@@ -94,3 +111,65 @@ def create_doctor(request):
         return JsonResponse({'msg': 'Data has been successfully created', 'status': 200}, status=200)
     except Exception as e:
         return JsonResponse({'msg': str(e), 'status': 500}, status=500)
+    
+@csrf_exempt
+def get_doctor(request):
+    try:
+        doctors = Doctor.objects.all()
+        data = []
+
+        for doctor in doctors:
+            doctor_dict ={}
+            doctor_dict['id'] = doctor.id
+            doctor_dict['first_name'] = doctor.first_name
+            doctor_dict['last_name'] = doctor.last_name
+            doctor_dict['specialty'] = doctor.specialty
+            doctor_dict['contact_info'] = doctor.contact_info
+            doctor_dict['reviews'] = doctor.reviews
+            doctor_dict['location'] = doctor.location
+
+
+            data.append(doctor_dict)
+        return JsonResponse({'data':data,'status':200},status = 200)
+    except Exception as e:
+        return JsonResponse({'data':str(e),'status':500},status = 200)
+    
+@csrf_exempt
+def update_doctor(request):
+    if request.method != 'POST':
+        return JsonResponse({'msg': 'Invalid Request','status':403},status = 200)
+    try:
+        id = request.POST['id']
+        first_name = request.POST['first_name']
+        last_name = request.POST['last_name']
+        specialty = request.POST['specialty']
+        contact_info = request.POST['contact_info']
+        reviews = request.POST['reviews']
+        location = request.POST['location']
+
+        doctor = Doctor.objects.get(id = id)
+        doctor.first_name = first_name
+        doctor.last_name = last_name
+        doctor.specialty = specialty
+        doctor.contact_info = contact_info
+        doctor.reviews = reviews
+        doctor.location = location
+        doctor.save()
+        return JsonResponse({'msg':'Data has been updated successfully','status':200},status = 200)
+    except Exception as e:
+        return JsonResponse({'msg':str(e),'status':500},status = 200)
+    
+@csrf_exempt
+def delete_doctor(request):
+    if request.method != 'POST':
+        return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=403)
+    
+    try:
+        id = request.POST['id']
+
+        user = Doctor.objects.get(id = id)
+        user.delete()
+
+        return JsonResponse({'msg':'Data has been removed successfully','status':200},status=200)
+    except Exception as e:
+        return JsonResponse({'msg':str(e),'status':500},status=200)
