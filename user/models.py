@@ -35,16 +35,54 @@ class User(AbstractBaseUser):
 
 class UserProfile(models.Model):
     MEMBERSHIP_STATUS = [('regular', 'Regular'), ('premium', 'Premium')]
+    ACTIVITY_LEVEL_CHOICES = [
+    ('sedentary', 'Sedentary'),
+    ('lightly_active', 'Lightly Active'),
+    ('moderately_active', 'Moderately Active'),
+    ('very_active', 'Very Active'),
+    ('super_active', 'Super Active'),
+    ]
+    DIETARY_PREFERENCE_CHOICES = [
+    ('vegetarian', 'Vegetarian'),
+    ('vegan', 'Vegan'),
+    ('pescatarian', 'Pescatarian'),
+    ('gluten_free', 'Gluten-Free'),
+    ('keto', 'Keto'),
+    ('paleo', 'Paleo'),
+    ('low_carb', 'Low-Carb'),
+    ('high_protein', 'High-Protein'),
+    ('diabetic_friendly', 'Diabetic-Friendly'),
+    ('low_sodium', 'Low-Sodium'),
+    ('allergies', 'Allergies'),
+    ]
+
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
-    date_of_birth = models.DateField()
+    date_of_birth = models.DateField(null=False)
     gender = models.CharField(max_length=6, choices=[('male', 'Male'), ('female', 'Female'), ('other', 'Other')])
+    weight = models.FloatField(null=False, default=0)
+    height = models.FloatField(null=False, default=0)
+    activity_level = models.CharField(max_length=20, choices=ACTIVITY_LEVEL_CHOICES,null=True)
+    dietary_preferences = models.CharField(max_length=50, choices=DIETARY_PREFERENCE_CHOICES,null=True)
+    health_conditions = models.TextField(null=True)
     medical_history = models.TextField(blank=True, null=True)
     health_goals = models.TextField(blank=True, null=True)
     membership_status = models.CharField(max_length=7, choices=MEMBERSHIP_STATUS, default='regular')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+
+class DietPlan(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField(null=False,blank=True)
+    suitable_for = models.TextField(null=False,blank=True)  # JSON field or text to describe suitability
+
+class ExercisePlan(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField(null=False,blank=True)
+    suitable_for = models.TextField(null=False,blank=True)  # JSON field or text to describe suitability
+
 
 class Doctor(models.Model):
     first_name = models.CharField(max_length=50)
@@ -58,10 +96,12 @@ class Doctor(models.Model):
 
 class HealthRecommendation(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    diet_recommendations = models.TextField()
-    exercise_recommendations = models.TextField()
+    diet_plan = models.ForeignKey(DietPlan, on_delete=models.SET_NULL, null=True, blank=True)
+    exercise_plan = models.ForeignKey(ExercisePlan, on_delete=models.SET_NULL, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+
 
 class HealthReport(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
