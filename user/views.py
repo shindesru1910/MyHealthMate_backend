@@ -216,7 +216,7 @@ def get_health_recommendation(request):
         return JsonResponse({'msg': str(e), 'status': 500}, status=500)
 
 @csrf_exempt
-def update_health_recommendation_(request):
+def update_health_recommendation(request):
     # this will be comment of this API
     if request.method != 'POST':
         return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=403)
