@@ -227,7 +227,7 @@ def update_health_recommendation(request):
         
         recommendation = HealthRecommendation.objects.get(id=recommendation_id)
         recommendation.diet_plan = diet_plan
-    
+        recommendation.exercise_plan = exercise_plan
         recommendation.save()
         
         return JsonResponse({'msg': 'Health recommendation updated successfully', 'status': 200}, status=200)
