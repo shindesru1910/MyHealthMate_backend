@@ -88,7 +88,7 @@ def delete_user(request):
         return JsonResponse({'msg':str(e),'status':500},status=200)
 
 
-    
+#USER PROFILE BAAKI HAI 
 
 @csrf_exempt
 def create_doctor(request):
@@ -173,3 +173,364 @@ def delete_doctor(request):
         return JsonResponse({'msg':'Data has been removed successfully','status':200},status=200)
     except Exception as e:
         return JsonResponse({'msg':str(e),'status':500},status=200)
+    
+@csrf_exempt
+def create_health_recommendation(request):
+    if request.method != 'POST':
+        return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=403)
+    
+    try:
+        user_id = request.POST['user']
+        diet_recommendations = request.POST['diet_recommendations']
+        exercise_recommendations = request.POST['exercise_recommendations']
+        
+        user = User.objects.get(id=user_id)
+        recommendation = HealthRecommendation(
+            user=user, diet_recommendations=diet_recommendations,
+            exercise_recommendations=exercise_recommendations
+        )
+        recommendation.save()
+        
+        return JsonResponse({'msg': 'Health recommendation created successfully', 'status': 200}, status=200)
+    except Exception as e:
+        return JsonResponse({'msg': str(e), 'status': 500}, status=500)
+    
+@csrf_exempt
+def get_health_recommendation(request):
+    try:
+        recommendations = HealthRecommendation.objects.all()
+        data = []
+
+        for recommendation in recommendations:
+            recommendation_dict = {}
+            recommendation_dict['id'] = recommendation.id
+            recommendation_dict['user'] = recommendation.user.id
+            recommendation_dict['diet_recommendations'] = recommendation.diet_recommendations
+            recommendation_dict['exercise_recommendations'] = recommendation.exercise_recommendations
+            recommendation_dict['created_at'] = recommendation.created_at
+            recommendation_dict['updated_at'] = recommendation.updated_at
+
+            data.append(recommendation_dict)
+        return JsonResponse({'data': data, 'status': 200}, status=200)
+    except Exception as e:
+        return JsonResponse({'msg': str(e), 'status': 500}, status=500)
+
+@csrf_exempt
+def update_health_recommendation(request):
+    if request.method != 'POST':
+        return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=403)
+    
+    try:
+        recommendation_id = request.POST['id']
+        diet_recommendations = request.POST['diet_recommendations']
+        exercise_recommendations = request.POST['exercise_recommendations']
+        
+        recommendation = HealthRecommendation.objects.get(id=recommendation_id)
+        recommendation.diet_recommendations = diet_recommendations
+        recommendation.exercise_recommendations = exercise_recommendations
+        recommendation.save()
+        
+        return JsonResponse({'msg': 'Health recommendation updated successfully', 'status': 200}, status=200)
+    except Exception as e:
+        return JsonResponse({'msg': str(e), 'status': 500}, status=500)
+
+@csrf_exempt
+def delete_health_recommendation(request):
+    if request.method != 'POST':
+        return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=403)
+    
+    try:
+        recommendation_id = request.POST['id']
+        recommendation = HealthRecommendation.objects.get(id=recommendation_id)
+        recommendation.delete()
+        
+        return JsonResponse({'msg': 'Health recommendation deleted successfully', 'status': 200}, status=200)
+    except Exception as e:
+        return JsonResponse({'msg': str(e), 'status': 500}, status=500)
+
+@csrf_exempt
+def create_health_report(request):
+    if request.method != 'POST':
+        return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=403)
+    
+    try:
+        user_id = request.POST['user_id']
+        report_name = request.POST['report_name']
+        report_file = request.POST['report_file']
+
+        user = User.objects.get(id=user_id)
+        report = HealthReport(user=user, report_name=report_name, report_file=report_file)
+        report.save()
+
+        return JsonResponse({'msg': 'Data has been successfully created', 'status': 200}, status=200)
+    except Exception as e:
+        return JsonResponse({'msg': str(e), 'status': 500}, status=500)
+
+@csrf_exempt
+def get_health_report(request):
+    try:
+        reports = HealthReport.objects.all()
+        data = []
+
+        for report in reports:
+            report_dict = {}
+            report_dict['id'] = report.id
+            report_dict['user'] = report.user.id
+            report_dict['report_name'] = report.report_name
+            report_dict['report_file'] = report.report_file
+            report_dict['date'] = report.date
+
+            data.append(report_dict)
+        return JsonResponse({'data': data, 'status': 200}, status=200)
+    except Exception as e:
+        return JsonResponse({'msg': str(e), 'status': 500}, status=500)
+
+
+@csrf_exempt
+def update_health_report(request):
+    if request.method != 'POST':
+        return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=403)
+    try:
+        id = request.POST['id']
+        user_id = request.POST['user_id']
+        report_name = request.POST['report_name']
+        report_file = request.POST['report_file']
+
+        report = HealthReport.objects.get(id=id)
+        report.user = User.objects.get(id=user_id)
+        report.report_name = report_name
+        report.report_file = report_file
+        report.save()
+        return JsonResponse({'msg': 'Data has been updated successfully', 'status': 200}, status=200)
+    except Exception as e:
+        return JsonResponse({'msg': str(e), 'status': 500}, status=500)
+
+@csrf_exempt
+def delete_health_report(request):
+    if request.method != 'POST':
+        return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=403)
+    
+    try:
+        id = request.POST['id']
+        report = HealthReport.objects.get(id=id)
+        report.delete()
+        return JsonResponse({'msg': 'Data has been removed successfully', 'status': 200}, status=200)
+    except Exception as e:
+        return JsonResponse({'msg': str(e), 'status': 500}, status=500)
+
+# Appointment APIs
+@csrf_exempt
+def create_appointment(request):
+    if request.method != 'POST':
+        return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=403)
+    
+    try:
+        user_id = request.POST['user_id']
+        doctor_id = request.POST['doctor_id']
+        appointment_date = request.POST['appointment_date']
+        status = request.POST['status']
+
+        user = User.objects.get(id=user_id)
+        doctor = Doctor.objects.get(id=doctor_id)
+        appointment = Appointment(user=user, doctor=doctor, appointment_date=appointment_date, status=status)
+        appointment.save()
+
+        return JsonResponse({'msg': 'Data has been successfully created', 'status': 200}, status=200)
+    except Exception as e:
+        return JsonResponse({'msg': str(e), 'status': 500}, status=500)
+
+@csrf_exempt
+def get_appointment(request):
+    try:
+        appointments = Appointment.objects.all()
+        data = []
+
+        for appointment in appointments:
+            appointment_dict = {}
+            appointment_dict['id'] = appointment.id
+            appointment_dict['user'] = appointment.user.id
+            appointment_dict['doctor'] = appointment.doctor.id
+            appointment_dict['appointment_date'] = appointment.appointment_date
+            appointment_dict['status'] = appointment.status
+            appointment_dict['created_at'] = appointment.created_at
+            appointment_dict['updated_at'] = appointment.updated_at
+
+            data.append(appointment_dict)
+        return JsonResponse({'data': data, 'status': 200}, status=200)
+    except Exception as e:
+        return JsonResponse({'msg': str(e), 'status': 500}, status=500)
+
+
+@csrf_exempt
+def update_appointment(request):
+    if request.method != 'POST':
+        return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=403)
+    try:
+        id = request.POST['id']
+        user_id = request.POST['user_id']
+        doctor_id = request.POST['doctor_id']
+        appointment_date = request.POST['appointment_date']
+        status = request.POST['status']
+
+        appointment = Appointment.objects.get(id=id)
+        appointment.user = User.objects.get(id=user_id)
+        appointment.doctor = Doctor.objects.get(id=doctor_id)
+        appointment.appointment_date = appointment_date
+        appointment.status = status
+        appointment.save()
+        return JsonResponse({'msg': 'Data has been updated successfully', 'status': 200}, status=200)
+    except Exception as e:
+        return JsonResponse({'msg': str(e), 'status': 500}, status=500)
+
+@csrf_exempt
+def delete_appointment(request):
+    if request.method != 'POST':
+        return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=403)
+    
+    try:
+        id = request.POST['id']
+        appointment = Appointment.objects.get(id=id)
+        appointment.delete()
+        return JsonResponse({'msg': 'Data has been removed successfully', 'status': 200}, status=200)
+    except Exception as e:
+        return JsonResponse({'msg': str(e), 'status': 500}, status=500)
+
+# ExerciseReminder APIs
+@csrf_exempt
+def create_exercise_reminder(request):
+    if request.method != 'POST':
+        return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=403)
+    
+    try:
+        user_id = request.POST['user_id']
+        reminder_time = request.POST['reminder_time']
+        reminder_message = request.POST['reminder_message']
+
+        user = User.objects.get(id=user_id)
+        reminder = ExerciseReminder(user=user, reminder_time=reminder_time, reminder_message=reminder_message)
+        reminder.save()
+
+        return JsonResponse({'msg': 'Data has been successfully created', 'status': 200}, status=200)
+    except Exception as e:
+        return JsonResponse({'msg': str(e), 'status': 500}, status=500)
+
+@csrf_exempt
+def get_exercise_reminder(request):
+    try:
+        reminders = ExerciseReminder.objects.all()
+        data = []
+
+        for reminder in reminders:
+            reminder_dict = {}
+            reminder_dict['id'] = reminder.id
+            reminder_dict['user'] = reminder.user.id
+            reminder_dict['reminder_time'] = reminder.reminder_time
+            reminder_dict['reminder_message'] = reminder.reminder_message
+            reminder_dict['created_at'] = reminder.created_at
+            reminder_dict['updated_at'] = reminder.updated_at
+
+            data.append(reminder_dict)
+        return JsonResponse({'data': data, 'status': 200}, status=200)
+    except Exception as e:
+        return JsonResponse({'msg': str(e), 'status': 500}, status=500)
+
+
+@csrf_exempt
+def update_exercise_reminder(request):
+    if request.method != 'POST':
+        return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=403)
+    try:
+        id = request.POST['id']
+        user_id = request.POST['user_id']
+        reminder_time = request.POST['reminder_time']
+        reminder_message = request.POST['reminder_message']
+
+        reminder = ExerciseReminder.objects.get(id=id)
+        reminder.user = User.objects.get(id=user_id)
+        reminder.reminder_time = reminder_time
+        reminder.reminder_message = reminder_message
+        reminder.save()
+        return JsonResponse({'msg': 'Data has been updated successfully', 'status': 200}, status=200)
+    except Exception as e:
+        return JsonResponse({'msg': str(e), 'status': 500}, status=500)
+
+@csrf_exempt
+def delete_exercise_reminder(request):
+    if request.method != 'POST':
+        return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=403)
+    
+    try:
+        id = request.POST['id']
+        reminder = ExerciseReminder.objects.get(id=id)
+        reminder.delete()
+        return JsonResponse({'msg': 'Data has been removed successfully', 'status': 200}, status=200)
+    except Exception as e:
+        return JsonResponse({'msg': str(e), 'status': 500}, status=500)
+
+# Feedback APIs
+@csrf_exempt
+def create_feedback(request):
+    if request.method != 'POST':
+        return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=403)
+    
+    try:
+        user_id = request.POST['user_id']
+        feedback_text = request.POST['feedback_text']
+
+        user = User.objects.get(id=user_id)
+        feedback = Feedback(user=user, feedback_text=feedback_text)
+        feedback.save()
+
+        return JsonResponse({'msg': 'Data has been successfully created', 'status': 200}, status=200)
+    except Exception as e:
+        return JsonResponse({'msg': str(e), 'status': 500}, status=500)
+
+@csrf_exempt
+def get_feedback(request):
+    try:
+        feedbacks = Feedback.objects.all()
+        data = []
+
+        for feedback in feedbacks:
+            feedback_dict = {}
+            feedback_dict['id'] = feedback.id
+            feedback_dict['user'] = feedback.user.id
+            feedback_dict['feedback_text'] = feedback.feedback_text
+            feedback_dict['created_at'] = feedback.created_at
+
+            data.append(feedback_dict)
+        return JsonResponse({'data': data, 'status': 200}, status=200)
+    except Exception as e:
+        return JsonResponse({'msg': str(e), 'status': 500}, status=500)
+
+
+@csrf_exempt
+def update_feedback(request):
+    if request.method != 'POST':
+        return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=403)
+    try:
+        id = request.POST['id']
+        user_id = request.POST['user_id']
+        feedback_text = request.POST['feedback_text']
+
+        feedback = Feedback.objects.get(id=id)
+        feedback.user = User.objects.get(id=user_id)
+        feedback.feedback_text = feedback_text
+        feedback.save()
+        return JsonResponse({'msg': 'Data has been updated successfully', 'status': 200}, status=200)
+    except Exception as e:
+        return JsonResponse({'msg': str(e), 'status': 500}, status=500)
+
+@csrf_exempt
+def delete_feedback(request):
+    if request.method != 'POST':
+        return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=403)
+    
+    try:
+        id = request.POST['id']
+        feedback = Feedback.objects.get(id=id)
+        feedback.delete()
+        return JsonResponse({'msg': 'Data has been removed successfully', 'status': 200}, status=200)
+    except Exception as e:
+        return JsonResponse({'msg': str(e), 'status': 500}, status=500)
+
