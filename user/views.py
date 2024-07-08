@@ -222,12 +222,12 @@ def update_health_recommendation(request):
     
     try:
         recommendation_id = request.POST['id']
-        diet_recommendations = request.POST['diet_recommendations']
-        exercise_recommendations = request.POST['exercise_recommendations']
+        diet_plan = request.POST['diet_plan']
+        exercise_plan = request.POST['exercise_plan']
         
         recommendation = HealthRecommendation.objects.get(id=recommendation_id)
-        recommendation.diet_recommendations = diet_recommendations
-        recommendation.exercise_recommendations = exercise_recommendations
+        recommendation.diet_plan = diet_plan
+        recommendation.exercise_plan = exercise_plan
         recommendation.save()
         
         return JsonResponse({'msg': 'Health recommendation updated successfully', 'status': 200}, status=200)
