@@ -167,8 +167,8 @@ def delete_doctor(request):
     try:
         id = request.POST['id']
 
-        user = Doctor.objects.get(id = id)
-        user.delete()
+        doctor = Doctor.objects.get(id = id)
+        doctor.delete()
 
         return JsonResponse({'msg':'Data has been removed successfully','status':200},status=200)
     except Exception as e:
@@ -248,6 +248,77 @@ def delete_diet_plan(request):
     except Exception as e:
         return JsonResponse({'msg':str(e),'status':500},status=200)
 
+@csrf_exempt
+def create_exerciseplan(request):
+    if request.method != 'POST':
+        return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=403)
+    
+    try:
+        # Retrieve data from POST request
+        name = request.POST['name']
+        description = request.POST['description']
+        suitable_for = request.POST['suitable_for']
+
+        exercise_obj = ExercisePlan(name=name, description=description, suitable_for=suitable_for)
+        exercise_obj.save()
+
+        return JsonResponse({'msg': 'Data has been successfully created', 'status': 200}, status=200)
+    except Exception as e:
+        return JsonResponse({'msg': str(e), 'status': 500}, status=500)
+@csrf_exempt
+def get_exerciseplan(request):
+    try:
+        exercises = ExercisePlan.objects.all()
+        data = []
+
+        for exercise in exercises:
+            exercise_dict ={}
+            exercise_dict['id'] = exercise.id
+            exercise_dict['first_name'] = exercise.name
+            exercise_dict['last_name'] = exercise.description
+            exercise_dict['specialty'] = exercise.suitable_for
+
+
+            data.append(exercise_dict)
+        return JsonResponse({'data':data,'status':200},status = 200)
+    except Exception as e:
+        return JsonResponse({'data':str(e),'status':500},status = 200)
+    
+@csrf_exempt
+def delete_exerciseplan(request):
+    if request.method != 'POST':
+        return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=403)
+    
+    try:
+        id = request.POST['id']
+
+        exercise = ExercisePlan.objects.get(id = id)
+        exercise.delete()
+
+        return JsonResponse({'msg':'Data has been removed successfully','status':200},status=200)
+    except Exception as e:
+        return JsonResponse({'msg':str(e),'status':500},status=200)
+    
+@csrf_exempt
+def update_exerciseplan(request):
+    if request.method != 'POST':
+        return JsonResponse({'msg': 'Invalid Request','status':403},status = 200)
+    try:
+        id = request.POST['id']
+        name = request.POST['name']
+        description = request.POST['description']
+        suitable_for = request.POST['suitable_for']
+
+        exercise = ExercisePlan.objects.get(id = id)
+        exercise.name = name
+        exercise.description = description
+        exercise.suitable_for = suitable_for
+        exercise.save()
+        return JsonResponse({'msg':'Data has been updated successfully','status':200},status = 200)
+    except Exception as e:
+        return JsonResponse({'msg':str(e),'status':500},status = 200)
+    
+    
 @csrf_exempt
 def create_health_recommendation(request):
     if request.method != 'POST':
