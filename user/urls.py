@@ -14,6 +14,11 @@ urlpatterns = [
     path('update-doctor',views.update_doctor, name='update-doctor'),
     path('delete-doctor',views.delete_doctor, name='delete-doctor'),
     
+    path('create-diet-plan',views.create_diet_plan, name='create-diet-plan'),
+    path('get-diet-plan',views.get_diet_plan, name='get-diet-plan'),
+    path('update-diet-plan',views.update_diet_plan, name='update-diet-plan'),
+    path('delete-diet-plan',views.delete_diet_plan, name='delete-diet-plan'),
+
     path('create-health-recommendation',views.create_health_recommendation, name='create-health-recommendation'),
     path('get-health-recommendation',views.get_health_recommendation, name='get-health-recommendation'),
     path('update-health-recommendation',views.update_health_recommendation, name='update-health-recommendation'),

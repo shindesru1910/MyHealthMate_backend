@@ -22,7 +22,7 @@ def create_user(request):
     
     try:
         phone = request.POST['phone']
-        email = request.POST.get['email']
+        email = request.POST['email']
         
         if not phone or not email:
             return JsonResponse({'msg': 'Phone and email are required', 'status': 400}, status=400)
@@ -173,7 +173,81 @@ def delete_doctor(request):
         return JsonResponse({'msg':'Data has been removed successfully','status':200},status=200)
     except Exception as e:
         return JsonResponse({'msg':str(e),'status':500},status=200)
+
+@csrf_exempt
+def create_diet_plan(request):
+    if request.method != 'POST':
+        return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=403)
     
+    try:
+        name = request.POST['name']
+        description = request.POST['description']
+        suitable_for = request.POST['suitable_for']
+        
+        dietplan_obj = DietPlan(
+            name=name, 
+            description=description,
+            suitable_for=suitable_for
+            
+        )
+        dietplan_obj.save()
+
+        return JsonResponse({'msg': 'Diet Plan created successfully', 'status': 200}, status=200)
+    except Exception as e:
+        return JsonResponse({'msg': str(e), 'status': 500}, status=500)
+    
+@csrf_exempt
+def get_diet_plan(request):
+    try:
+        dietplan = DietPlan.objects.all()
+        data = []
+
+        for dietplan in dietplan:
+            dietplan_dict ={}
+            dietplan_dict['name'] = dietplan.name
+            dietplan_dict['description'] = dietplan.description
+            dietplan_dict['suitable_for'] = dietplan.suitable_for
+
+        
+            data.append(dietplan_dict)
+        return JsonResponse({'data':data,'status':200},status = 200)
+    except Exception as e:
+        return JsonResponse({'data':str(e),'status':500},status = 200)
+    
+@csrf_exempt
+def update_diet_plan(request):
+    if request.method != 'POST':
+        return JsonResponse({'msg': 'Invalid Request','status':403},status = 200)
+    try:
+        id = request.POST['id']
+        name = request.POST['name']
+        description = request.POST['description']
+        suitable_for = request.POST['suitable_for']
+    
+        dietplan = DietPlan.objects.get(id=id)
+        dietplan.name = name
+        dietplan.description = description
+        dietplan.suitable_for = suitable_for
+        dietplan.save()
+        return JsonResponse({'msg':'Data has been updated successfully','status':200},status = 200)
+    except Exception as e:
+        return JsonResponse({'msg':str(e),'status':500},status = 200)
+    
+@csrf_exempt
+def delete_diet_plan(request):
+    if request.method != 'POST':
+        return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=403)
+    
+    try:
+        id = request.POST['id']
+
+        dietplan = DietPlan.objects.get(id = id)
+        dietplan.delete()
+
+        return JsonResponse({'msg':'Data has been removed successfully','status':200},status=200)
+    except Exception as e:
+        return JsonResponse({'msg':str(e),'status':500},status=200)
+
 @csrf_exempt
 def create_health_recommendation(request):
     if request.method != 'POST':
@@ -181,13 +255,14 @@ def create_health_recommendation(request):
     
     try:
         user_id = request.POST['user']
-        diet_recommendations = request.POST['diet_recommendations']
-        exercise_recommendations = request.POST['exercise_recommendations']
+        diet_plan = request.POST['diet_plan']
+        exercise_plan = request.POST['exercise_plan']
         
         user = User.objects.get(id=user_id)
         recommendation = HealthRecommendation(
-            user=user, diet_recommendations=diet_recommendations,
-            exercise_recommendations=exercise_recommendations
+            user=user, 
+            diet_plan=diet_plan,
+            exercise_plan=exercise_plan
         )
         recommendation.save()
         
@@ -205,8 +280,8 @@ def get_health_recommendation(request):
             recommendation_dict = {}
             recommendation_dict['id'] = recommendation.id
             recommendation_dict['user'] = recommendation.user.id
-            recommendation_dict['diet_recommendations'] = recommendation.diet_recommendations
-            recommendation_dict['exercise_recommendations'] = recommendation.exercise_recommendations
+            recommendation_dict['diet_plan'] = recommendation.diet_plan
+            recommendation_dict['exercise_plan'] = recommendation.exercise_plan
             recommendation_dict['created_at'] = recommendation.created_at
             recommendation_dict['updated_at'] = recommendation.updated_at
 
