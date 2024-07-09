@@ -6,8 +6,7 @@ urlpatterns = [
     path('get-user',views.get_user, name='get-user'),
     path('update-user',views.update_user, name='update-user'),
     path('delete-user',views.delete_user, name='delete-user'),
-
-#UserProfile Baaki hai
+    
     path('create-user-profile',views.create_user_profile, name='create-user-profile'),
     path('get-user-profile',views.get_user_profile, name='get-user-profile'),
     path('update-user-profile',views.update_user_profile, name='update-user-profile'),
