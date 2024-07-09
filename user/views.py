@@ -91,6 +91,38 @@ def delete_user(request):
 #USER PROFILE BAAKI HAI 
 
 @csrf_exempt
+def create_user_profile(request):
+    if request.method != 'POST':
+        return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=403)
+    
+    try:
+        user_id = request.POST['user_id']
+        user = User.objects.get(id = user_id)
+        first_name  = request.POST['first_name']
+        last_name  = request.POST['last_name']
+        date_of_birth = request.POST['date_of_birth']
+        gender = request.POST['gender']
+        weight = request.POST['weight']
+        height = request.POST['height']
+        activity_levelight = request.POST['activity_level']
+        dietary_preferences = request.POST['dietary_preferences']
+        health_conditions = request.POST['health_conditions']
+        medical_history = request.POST['medical_history']
+        health_goals = request.POST['health_goals']
+        membership_status = request.POST['membership_status']
+        
+        
+        if UserProfile.objects.filter(user=user).exists():
+            return JsonResponse({'msg': 'User is already exists', 'status': 404}, status=404)
+
+        user_user = UserProfile.objects.create(user=user, first_name=first_name,last_name=last_name,date_of_birth=date_of_birth,gender=gender,weight=weight,height= height,activity_levelight= activity_levelight, dietary_preferences= dietary_preferences,health_conditions= health_conditions,health_goals=health_goals,membership_status= membership_status)
+        user_user.save()
+        return JsonResponse({'msg': 'Data has been successfully created', 'status': 200}, status=200)
+    except Exception as e:
+        return JsonResponse({'msg': str(e), 'status': 500}, status=500)
+
+
+@csrf_exempt
 def create_doctor(request):
     if request.method != 'POST':
         return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=403)

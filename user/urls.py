@@ -8,6 +8,8 @@ urlpatterns = [
     path('delete-user',views.delete_user, name='delete-user'),
 
 #UserProfile Baaki hai
+    path('create-user-profile',views.create_user_profile, name='create-user-profile'),
+
 
     path('create-doctor',views.create_doctor, name='create-doctor'),
     path('get-doctor',views.get_doctor, name='get-doctor'),
