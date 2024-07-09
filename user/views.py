@@ -104,22 +104,101 @@ def create_user_profile(request):
         gender = request.POST['gender']
         weight = request.POST['weight']
         height = request.POST['height']
-        activity_levelight = request.POST['activity_level']
+        activity_level = request.POST['activity_level']
         dietary_preferences = request.POST['dietary_preferences']
         health_conditions = request.POST['health_conditions']
         medical_history = request.POST['medical_history']
         health_goals = request.POST['health_goals']
         membership_status = request.POST['membership_status']
         
-        
-        if UserProfile.objects.filter(user=user).exists():
-            return JsonResponse({'msg': 'User is already exists', 'status': 404}, status=404)
-
-        user_user = UserProfile.objects.create(user=user, first_name=first_name,last_name=last_name,date_of_birth=date_of_birth,gender=gender,weight=weight,height= height,activity_levelight= activity_levelight, dietary_preferences= dietary_preferences,health_conditions= health_conditions,health_goals=health_goals,membership_status= membership_status)
+        user_user = UserProfile.objects.create(user=user, first_name=first_name,last_name=last_name,date_of_birth=date_of_birth,gender=gender,weight=weight,height= height,activity_level= activity_level, dietary_preferences= dietary_preferences,health_conditions= health_conditions,health_goals=health_goals,medical_history=medical_history,membership_status= membership_status)
         user_user.save()
         return JsonResponse({'msg': 'Data has been successfully created', 'status': 200}, status=200)
     except Exception as e:
         return JsonResponse({'msg': str(e), 'status': 500}, status=500)
+    
+@csrf_exempt
+def get_user_profile(request):
+    try:
+        users_profile = UserProfile.objects.all()
+        data = []
+
+        for user_profile in users_profile:
+            user_profile_dict ={}
+            user_profile_dict['id'] = user_profile.id
+            user_profile_dict['first_name'] = user_profile.first_name
+            user_profile_dict['last_name'] = user_profile.last_name
+            user_profile_dict['date_of_birth'] = user_profile.date_of_birth
+            user_profile_dict['gender'] = user_profile.gender
+            user_profile_dict['weight'] = user_profile.weight
+            user_profile_dict['height'] = user_profile.height
+            user_profile_dict['activity_level'] = user_profile.activity_level
+            user_profile_dict['dietary_preferences'] = user_profile.dietary_preferences
+            user_profile_dict['health_conditions'] = user_profile.health_conditions
+            user_profile_dict['medical_history'] = user_profile.medical_history
+            user_profile_dict['health_goals'] = user_profile.health_goals
+            user_profile_dict['health_goals'] = user_profile.health_goals
+            user_profile_dict['membership_status'] = user_profile.membership_status
+
+
+            data.append(user_profile_dict)
+        return JsonResponse({'data':data,'status':200},status = 200)
+    except Exception as e:
+        return JsonResponse({'data':str(e),'status':500},status = 200)
+    
+@csrf_exempt
+def update_user_profile(request):
+    if request.method != 'POST':
+        return JsonResponse({'msg': 'Invalid Request','status':403},status = 200)
+    try:
+        id = request.POST['id']
+        first_name = request.POST['first_name']
+        last_name = request.POST['last_name']
+        date_of_birth = request.POST['date_of_birth']
+        gender = request.POST['gender']
+        weight = request.POST['weight']
+        height = request.POST['height']
+        activity_level = request.POST['activity_level']
+        dietary_preferences = request.POST['dietary_preferences']
+        health_conditions = request.POST['health_conditions']
+        medical_history = request.POST['medical_history']
+        health_goals = request.POST['health_goals']
+        membership_status = request.POST['membership_status']
+
+        user_profile = UserProfile.objects.get(id = id)
+        user_profile.first_name = first_name
+        user_profile.last_name = last_name
+        user_profile.date_of_birth = date_of_birth
+        user_profile.gender = gender
+        user_profile.weight = weight
+        user_profile.height = height
+        user_profile.activity_level = activity_level
+        user_profile.dietary_preferences = dietary_preferences
+        user_profile.health_conditions = health_conditions
+        user_profile.medical_history = medical_history
+        user_profile.health_goals = health_goals
+        user_profile.membership_status = membership_status
+        user_profile.save()
+        return JsonResponse({'msg':'Data has been updated successfully','status':200},status = 200)
+    except Exception as e:
+        return JsonResponse({'msg':str(e),'status':500},status = 200)
+    
+@csrf_exempt
+def delete_user_profile(request):
+    if request.method != 'POST':
+        return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=403)
+    
+    try:
+        id = request.POST['id']
+
+        user_profile = UserProfile.objects.get(id = id)
+        user_profile.delete()
+
+        return JsonResponse({'msg':'Data has been removed successfully','status':200},status=200)
+    except Exception as e:
+        return JsonResponse({'msg':str(e),'status':500},status=200)
+
+
 
 
 @csrf_exempt
