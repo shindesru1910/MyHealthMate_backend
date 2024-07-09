@@ -1,17 +1,17 @@
 import pytz
-# import os
-# from django.db.models import Sum
-# import jwt
+from django.contrib.auth import authenticate, login
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
 from . models import *
+# import os
+# from django.db.models import Sum
+# import jwt
 # from datetime import datetime,timezone,timedelta
-from django.contrib.auth import authenticate, login
 # from .authentication import create_token
 # from firebase_admin import credentials
 # from firebase_admin import firestore
-from django.conf import settings
 
 ist_timezone = pytz.timezone('Asia/Kolkata')
 
@@ -88,7 +88,6 @@ def delete_user(request):
         return JsonResponse({'msg':str(e),'status':500},status=200)
 
 
-#USER PROFILE BAAKI HAI 
 
 @csrf_exempt
 def create_user_profile(request):
