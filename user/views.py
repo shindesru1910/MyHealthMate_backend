@@ -5,15 +5,32 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from . models import *
+from django.contrib.auth import authenticate
+from .authentication import create_token
 # import os
 # from django.db.models import Sum
 # import jwt
 # from datetime import datetime,timezone,timedelta
-# from .authentication import create_token
 # from firebase_admin import credentials
 # from firebase_admin import firestore
 
 ist_timezone = pytz.timezone('Asia/Kolkata')
+
+@csrf_exempt
+def login(request):
+    if request.method != 'POST':
+        return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=400)
+
+    email = request.POST.get('email')
+    password = request.POST.get('password')
+
+    user = authenticate(request, email=email, password=password)
+
+    if user is not None:
+        token = create_token(user.id, user.email, user.first_name + ' ' + user.last_name)
+        return JsonResponse({'status': 200, 'msg': 'Login Successfully', 'token': token}, status=200)
+    else:
+        return JsonResponse({'status': 400, 'msg': 'Check your email or password!!'}, status=200)
 
 @csrf_exempt
 def create_user(request):
