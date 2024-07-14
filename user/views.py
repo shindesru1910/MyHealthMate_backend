@@ -21,12 +21,13 @@ def login(request):
     if request.method != 'POST':
         return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=400)
 
-    email = request.POST.get('email')
-    password = request.POST.get('password')
+    email = request.POST['email']
+    password = request.POST['password']
 
     user = authenticate(request, email=email, password=password)
 
     if user is not None:
+        user_profile = UserProfile(user = user)
         token = create_token(user.id, user.email, user.first_name + ' ' + user.last_name)
         return JsonResponse({'status': 200, 'msg': 'Login Successfully', 'token': token}, status=200)
     else:
@@ -40,6 +41,10 @@ def create_user(request):
     try:
         phone = request.POST['phone']
         email = request.POST['email']
+        first_name = request.POST['first_name']
+        last_name = request.POST['last_name']
+        date_of_birth = request.POST['date_of_birth']
+        gender = request.POST['gender']
         
         if not phone or not email:
             return JsonResponse({'msg': 'Phone and email are required', 'status': 400}, status=400)
@@ -47,7 +52,7 @@ def create_user(request):
         if User.objects.filter(email=email).exists():
             return JsonResponse({'msg': 'Email already exists', 'status': 404}, status=404)
 
-        user_user = User.objects.create(email=email, phone=phone)
+        user_user = User.objects.create(email=email, phone=phone,first_name=first_name,last_name=last_name,date_of_birth=date_of_birth,gender=gender)
         user_user.save()
         return JsonResponse({'msg': 'Data has been successfully created', 'status': 200}, status=200)
     except Exception as e:
@@ -65,6 +70,10 @@ def get_user(request):
             user_dict['id'] = user.id
             user_dict['phone'] = user.phone
             user_dict['email'] = user.email
+            user_dict['first_name'] = user.first_name
+            user_dict['last_name'] = user.last_name
+            user_dict['date_of_birth'] = user.date_of_birth
+            user_dict['gender'] = user.gender
 
 
             data.append(user_dict)
@@ -80,10 +89,18 @@ def update_user(request):
         id = request.POST['id']
         phone = request.POST['phone']
         email = request.POST['email']
+        first_name = request.POST['first_name']
+        last_name = request.POST['last_name']
+        date_of_birth = request.POST['date_of_birth']
+        gender = request.POST['gender']
 
         user = User.objects.get(id = id)
         user.phone = phone
         user.email = email
+        user.first_name = first_name
+        user.last_name = last_name
+        user.date_of_birth = date_of_birth
+        user.gender = gender
         user.save()
         return JsonResponse({'msg':'Data has been updated successfully','status':200},status = 200)
     except Exception as e:
@@ -114,10 +131,6 @@ def create_user_profile(request):
     try:
         user_id = request.POST['user_id']
         user = User.objects.get(id = user_id)
-        first_name  = request.POST['first_name']
-        last_name  = request.POST['last_name']
-        date_of_birth = request.POST['date_of_birth']
-        gender = request.POST['gender']
         weight = request.POST['weight']
         height = request.POST['height']
         activity_level = request.POST['activity_level']
@@ -127,7 +140,7 @@ def create_user_profile(request):
         health_goals = request.POST['health_goals']
         membership_status = request.POST['membership_status']
         
-        user_user = UserProfile.objects.create(user=user, first_name=first_name,last_name=last_name,date_of_birth=date_of_birth,gender=gender,weight=weight,height= height,activity_level= activity_level, dietary_preferences= dietary_preferences,health_conditions= health_conditions,health_goals=health_goals,medical_history=medical_history,membership_status= membership_status)
+        user_user = UserProfile.objects.create(user=user,weight=weight,height= height,activity_level= activity_level, dietary_preferences= dietary_preferences,health_conditions= health_conditions,health_goals=health_goals,medical_history=medical_history,membership_status= membership_status)
         user_user.save()
         return JsonResponse({'msg': 'Data has been successfully created', 'status': 200}, status=200)
     except Exception as e:
@@ -142,10 +155,6 @@ def get_user_profile(request):
         for user_profile in users_profile:
             user_profile_dict ={}
             user_profile_dict['id'] = user_profile.id
-            user_profile_dict['first_name'] = user_profile.first_name
-            user_profile_dict['last_name'] = user_profile.last_name
-            user_profile_dict['date_of_birth'] = user_profile.date_of_birth
-            user_profile_dict['gender'] = user_profile.gender
             user_profile_dict['weight'] = user_profile.weight
             user_profile_dict['height'] = user_profile.height
             user_profile_dict['activity_level'] = user_profile.activity_level
@@ -168,10 +177,6 @@ def update_user_profile(request):
         return JsonResponse({'msg': 'Invalid Request','status':403},status = 200)
     try:
         id = request.POST['id']
-        first_name = request.POST['first_name']
-        last_name = request.POST['last_name']
-        date_of_birth = request.POST['date_of_birth']
-        gender = request.POST['gender']
         weight = request.POST['weight']
         height = request.POST['height']
         activity_level = request.POST['activity_level']
@@ -182,10 +187,6 @@ def update_user_profile(request):
         membership_status = request.POST['membership_status']
 
         user_profile = UserProfile.objects.get(id = id)
-        user_profile.first_name = first_name
-        user_profile.last_name = last_name
-        user_profile.date_of_birth = date_of_birth
-        user_profile.gender = gender
         user_profile.weight = weight
         user_profile.height = height
         user_profile.activity_level = activity_level
