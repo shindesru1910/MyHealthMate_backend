@@ -23,8 +23,12 @@ class CustomUserMangaer(BaseUserManager):
         return user
     
 class User(AbstractBaseUser):
-    phone = models.BigIntegerField(unique=True)
-    email = models.EmailField(max_length=50)
+    phone = models.BigIntegerField(null=False)
+    email = models.EmailField(max_length=50,unique=True)
+    first_name = models.CharField(max_length=50,null=True)
+    last_name = models.CharField(max_length=50,null= True)
+    date_of_birth = models.DateField(null=True,blank=True)
+    gender = models.CharField(max_length=6,null=True, choices=[('male', 'Male'), ('female', 'Female'), ('other', 'Other')])
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     USERNAME_FIELD = 'email'
@@ -57,10 +61,6 @@ class UserProfile(models.Model):
     ]
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    first_name = models.CharField(max_length=50)
-    last_name = models.CharField(max_length=50)
-    date_of_birth = models.DateField(null=False)
-    gender = models.CharField(max_length=6, choices=[('male', 'Male'), ('female', 'Female'), ('other', 'Other')])
     weight = models.FloatField(null=False, default=0)
     height = models.FloatField(null=False, default=0)
     activity_level = models.CharField(max_length=20, choices=ACTIVITY_LEVEL_CHOICES,null=True)

@@ -21,10 +21,10 @@ urlpatterns = [
     path('update-doctor',views.update_doctor, name='update-doctor'),
     path('delete-doctor',views.delete_doctor, name='delete-doctor'),
 
-    path('create-exerciseplan',views.create_exerciseplan, name='create-exerciseplan'),
-    path('get-exerciseplan',views.get_exerciseplan, name='get-exerciseplan'),
-    path('update-exerciseplan',views.update_exerciseplan, name='update-exerciseplan'),
-    path('delete-exerciseplan',views.delete_exerciseplan, name='delete-exerciseplan'),
+    path('create-exercise-plan',views.create_exerciseplan, name='create-exercise-plan'),
+    path('get-exercise-plan',views.get_exerciseplan, name='get-exercise-plan'),
+    path('update-exercise-plan',views.update_exerciseplan, name='update-exercise-plan'),
+    path('delete-exercise-plan',views.delete_exerciseplan, name='delete-exercise-plan'),
     
     path('create-diet-plan',views.create_diet_plan, name='create-diet-plan'),
     path('get-diet-plan',views.get_diet_plan, name='get-diet-plan'),
