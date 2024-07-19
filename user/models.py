@@ -4,9 +4,7 @@ from django.contrib.auth.models import(BaseUserManager, AbstractBaseUser)
 class CustomUserMangaer(BaseUserManager):
     def create_user(self,phone,email=None,password=None,address=None):
         user = self.model(
-            phone = phone,
-            email = email,
-            address = address,
+            email = email
         )
         user.set_password(password)
         user.save(using=self._db)

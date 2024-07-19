@@ -39,22 +39,49 @@ def create_user(request):
         return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=403)
     
     try:
-        phone = request.POST['phone']
-        email = request.POST['email']
-        first_name = request.POST['first_name']
-        last_name = request.POST['last_name']
-        date_of_birth = request.POST['date_of_birth']
-        gender = request.POST['gender']
-        
+        print("POST Request")
+        phone = request.POST.get('phone')
+        email = request.POST.get('email')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        date_of_birth = request.POST.get('date_of_birth')
+        gender = request.POST.get('gender')
+        password = request.POST.get('password')
+
+        weight = request.POST.get('weight')
+        height = request.POST.get('height')
+        activity_level = request.POST.get('activity_level')
+        dietary_preferences = request.POST.get('dietary_preferences')
+        health_conditions = request.POST.get('health_conditions')
+        medical_history = request.POST.get('medical_history')
+        health_goals = request.POST.get('health_goals')
+        membership_status = request.POST.get('membership_status')
+
+        # Validate required fields
         if not phone or not email:
             return JsonResponse({'msg': 'Phone and email are required', 'status': 400}, status=400)
         
+        # Check if email already exists
         if User.objects.filter(email=email).exists():
-            return JsonResponse({'msg': 'Email already exists', 'status': 404}, status=404)
+            return JsonResponse({'msg': 'Email already exists', 'status': 400}, status=400)
 
-        user_user = User.objects.create(email=email, phone=phone,first_name=first_name,last_name=last_name,date_of_birth=date_of_birth,gender=gender)
-        user_user.save()
-        return JsonResponse({'msg': 'Data has been successfully created', 'status': 200}, status=200)
+        # Create the User
+        user = User(phone=phone, email=email, first_name=first_name, last_name=last_name, 
+                    date_of_birth=date_of_birth, gender=gender)
+        user.set_password(password)
+        user.save()
+
+        # Create the UserProfile
+        user_profile = UserProfile(
+            user=user, weight=weight, height=height, activity_level=activity_level,
+            dietary_preferences=dietary_preferences, health_conditions=health_conditions,
+            medical_history=medical_history, health_goals=health_goals, 
+            membership_status=membership_status
+        )
+        user_profile.save()
+
+        return JsonResponse({'msg': 'User Created Successfully', 'status': 200}, status=200)
+    
     except Exception as e:
         return JsonResponse({'msg': str(e), 'status': 500}, status=500)
 
