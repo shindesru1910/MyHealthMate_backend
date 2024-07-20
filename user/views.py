@@ -28,7 +28,7 @@ def login(request):
 
     if user is not None:
         user_profile = UserProfile(user = user)
-        token = create_token(user.id, user.email, user.first_name + ' ' + user.last_name)
+        token = create_token(user.id, user.email, user.first_name + ' ' + user.last_name,user.is_admin)
         return JsonResponse({'status': 200, 'msg': 'Login Successfully', 'token': token}, status=200)
     else:
         return JsonResponse({'status': 400, 'msg': 'Check your email or password!!'}, status=200)
