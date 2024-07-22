@@ -1,3 +1,5 @@
+from django.forms import ValidationError
+from django.utils.dateparse import parse_datetime
 import pytz
 from django.contrib.auth import authenticate, login
 from django.shortcuts import render
@@ -328,6 +330,70 @@ def delete_doctor(request):
         return JsonResponse({'msg':'Data has been removed successfully','status':200},status=200)
     except Exception as e:
         return JsonResponse({'msg':str(e),'status':500},status=200)
+    
+# Get Speciality for Appointment form API
+@csrf_exempt
+def get_specialties(request):
+    if request.method != 'GET':
+        return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=200)
+    
+    try:
+        # Retrieve unique specialties from the Doctor model
+        specialties = Doctor.objects.values_list('specialty', flat=True).distinct()
+        return JsonResponse({'specialties': list(specialties), 'status': 200}, status=200)
+    except Exception as e:
+        return JsonResponse({'msg': str(e), 'status': 500}, status=200)
+    
+# For Submitting the Appointment form, Submit API
+# @csrf_exempt
+# def submit_appointment(request):
+#     if request.method == 'POST':
+#         # Parse the incoming data
+#         name = request.POST.get('name')
+#         email = request.POST.get('email')
+#         phone = request.POST.get('phone')
+#         date = request.POST.get('date')
+#         specialty = request.POST.get('speciality')
+#         doctor_id = request.POST.get('doctor')
+#         message = request.POST.get('message')
+
+#         # Validate the data
+#         if not all([name, email, date, specialty, doctor_id]):
+#             return JsonResponse({'error': 'Missing required fields'}, status=400)
+        
+#         try:
+#             user = User.objects.get(email=email)
+#             doctor = Doctor.objects.get(id=doctor_id)
+
+#             # Create the appointment
+#             appointment = Appointment(
+#                 user=user,
+#                 doctor=doctor,
+#                 appointment_date=date,
+#                 status='scheduled',
+#                 phone=phone,
+#                 specialty=specialty,
+#                 message=message
+#             )
+
+#             # Save the appointment
+#             appointment.clean()  # Call clean to perform validation
+#             appointment.save()
+
+#             # Return success response
+#             return JsonResponse({'status': 'OK'})
+#         except User.DoesNotExist:
+#             return JsonResponse({'error': 'User not found'}, status=404)
+#         except Doctor.DoesNotExist:
+#             return JsonResponse({'error': 'Doctor not found'}, status=404)
+#         except ValidationError as e:
+#             return JsonResponse({'error': str(e)}, status=400)
+#         except Exception as e:
+#             return JsonResponse({'error': f'An unexpected error occurred: {str(e)}'}, status=500)
+
+#     return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+
 
 @csrf_exempt
 def create_diet_plan(request):
@@ -787,24 +853,48 @@ def create_feedback(request):
     except Exception as e:
         return JsonResponse({'msg': str(e), 'status': 500}, status=500)
 
+# @csrf_exempt
+# def get_feedback(request):
+#     try:
+#         feedbacks = Feedback.objects.all()
+#         data = []
+
+#         for feedback in feedbacks:
+#             feedback_dict = {}
+#             feedback_dict['id'] = feedback.id
+#             feedback_dict['user'] = feedback.user.id
+#             feedback_dict['feedback_text'] = feedback.feedback_text
+#             feedback_dict['created_at'] = feedback.created_at
+
+#             data.append(feedback_dict)
+#         return JsonResponse({'data': data, 'status': 200}, status=200)
+#     except Exception as e:
+#         return JsonResponse({'msg': str(e), 'status': 500}, status=500)
+
+
+#new
 @csrf_exempt
 def get_feedback(request):
     try:
-        feedbacks = Feedback.objects.all()
+        feedbacks = Feedback.objects.select_related('user').all()  
         data = []
 
         for feedback in feedbacks:
-            feedback_dict = {}
-            feedback_dict['id'] = feedback.id
-            feedback_dict['user'] = feedback.user.id
-            feedback_dict['feedback_text'] = feedback.feedback_text
-            feedback_dict['created_at'] = feedback.created_at
-
+            feedback_dict = {
+                'id': feedback.id,
+                'user': {
+                    'id': feedback.user.id,
+                    'first_name': feedback.user.first_name,
+                    'last_name': feedback.user.last_name
+                },
+                'feedback_text': feedback.feedback_text,
+                'created_at': feedback.created_at
+            }
             data.append(feedback_dict)
+
         return JsonResponse({'data': data, 'status': 200}, status=200)
     except Exception as e:
         return JsonResponse({'msg': str(e), 'status': 500}, status=500)
-
 
 @csrf_exempt
 def update_feedback(request):
@@ -835,4 +925,5 @@ def delete_feedback(request):
         return JsonResponse({'msg': 'Data has been removed successfully', 'status': 200}, status=200)
     except Exception as e:
         return JsonResponse({'msg': str(e), 'status': 500}, status=500)
+
 

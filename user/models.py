@@ -120,6 +120,28 @@ class HealthReport(models.Model):
     report_file = models.CharField(max_length=255)
     date = models.DateTimeField(auto_now_add=True)
 
+# New Appointment class to store appointment data
+# class Appointment(models.Model):
+#     STATUS_CHOICES = [
+#         ('scheduled', 'Scheduled'),
+#         ('pending', 'Pending'),
+#         ('completed', 'Completed'),
+#         ('cancelled', 'Cancelled'),
+#     ]
+
+#     user = models.ForeignKey(User, on_delete=models.CASCADE)
+#     doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE)
+#     appointment_date = models.DateTimeField()  # Handles both date and time
+#     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='scheduled')
+#     phone = models.CharField(max_length=15, blank=True, null=True)  # For user's phone number
+#     specialty = models.CharField(max_length=100, blank=True, null=True)  # For the specialty
+#     message = models.TextField(blank=True, null=True)  # For any additional message
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     updated_at = models.DateTimeField(auto_now=True)
+
+#     def clean(self):
+#         #validation 
+#         pass
 class Appointment(models.Model):
     STATUS_CHOICES = [
         ('scheduled', 'Scheduled'),
