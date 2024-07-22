@@ -20,6 +20,10 @@ urlpatterns = [
     path('get-doctor',views.get_doctor, name='get-doctor'),
     path('update-doctor',views.update_doctor, name='update-doctor'),
     path('delete-doctor',views.delete_doctor, name='delete-doctor'),
+    #Get appointmemnt for appointment form
+    path('get-specialties',views.get_specialties, name="get_specialties"),
+    # Form Submission of Appointment
+    # path('submit-appointment',views.submit_appointment, name="submit-appointment"),
 
     path('create-exercise-plan',views.create_exerciseplan, name='create-exercise-plan'),
     path('get-exercise-plan',views.get_exerciseplan, name='get-exercise-plan'),
