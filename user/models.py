@@ -4,9 +4,7 @@ from django.contrib.auth.models import(BaseUserManager, AbstractBaseUser)
 class CustomUserMangaer(BaseUserManager):
     def create_user(self,phone,email=None,password=None,address=None):
         user = self.model(
-            phone = phone,
-            email = email,
-            address = address,
+            email = email
         )
         user.set_password(password)
         user.save(using=self._db)
@@ -29,6 +27,7 @@ class User(AbstractBaseUser):
     last_name = models.CharField(max_length=50,null= True)
     date_of_birth = models.DateField(null=True,blank=True)
     gender = models.CharField(max_length=6,null=True, choices=[('male', 'Male'), ('female', 'Female'), ('other', 'Other')])
+    is_admin = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     USERNAME_FIELD = 'email'
@@ -49,15 +48,27 @@ class UserProfile(models.Model):
     DIETARY_PREFERENCE_CHOICES = [
     ('vegetarian', 'Vegetarian'),
     ('vegan', 'Vegan'),
-    ('pescatarian', 'Pescatarian'),
     ('gluten_free', 'Gluten-Free'),
-    ('keto', 'Keto'),
-    ('paleo', 'Paleo'),
     ('low_carb', 'Low-Carb'),
     ('high_protein', 'High-Protein'),
     ('diabetic_friendly', 'Diabetic-Friendly'),
-    ('low_sodium', 'Low-Sodium'),
     ('allergies', 'Allergies'),
+    ]
+    HEALTH_CONDITION_CHOICES=[
+        ('hypertension','hypertension'),
+        ('diabetes','diabetes'),
+        ('asthma','asthma'),
+        ('heart_disease','heart_disease'),
+        ('allergy','allergy'),
+        ('thyroid','thyroid'),
+        ('cancer','cancer'),
+        ('kidney_disease','kidney_disease'),
+    ]
+    MEDICAL_HISTORY_CHOICES=[
+        ('previous_surgeries','previous_surgeries'),
+        ('chronic_illnesses','chronic_illnesses'),
+        ('medications','medications'),
+        ('allergies','allergies'),
     ]
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -65,8 +76,8 @@ class UserProfile(models.Model):
     height = models.FloatField(null=False, default=0)
     activity_level = models.CharField(max_length=20, choices=ACTIVITY_LEVEL_CHOICES,null=True)
     dietary_preferences = models.CharField(max_length=50, choices=DIETARY_PREFERENCE_CHOICES,null=True)
-    health_conditions = models.TextField(null=True)
-    medical_history = models.TextField(blank=True, null=True)
+    health_conditions = models.TextField(null=True, choices=HEALTH_CONDITION_CHOICES)
+    medical_history = models.TextField(blank=True, null=True,choices=MEDICAL_HISTORY_CHOICES)
     health_goals = models.TextField(blank=True, null=True)
     membership_status = models.CharField(max_length=7, choices=MEMBERSHIP_STATUS, default='regular')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -109,6 +120,28 @@ class HealthReport(models.Model):
     report_file = models.CharField(max_length=255)
     date = models.DateTimeField(auto_now_add=True)
 
+# New Appointment class to store appointment data
+# class Appointment(models.Model):
+#     STATUS_CHOICES = [
+#         ('scheduled', 'Scheduled'),
+#         ('pending', 'Pending'),
+#         ('completed', 'Completed'),
+#         ('cancelled', 'Cancelled'),
+#     ]
+
+#     user = models.ForeignKey(User, on_delete=models.CASCADE)
+#     doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE)
+#     appointment_date = models.DateTimeField()  # Handles both date and time
+#     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='scheduled')
+#     phone = models.CharField(max_length=15, blank=True, null=True)  # For user's phone number
+#     specialty = models.CharField(max_length=100, blank=True, null=True)  # For the specialty
+#     message = models.TextField(blank=True, null=True)  # For any additional message
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     updated_at = models.DateTimeField(auto_now=True)
+
+#     def clean(self):
+#         #validation 
+#         pass
 class Appointment(models.Model):
     STATUS_CHOICES = [
         ('scheduled', 'Scheduled'),

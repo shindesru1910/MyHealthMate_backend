@@ -1,3 +1,5 @@
+from django.forms import ValidationError
+from django.utils.dateparse import parse_datetime
 import pytz
 from django.contrib.auth import authenticate, login
 from django.shortcuts import render
@@ -28,7 +30,7 @@ def login(request):
 
     if user is not None:
         user_profile = UserProfile(user = user)
-        token = create_token(user.id, user.email, user.first_name + ' ' + user.last_name)
+        token = create_token(user.id, user.email, user.first_name + ' ' + user.last_name,user.is_admin)
         return JsonResponse({'status': 200, 'msg': 'Login Successfully', 'token': token}, status=200)
     else:
         return JsonResponse({'status': 400, 'msg': 'Check your email or password!!'}, status=200)
@@ -39,22 +41,49 @@ def create_user(request):
         return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=403)
     
     try:
-        phone = request.POST['phone']
-        email = request.POST['email']
-        first_name = request.POST['first_name']
-        last_name = request.POST['last_name']
-        date_of_birth = request.POST['date_of_birth']
-        gender = request.POST['gender']
-        
+        print("POST Request")
+        phone = request.POST.get('phone')
+        email = request.POST.get('email')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        date_of_birth = request.POST.get('date_of_birth')
+        gender = request.POST.get('gender')
+        password = request.POST.get('password')
+
+        weight = request.POST.get('weight')
+        height = request.POST.get('height')
+        activity_level = request.POST.get('activity_level')
+        dietary_preferences = request.POST.get('dietary_preferences')
+        health_conditions = request.POST.get('health_conditions')
+        medical_history = request.POST.get('medical_history')
+        health_goals = request.POST.get('health_goals')
+        membership_status = request.POST.get('membership_status')
+
+        # Validate required fields
         if not phone or not email:
             return JsonResponse({'msg': 'Phone and email are required', 'status': 400}, status=400)
         
+        # Check if email already exists
         if User.objects.filter(email=email).exists():
-            return JsonResponse({'msg': 'Email already exists', 'status': 404}, status=404)
+            return JsonResponse({'msg': 'Email already exists', 'status': 400}, status=400)
 
-        user_user = User.objects.create(email=email, phone=phone,first_name=first_name,last_name=last_name,date_of_birth=date_of_birth,gender=gender)
-        user_user.save()
-        return JsonResponse({'msg': 'Data has been successfully created', 'status': 200}, status=200)
+        # Create the User
+        user = User(phone=phone, email=email, first_name=first_name, last_name=last_name, 
+                    date_of_birth=date_of_birth, gender=gender)
+        user.set_password(password)
+        user.save()
+
+        # Create the UserProfile
+        user_profile = UserProfile(
+            user=user, weight=weight, height=height, activity_level=activity_level,
+            dietary_preferences=dietary_preferences, health_conditions=health_conditions,
+            medical_history=medical_history, health_goals=health_goals, 
+            membership_status=membership_status
+        )
+        user_profile.save()
+
+        return JsonResponse({'msg': 'User Created Successfully', 'status': 200}, status=200)
+    
     except Exception as e:
         return JsonResponse({'msg': str(e), 'status': 500}, status=500)
 
@@ -301,6 +330,70 @@ def delete_doctor(request):
         return JsonResponse({'msg':'Data has been removed successfully','status':200},status=200)
     except Exception as e:
         return JsonResponse({'msg':str(e),'status':500},status=200)
+    
+# Get Speciality for Appointment form API
+@csrf_exempt
+def get_specialties(request):
+    if request.method != 'GET':
+        return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=200)
+    
+    try:
+        # Retrieve unique specialties from the Doctor model
+        specialties = Doctor.objects.values_list('specialty', flat=True).distinct()
+        return JsonResponse({'specialties': list(specialties), 'status': 200}, status=200)
+    except Exception as e:
+        return JsonResponse({'msg': str(e), 'status': 500}, status=200)
+    
+# For Submitting the Appointment form, Submit API
+# @csrf_exempt
+# def submit_appointment(request):
+#     if request.method == 'POST':
+#         # Parse the incoming data
+#         name = request.POST.get('name')
+#         email = request.POST.get('email')
+#         phone = request.POST.get('phone')
+#         date = request.POST.get('date')
+#         specialty = request.POST.get('speciality')
+#         doctor_id = request.POST.get('doctor')
+#         message = request.POST.get('message')
+
+#         # Validate the data
+#         if not all([name, email, date, specialty, doctor_id]):
+#             return JsonResponse({'error': 'Missing required fields'}, status=400)
+        
+#         try:
+#             user = User.objects.get(email=email)
+#             doctor = Doctor.objects.get(id=doctor_id)
+
+#             # Create the appointment
+#             appointment = Appointment(
+#                 user=user,
+#                 doctor=doctor,
+#                 appointment_date=date,
+#                 status='scheduled',
+#                 phone=phone,
+#                 specialty=specialty,
+#                 message=message
+#             )
+
+#             # Save the appointment
+#             appointment.clean()  # Call clean to perform validation
+#             appointment.save()
+
+#             # Return success response
+#             return JsonResponse({'status': 'OK'})
+#         except User.DoesNotExist:
+#             return JsonResponse({'error': 'User not found'}, status=404)
+#         except Doctor.DoesNotExist:
+#             return JsonResponse({'error': 'Doctor not found'}, status=404)
+#         except ValidationError as e:
+#             return JsonResponse({'error': str(e)}, status=400)
+#         except Exception as e:
+#             return JsonResponse({'error': f'An unexpected error occurred: {str(e)}'}, status=500)
+
+#     return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+
 
 @csrf_exempt
 def create_diet_plan(request):
@@ -760,24 +853,48 @@ def create_feedback(request):
     except Exception as e:
         return JsonResponse({'msg': str(e), 'status': 500}, status=500)
 
+# @csrf_exempt
+# def get_feedback(request):
+#     try:
+#         feedbacks = Feedback.objects.all()
+#         data = []
+
+#         for feedback in feedbacks:
+#             feedback_dict = {}
+#             feedback_dict['id'] = feedback.id
+#             feedback_dict['user'] = feedback.user.id
+#             feedback_dict['feedback_text'] = feedback.feedback_text
+#             feedback_dict['created_at'] = feedback.created_at
+
+#             data.append(feedback_dict)
+#         return JsonResponse({'data': data, 'status': 200}, status=200)
+#     except Exception as e:
+#         return JsonResponse({'msg': str(e), 'status': 500}, status=500)
+
+
+#new
 @csrf_exempt
 def get_feedback(request):
     try:
-        feedbacks = Feedback.objects.all()
+        feedbacks = Feedback.objects.select_related('user').all()  
         data = []
 
         for feedback in feedbacks:
-            feedback_dict = {}
-            feedback_dict['id'] = feedback.id
-            feedback_dict['user'] = feedback.user.id
-            feedback_dict['feedback_text'] = feedback.feedback_text
-            feedback_dict['created_at'] = feedback.created_at
-
+            feedback_dict = {
+                'id': feedback.id,
+                'user': {
+                    'id': feedback.user.id,
+                    'first_name': feedback.user.first_name,
+                    'last_name': feedback.user.last_name
+                },
+                'feedback_text': feedback.feedback_text,
+                'created_at': feedback.created_at
+            }
             data.append(feedback_dict)
+
         return JsonResponse({'data': data, 'status': 200}, status=200)
     except Exception as e:
         return JsonResponse({'msg': str(e), 'status': 500}, status=500)
-
 
 @csrf_exempt
 def update_feedback(request):
@@ -808,4 +925,5 @@ def delete_feedback(request):
         return JsonResponse({'msg': 'Data has been removed successfully', 'status': 200}, status=200)
     except Exception as e:
         return JsonResponse({'msg': str(e), 'status': 500}, status=500)
+
 
