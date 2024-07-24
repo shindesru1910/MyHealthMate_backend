@@ -39,7 +39,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'user',
-    'corsheaders'
+    'corsheaders',
+    'django_cron',
+    # 'django_apscheduler',
+    # 'user.apps.UserConfig',
 ]
 
 AUTH_USER_MODEL = 'user.User'
@@ -141,4 +144,18 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
+
+# CRON_CLASSES = [
+#     'myapp.cron.SendRemindersCronJob',
+# ]
+
+
+
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = 'myhealthmate2002@gmail.com'
+# EMAIL_HOST_PASSWORD = 'sha_sru_man'
+# DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
