@@ -60,4 +60,7 @@ urlpatterns = [
     path('update-feedback',views.update_feedback, name='update-feedback'),
     path('delete-feedback',views.delete_feedback, name='delete-feedback'),
 
+    path('get-all-emails',views.get_all_emails, name='get-all-emails'),
+    path('set-reminder', views.set_reminder, name='set-reminder'),
+
     ]

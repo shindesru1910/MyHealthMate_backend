@@ -1,3 +1,4 @@
+import json
 from django.forms import ValidationError
 from django.utils.dateparse import parse_datetime
 import pytz
@@ -9,6 +10,10 @@ from django.conf import settings
 from . models import *
 from django.contrib.auth import authenticate
 from .authentication import create_token
+
+from django.utils.dateparse import parse_time
+from django.contrib.auth.decorators import login_required
+
 # import os
 # from django.db.models import Sum
 # import jwt
@@ -927,3 +932,25 @@ def delete_feedback(request):
         return JsonResponse({'msg': str(e), 'status': 500}, status=500)
 
 
+@csrf_exempt
+@login_required
+def set_reminder(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        title = data.get('title')
+        name = data.get('name')
+        time = parse_time(data.get('time'))
+
+        if not all([title, name, time]):
+            return JsonResponse({'status': 'error', 'message': 'Missing fields'}, status=400)
+
+        Reminder.objects.create(user=request.user, title=title, name=name, time=time)
+        return JsonResponse({'status': 'success'}, status=200)
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+
+@login_required
+def get_all_emails(request):
+    if request.method == 'GET':
+        emails = list(User.objects.values_list('email', flat=True))
+        return JsonResponse({'emails': emails}, status=200)
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
