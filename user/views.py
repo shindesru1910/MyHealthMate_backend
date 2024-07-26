@@ -100,25 +100,51 @@ def get_user(request):
         data = []
 
         for user in users:
-            user_dict ={}
-            user_dict['id'] = user.id
-            user_dict['phone'] = user.phone
-            user_dict['email'] = user.email
-            user_dict['first_name'] = user.first_name
-            user_dict['last_name'] = user.last_name
-            user_dict['date_of_birth'] = user.date_of_birth
-            user_dict['gender'] = user.gender
+            user_dict = {
+                'id': user.id,
+                'phone': user.phone,
+                'email': user.email,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'date_of_birth': user.date_of_birth,
+                'gender': user.gender,
+            }
 
+            try:
+                user_profile = user.userprofile
+                user_dict.update({
+                    'weight': user_profile.weight,
+                    'height': user_profile.height,
+                    'activity_level': user_profile.activity_level,
+                    'dietary_preferences': user_profile.dietary_preferences,
+                    'health_conditions': user_profile.health_conditions,
+                    'medical_history': user_profile.medical_history,
+                    'health_goals': user_profile.health_goals,
+                    'membership_status': user_profile.membership_status,
+                })
+            except UserProfile.DoesNotExist:
+                user_dict.update({
+                    'weight': None,
+                    'height': None,
+                    'activity_level': None,
+                    'dietary_preferences': None,
+                    'health_conditions': None,
+                    'medical_history': None,
+                    'health_goals': None,
+                    'membership_status': None,
+                })
 
             data.append(user_dict)
-        return JsonResponse({'data':data,'status':200},status = 200)
+        
+        return JsonResponse({'data': data, 'status': 200}, status=200)
     except Exception as e:
-        return JsonResponse({'data':str(e),'status':500},status = 200)
+        return JsonResponse({'data': str(e), 'status': 500}, status=200)
     
 @csrf_exempt
 def update_user(request):
     if request.method != 'POST':
         return JsonResponse({'msg': 'Invalid Request','status':403},status = 200)
+    
     try:
         id = request.POST['id']
         phone = request.POST['phone']
@@ -128,7 +154,17 @@ def update_user(request):
         date_of_birth = request.POST['date_of_birth']
         gender = request.POST['gender']
 
-        user = User.objects.get(id = id)
+        weight = request.POST['weight']
+        height = request.POST['height']
+        activity_level = request.POST['activity_level']
+        dietary_preferences = request.POST['dietary_preferences']
+        health_conditions = request.POST['health_conditions']
+        medical_history = request.POST['medical_history']
+        health_goals = request.POST['health_goals']
+        membership_status = request.POST['membership_status']
+
+        # Update User data
+        user = User.objects.get(id=id)
         user.phone = phone
         user.email = email
         user.first_name = first_name
@@ -136,9 +172,22 @@ def update_user(request):
         user.date_of_birth = date_of_birth
         user.gender = gender
         user.save()
-        return JsonResponse({'msg':'Data has been updated successfully','status':200},status = 200)
+
+        # Update or create UserProfile data
+        user_profile, created = UserProfile.objects.get_or_create(user=user)
+        user_profile.weight = weight
+        user_profile.height = height
+        user_profile.activity_level = activity_level
+        user_profile.dietary_preferences = dietary_preferences
+        user_profile.health_conditions = health_conditions
+        user_profile.medical_history = medical_history
+        user_profile.health_goals = health_goals
+        user_profile.membership_status = membership_status
+        user_profile.save()
+
+        return JsonResponse({'msg':'Data has been updated successfully','status':200},status=200)
     except Exception as e:
-        return JsonResponse({'msg':str(e),'status':500},status = 200)
+        return JsonResponse({'msg':str(e),'status':500},status=200)
     
 @csrf_exempt
 def delete_user(request):
