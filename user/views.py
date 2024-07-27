@@ -8,6 +8,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from . models import *
+
 from django.contrib.auth import authenticate
 from .authentication import create_token
 

@@ -38,8 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'user',
-    'corsheaders',
-    'django_cron',
+    # 'corsheaders',
+    # 'django_cron',
     # 'django_apscheduler',
     # 'user.apps.UserConfig',
 ]
