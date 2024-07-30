@@ -179,6 +179,7 @@ class Reminder(models.Model):
     name = models.CharField(max_length=255)
     time = models.TimeField()
     created_at = models.DateTimeField(auto_now_add=True)
+    sent = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.name} - {self.time}"
