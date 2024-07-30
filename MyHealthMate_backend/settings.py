@@ -25,7 +25,10 @@ SECRET_KEY = 'django-insecure-&&r49#pa4+8rejbk5gt(l7t6w-o53e*#!uvvl^yk5uo4$#@tff
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+#
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver']
+# LOGIN_REDIRECT_URL = '/'
+# LOGOUT_REDIRECT_URL = '/'
 
 
 # Application definition
@@ -38,7 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'user',
-    # 'corsheaders',
+    'corsheaders',
     # 'django_cron',
     # 'django_apscheduler',
     # 'user.apps.UserConfig',
