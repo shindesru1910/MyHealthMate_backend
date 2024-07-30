@@ -1,9 +1,16 @@
 from django.urls import path
 from . import views
+from django.contrib.auth import views as auth_views
+
 
 urlpatterns = [
     # path('',views.user,name='user'),
     path('login',views.login,name='login'),
+    
+    #
+    # path('accounts/login/', auth_views.LoginView.as_view(), name='login'),
+
+
 
     path('create-user',views.create_user, name='create-user'),
     path('get-user',views.get_user, name='get-user'),
