@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from django.views.generic import TemplateView
 
 urlpatterns = [
     # path('',views.user,name='user'),
@@ -63,4 +64,7 @@ urlpatterns = [
     path('get-all-emails',views.get_all_emails, name='get-all-emails'),
     path('set-reminder', views.set_reminder, name='set-reminder'),
 
+    path('password-reset-request', views.password_reset_request, name='password-reset-request'),
+    path('reset/<uidb64>/<token>/', views.password_reset_confirm, name='password-reset-confirm'),
+    path('', TemplateView.as_view(template_name='index.html')), 
     ]

@@ -8,6 +8,19 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from . models import *
+from django.contrib.auth.models import User
+from django.core.mail import send_mail
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.utils.encoding import force_bytes, force_str
+from django.template.loader import render_to_string
+from django.contrib.auth.tokens import default_token_generator
+from django.shortcuts import render, redirect
+from django.contrib.auth.forms import SetPasswordForm
+from django.contrib.auth import get_user_model
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_decode
+from django.http import JsonResponse
 
 from django.contrib.auth import authenticate
 from .authentication import create_token
@@ -15,12 +28,26 @@ from .authentication import create_token
 from django.utils.dateparse import parse_time
 from django.contrib.auth.decorators import login_required
 
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail, BadHeaderError
+from django.http import JsonResponse, HttpResponse
+from django.template.loader import render_to_string
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
+from django.contrib.auth.models import User
+import logging
+
 # import os
 # from django.db.models import Sum
 # import jwt
 # from datetime import datetime,timezone,timedelta
 # from firebase_admin import credentials
 # from firebase_admin import firestore
+
+
+logger = logging.getLogger(__name__)
 
 ist_timezone = pytz.timezone('Asia/Kolkata')
 
@@ -1004,3 +1031,50 @@ def get_all_emails(request):
         emails = list(User.objects.values_list('email', flat=True))
         return JsonResponse({'emails': emails}, status=200)
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+
+User = get_user_model()
+@csrf_exempt
+def password_reset_request(request):
+    if request.method == "POST":
+        email = request.POST.get("email")
+        logger.debug(f"Received password reset request for email: {email}")
+        associated_user = User.objects.filter(email=email).first()
+        if associated_user:
+            logger.debug(f"User found: {associated_user.email}")
+            subject = "Password Reset Requested"
+            email_template_name = "password_reset_email.html"
+            context = {
+                "email": associated_user.email,
+                "domain": request.get_host(),
+                "site_name": "MyHealthMate",
+                "uid": urlsafe_base64_encode(force_bytes(associated_user.pk)),
+                "token": default_token_generator.make_token(associated_user),
+                "protocol": 'http',
+            }
+            email = render_to_string(email_template_name, context)
+            try:
+                send_mail(subject, email, settings.EMAIL_HOST_USER, [associated_user.email])
+                logger.debug(f"Password reset email sent to {associated_user.email}")
+            except BadHeaderError:
+                logger.error("Invalid header found.")
+                return HttpResponse('Invalid header found.')
+            except Exception as e:
+                logger.error(f"An error occurred: {str(e)}")
+                return HttpResponse(f'An error occurred: {str(e)}')
+        else:
+            logger.debug("No user found with the provided email.")
+        return JsonResponse({"message": "If an account with the provided email exists, a password reset link has been sent."})
+
+@csrf_exempt   
+def password_reset_confirm(request, uidb64=None, token=None):
+    if request.method == 'POST':
+        uid = force_text(urlsafe_base64_decode(uidb64))  # type: ignore
+        user = User.objects.get(pk=uid)
+        form = SetPasswordForm(user, request.POST)
+        if form.is_valid():
+            form.save()
+            return JsonResponse({"message": "Password has been reset successfully."})
+        else:
+            return JsonResponse({"errors": form.errors}, status=400)
+    else:
+        return render(request, 'password_reset_confirm.html', {'uidb64': uidb64, 'token': token})
