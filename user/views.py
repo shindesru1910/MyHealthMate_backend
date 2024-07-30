@@ -1065,6 +1065,7 @@ def password_reset_request(request):
         email = request.POST.get("email")
         logger.debug(f"Received password reset request for email: {email}")
         associated_user = User.objects.filter(email=email).first()
+        print(associated_user)
         if associated_user:
             logger.debug(f"User found: {associated_user.email}")
             subject = "Password Reset Requested"
