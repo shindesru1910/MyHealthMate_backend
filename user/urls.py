@@ -72,6 +72,7 @@ urlpatterns = [
     path('set-reminder', views.set_reminder, name='set-reminder'),
 
     path('password-reset-request', views.password_reset_request, name='password-reset-request'),
-    path('reset/<uidb64>/<token>/', views.password_reset_confirm, name='password-reset-confirm'),
+    # path('reset/<uidb64>/<token>/', views.password_reset_confirm, name='password-reset-confirm'),
+    path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('', TemplateView.as_view(template_name='index.html')), 
     ]
