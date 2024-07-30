@@ -1,10 +1,11 @@
 import json
+import logging
 from django.forms import ValidationError
 from django.utils.dateparse import parse_datetime
 import pytz
 from django.contrib.auth import authenticate, login
 from django.shortcuts import render
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from . models import *
@@ -13,6 +14,8 @@ from django.contrib.auth import authenticate
 from .authentication import create_token
 
 from django.utils.dateparse import parse_time
+from django.core.mail import send_mail
+
 from django.contrib.auth.decorators import login_required
 
 # import os
@@ -21,6 +24,7 @@ from django.contrib.auth.decorators import login_required
 # from datetime import datetime,timezone,timedelta
 # from firebase_admin import credentials
 # from firebase_admin import firestore
+
 
 ist_timezone = pytz.timezone('Asia/Kolkata')
 
@@ -981,22 +985,45 @@ def delete_feedback(request):
     except Exception as e:
         return JsonResponse({'msg': str(e), 'status': 500}, status=500)
 
+logger = logging.getLogger(__name__)
 
 @csrf_exempt
 @login_required
 def set_reminder(request):
     if request.method == 'POST':
-        data = json.loads(request.body)
-        title = data.get('title')
-        name = data.get('name')
-        time = parse_time(data.get('time'))
+        try:
+            data = json.loads(request.body)
+            title = data.get('title')
+            name = data.get('name')
+            time = data.get('time')
 
-        if not all([title, name, time]):
-            return JsonResponse({'status': 'error', 'message': 'Missing fields'}, status=400)
+            if not all([title, name, time]):
+                return JsonResponse({'status': 'error', 'message': 'Missing fields'}, status=400)
 
-        Reminder.objects.create(user=request.user, title=title, name=name, time=time)
-        return JsonResponse({'status': 'success'}, status=200)
+            Reminder.objects.create(user=request.user, title=title, name=name, time=time)
+            return JsonResponse({'status': 'success'}, status=200)
+        except json.JSONDecodeError:
+            logger.error("JSON decode error: %s", request.body)
+            return JsonResponse({'status': 'error', 'message': 'Invalid JSON'}, status=400)
+        except Exception as e:
+            logger.error("Exception occurred: %s", e)
+            return JsonResponse({'status': 'error', 'message': 'Server error'}, status=500)
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+
+
+def send_reminder_email(to_email, subject, body):
+    try:
+        send_mail(
+            subject,
+            body,
+            settings.DEFAULT_FROM_EMAIL,
+            [to_email],
+            fail_silently=False,
+        )
+        print(f"Email sent to {to_email}")
+    except Exception as e:
+        print(f"Failed to send email to {to_email}. Error: {e}")
+
 
 @login_required
 def get_all_emails(request):
