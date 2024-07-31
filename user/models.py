@@ -1,5 +1,7 @@
+from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import(BaseUserManager, AbstractBaseUser)
+from django.contrib.auth.models import User
 
 class CustomUserMangaer(BaseUserManager):
     def create_user(self,phone,email=None,password=None,address=None):
@@ -84,6 +86,14 @@ class UserProfile(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
 
+class Profile(models.Model):
+    user = models.OneToOneField(User,on_delete=models.CASCADE)
+    forget_password_token = models.CharField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.user.email
+
 class DietPlan(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(null=False,blank=True)
@@ -162,6 +172,17 @@ class ExerciseReminder(models.Model):
     reminder_message = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+class Reminder(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    title = models.CharField(max_length=255)
+    name = models.CharField(max_length=255)
+    time = models.TimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    sent = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.name} - {self.time}"
 
 class Feedback(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

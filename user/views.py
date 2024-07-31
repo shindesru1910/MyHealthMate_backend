@@ -1,20 +1,56 @@
+import json
+import logging
 from django.forms import ValidationError
 from django.utils.dateparse import parse_datetime
 import pytz
 from django.contrib.auth import authenticate, login
 from django.shortcuts import render
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from . models import *
+from django.contrib.auth.models import User
+from django.core.mail import send_mail
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.utils.encoding import force_bytes, force_str
+from django.template.loader import render_to_string
+from django.contrib.auth.tokens import default_token_generator
+from django.shortcuts import render, redirect
+from django.contrib.auth.forms import SetPasswordForm
+from django.contrib.auth import get_user_model
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_decode
+from django.http import JsonResponse
+
 from django.contrib.auth import authenticate
 from .authentication import create_token
+
+from django.utils.dateparse import parse_time
+from django.core.mail import send_mail
+
+from django.contrib.auth.decorators import login_required
+
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail, BadHeaderError
+from django.http import JsonResponse, HttpResponse
+from django.template.loader import render_to_string
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
+from django.contrib.auth.models import User
+import logging
+
 # import os
 # from django.db.models import Sum
 # import jwt
 # from datetime import datetime,timezone,timedelta
 # from firebase_admin import credentials
 # from firebase_admin import firestore
+
+
+logger = logging.getLogger(__name__)
 
 ist_timezone = pytz.timezone('Asia/Kolkata')
 
@@ -95,25 +131,51 @@ def get_user(request):
         data = []
 
         for user in users:
-            user_dict ={}
-            user_dict['id'] = user.id
-            user_dict['phone'] = user.phone
-            user_dict['email'] = user.email
-            user_dict['first_name'] = user.first_name
-            user_dict['last_name'] = user.last_name
-            user_dict['date_of_birth'] = user.date_of_birth
-            user_dict['gender'] = user.gender
+            user_dict = {
+                'id': user.id,
+                'phone': user.phone,
+                'email': user.email,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'date_of_birth': user.date_of_birth,
+                'gender': user.gender,
+            }
 
+            try:
+                user_profile = user.userprofile
+                user_dict.update({
+                    'weight': user_profile.weight,
+                    'height': user_profile.height,
+                    'activity_level': user_profile.activity_level,
+                    'dietary_preferences': user_profile.dietary_preferences,
+                    'health_conditions': user_profile.health_conditions,
+                    'medical_history': user_profile.medical_history,
+                    'health_goals': user_profile.health_goals,
+                    'membership_status': user_profile.membership_status,
+                })
+            except UserProfile.DoesNotExist:
+                user_dict.update({
+                    'weight': None,
+                    'height': None,
+                    'activity_level': None,
+                    'dietary_preferences': None,
+                    'health_conditions': None,
+                    'medical_history': None,
+                    'health_goals': None,
+                    'membership_status': None,
+                })
 
             data.append(user_dict)
-        return JsonResponse({'data':data,'status':200},status = 200)
+        
+        return JsonResponse({'data': data, 'status': 200}, status=200)
     except Exception as e:
-        return JsonResponse({'data':str(e),'status':500},status = 200)
+        return JsonResponse({'data': str(e), 'status': 500}, status=200)
     
 @csrf_exempt
 def update_user(request):
     if request.method != 'POST':
         return JsonResponse({'msg': 'Invalid Request','status':403},status = 200)
+    
     try:
         id = request.POST['id']
         phone = request.POST['phone']
@@ -123,7 +185,17 @@ def update_user(request):
         date_of_birth = request.POST['date_of_birth']
         gender = request.POST['gender']
 
-        user = User.objects.get(id = id)
+        weight = request.POST['weight']
+        height = request.POST['height']
+        activity_level = request.POST['activity_level']
+        dietary_preferences = request.POST['dietary_preferences']
+        health_conditions = request.POST['health_conditions']
+        medical_history = request.POST['medical_history']
+        health_goals = request.POST['health_goals']
+        membership_status = request.POST['membership_status']
+
+        # Update User data
+        user = User.objects.get(id=id)
         user.phone = phone
         user.email = email
         user.first_name = first_name
@@ -131,9 +203,22 @@ def update_user(request):
         user.date_of_birth = date_of_birth
         user.gender = gender
         user.save()
-        return JsonResponse({'msg':'Data has been updated successfully','status':200},status = 200)
+
+        # Update or create UserProfile data
+        user_profile, created = UserProfile.objects.get_or_create(user=user)
+        user_profile.weight = weight
+        user_profile.height = height
+        user_profile.activity_level = activity_level
+        user_profile.dietary_preferences = dietary_preferences
+        user_profile.health_conditions = health_conditions
+        user_profile.medical_history = medical_history
+        user_profile.health_goals = health_goals
+        user_profile.membership_status = membership_status
+        user_profile.save()
+
+        return JsonResponse({'msg':'Data has been updated successfully','status':200},status=200)
     except Exception as e:
-        return JsonResponse({'msg':str(e),'status':500},status = 200)
+        return JsonResponse({'msg':str(e),'status':500},status=200)
     
 @csrf_exempt
 def delete_user(request):
@@ -926,4 +1011,97 @@ def delete_feedback(request):
     except Exception as e:
         return JsonResponse({'msg': str(e), 'status': 500}, status=500)
 
+logger = logging.getLogger(__name__)
 
+@csrf_exempt
+@login_required
+def set_reminder(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            title = data.get('title')
+            name = data.get('name')
+            time = data.get('time')
+
+            if not all([title, name, time]):
+                return JsonResponse({'status': 'error', 'message': 'Missing fields'}, status=400)
+
+            Reminder.objects.create(user=request.user, title=title, name=name, time=time)
+            return JsonResponse({'status': 'success'}, status=200)
+        except json.JSONDecodeError:
+            logger.error("JSON decode error: %s", request.body)
+            return JsonResponse({'status': 'error', 'message': 'Invalid JSON'}, status=400)
+        except Exception as e:
+            logger.error("Exception occurred: %s", e)
+            return JsonResponse({'status': 'error', 'message': 'Server error'}, status=500)
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+
+
+def send_reminder_email(to_email, subject, body):
+    try:
+        send_mail(
+            subject,
+            body,
+            settings.DEFAULT_FROM_EMAIL,
+            [to_email],
+            fail_silently=False,
+        )
+        print(f"Email sent to {to_email}")
+    except Exception as e:
+        print(f"Failed to send email to {to_email}. Error: {e}")
+
+
+@login_required
+def get_all_emails(request):
+    if request.method == 'GET':
+        emails = list(User.objects.values_list('email', flat=True))
+        return JsonResponse({'emails': emails}, status=200)
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+
+User = get_user_model()
+@csrf_exempt
+def password_reset_request(request):
+    if request.method == "POST":
+        email = request.POST.get("email")
+        logger.debug(f"Received password reset request for email: {email}")
+        associated_user = User.objects.filter(email=email).first()
+        print(associated_user)
+        if associated_user:
+            logger.debug(f"User found: {associated_user.email}")
+            subject = "Password Reset Requested"
+            email_template_name = "password_reset_email.html"
+            context = {
+                "email": associated_user.email,
+                "domain": request.get_host(),
+                "site_name": "MyHealthMate",
+                "uid": urlsafe_base64_encode(force_bytes(associated_user.pk)),
+                "token": default_token_generator.make_token(associated_user),
+                "protocol": 'http',
+            }
+            email = render_to_string(email_template_name, context)
+            try:
+                send_mail(subject, email, settings.EMAIL_HOST_USER, [associated_user.email])
+                logger.debug(f"Password reset email sent to {associated_user.email}")
+            except BadHeaderError:
+                logger.error("Invalid header found.")
+                return HttpResponse('Invalid header found.')
+            except Exception as e:
+                logger.error(f"An error occurred: {str(e)}")
+                return HttpResponse(f'An error occurred: {str(e)}')
+        else:
+            logger.debug("No user found with the provided email.")
+        return JsonResponse({"message": "If an account with the provided email exists, a password reset link has been sent."})
+
+@csrf_exempt   
+def password_reset_confirm(request, uidb64=None, token=None):
+    if request.method == 'POST':
+        uid = force_text(urlsafe_base64_decode(uidb64))  # type: ignore
+        user = User.objects.get(pk=uid)
+        form = SetPasswordForm(user, request.POST)
+        if form.is_valid():
+            form.save()
+            return JsonResponse({"message": "Password has been reset successfully."})
+        else:
+            return JsonResponse({"errors": form.errors}, status=400)
+    else:
+        return render(request, 'password_reset_confirm.html', {'uidb64': uidb64, 'token': token})

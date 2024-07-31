@@ -1,9 +1,17 @@
 from django.urls import path
 from . import views
+from django.views.generic import TemplateView
+from django.contrib.auth import views as auth_views
+
 
 urlpatterns = [
     # path('',views.user,name='user'),
     path('login',views.login,name='login'),
+    
+    #
+    # path('accounts/login/', auth_views.LoginView.as_view(), name='login'),
+
+
 
     path('create-user',views.create_user, name='create-user'),
     path('get-user',views.get_user, name='get-user'),
@@ -60,4 +68,11 @@ urlpatterns = [
     path('update-feedback',views.update_feedback, name='update-feedback'),
     path('delete-feedback',views.delete_feedback, name='delete-feedback'),
 
+    path('get-all-emails',views.get_all_emails, name='get-all-emails'),
+    path('set-reminder', views.set_reminder, name='set-reminder'),
+
+    path('password-reset-request', views.password_reset_request, name='password-reset-request'),
+    # path('reset/<uidb64>/<token>/', views.password_reset_confirm, name='password-reset-confirm'),
+    path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
+    path('', TemplateView.as_view(template_name='index.html')), 
     ]

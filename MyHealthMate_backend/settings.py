@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -37,12 +38,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
     'user',
-    'corsheaders'
+    'corsheaders',
+    # 'django_cron',
+    # 'django_apscheduler',
+    # 'user.apps.UserConfig',
 ]
 
 AUTH_USER_MODEL = 'user.User'
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -57,7 +61,7 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # Replace with your React development server URL
+    "http://localhost:3000",  # Add your frontend URL here
 ]
 
 ROOT_URLCONF = 'MyHealthMate_backend.urls'
@@ -65,7 +69,7 @@ ROOT_URLCONF = 'MyHealthMate_backend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'frontend', 'build')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -105,12 +109,18 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 4,  
+        },
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
     },
     {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+    {
+        'NAME': 'user.validators.CustomPasswordValidator',
     },
 ]
 
@@ -140,5 +150,26 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # settings.py
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
+]
+
+
+# CRON_CLASSES = [
+#     'myapp.cron.SendRemindersCronJob',
+# ]
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'myhealthmate2002@gmail.com'
+EMAIL_HOST_PASSWORD = 'aase utgi axcq aqwd'
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+STATIC_URL = '/static/'
+
+# Add this if you have a React build to serve
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'frontend', 'build', 'static'),
 ]
 
