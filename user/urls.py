@@ -76,4 +76,7 @@ urlpatterns = [
     # path('reset/<uidb64>/<token>/', views.password_reset_confirm, name='password-reset-confirm'),
     path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('', TemplateView.as_view(template_name='index.html')), 
+
+    path('get-exercise-recommendations', views.get_exercise_recommendations, name='get-exercise-recommendations'),
+
     ]
