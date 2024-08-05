@@ -78,5 +78,6 @@ urlpatterns = [
     path('', TemplateView.as_view(template_name='index.html')), 
 
     path('get-exercise-recommendations', views.get_exercise_recommendations, name='get-exercise-recommendations'),
+    path('get-diet-recommendations', views.get_diet_recommendations, name='get-diet-recommendations'),
 
     ]

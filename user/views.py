@@ -1726,3 +1726,997 @@ def get_exercise_recommendations(request):
 #         finally:
 #         # Any cleanup code (if needed) goes here
 #             print("Request processing complete")
+
+
+# first api for diet plan
+# @csrf_exempt
+# def get_diet_recommendations(request):
+#     if request.method == 'POST':
+#         try:
+#             # Parse the JSON data from the request body
+#             data = json.loads(request.body)
+#             dietary_preference = data.get('dietary_preference')
+#             health_condition = data.get('health_condition')
+#             medical_history = data.get('medical_history')
+
+#             # Sample diet recommendations
+#             recommendations = {
+#                 "vegetarian": {
+#                     "diabetes": {
+#                         "name": "Low Glycemic Vegetarian Diet",
+#                         "description": "A vegetarian diet focusing on low glycemic index foods to help manage blood sugar levels. Includes plenty of whole grains, legumes, vegetables, and fruits.",
+#                         "meals": {
+#                             "Breakfast": "Oatmeal with berries and a handful of nuts.",
+#                             "Lunch": "Quinoa salad with chickpeas, cucumber, and olive oil dressing.",
+#                             "Dinner": "Stir-fried tofu with mixed vegetables.",
+#                             "Snacks": "Apple slices with almond butter."
+#                         },
+#                         "videos": [
+#                             "https://www.youtube.com/watch?v=DiabetesDiet",
+#                             "https://www.youtube.com/watch?v=VegetarianRecipes"
+#                         ]
+#                     },
+#                     "heart_disease": {
+#                         "name": "Heart-Healthy Vegetarian Diet",
+#                         "description": "A vegetarian diet designed to reduce cholesterol and improve heart health.",
+#                         "meals": {
+#                             "Breakfast": "Smoothie with spinach, banana, and flax seeds.",
+#                             "Lunch": "Lentil soup with a side of whole-grain bread.",
+#                             "Dinner": "Grilled portobello mushrooms with quinoa and steamed broccoli.",
+#                             "Snacks": "Carrot sticks with hummus."
+#                         },
+#                         "videos": [
+#                             "https://www.youtube.com/watch?v=HeartDiet",
+#                             "https://www.youtube.com/watch?v=VegetarianHeart"
+#                         ]
+#                     }
+#                 },
+#                 "vegan": {
+#                     "cancer": {
+#                         "name": "Anti-Cancer Vegan Diet",
+#                         "description": "A vegan diet rich in antioxidants and fiber to support cancer prevention and recovery.",
+#                         "meals": {
+#                             "Breakfast": "Green smoothie with kale, berries, and chia seeds.",
+#                             "Lunch": "Quinoa and black bean salad with avocado.",
+#                             "Dinner": "Stuffed bell peppers with lentils and vegetables.",
+#                             "Snacks": "Mixed nuts and a piece of fruit."
+#                         },
+#                         "videos": [
+#                             "https://www.youtube.com/watch?v=VeganCancer",
+#                             "https://www.youtube.com/watch?v=AntiCancerDiet"
+#                         ]
+#                     },
+#                     "allergy": {
+#                         "name": "Allergy-Friendly Vegan Diet",
+#                         "description": "A vegan diet free from common allergens like nuts, gluten, and soy.",
+#                         "meals": {
+#                             "Breakfast": "Buckwheat pancakes with fresh fruit.",
+#                             "Lunch": "Sweet potato and chickpea bowl with tahini dressing.",
+#                             "Dinner": "Zucchini noodles with tomato sauce and roasted vegetables.",
+#                             "Snacks": "Rice cakes with avocado."
+#                         },
+#                         "videos": [
+#                             "https://www.youtube.com/watch?v=VeganAllergy",
+#                             "https://www.youtube.com/watch?v=AllergyFriendly"
+#                         ]
+#                     }
+#                 },
+#                 "gluten_free": {
+#                     "asthma": {
+#                         "name": "Anti-Inflammatory Gluten-Free Diet",
+#                         "description": "A gluten-free diet that includes anti-inflammatory foods to help reduce asthma symptoms.",
+#                         "meals": {
+#                             "Breakfast": "Scrambled eggs with spinach and avocado.",
+#                             "Lunch": "Brown rice salad with black beans, corn, and cilantro-lime dressing.",
+#                             "Dinner": "Grilled salmon with sweet potato and green beans.",
+#                             "Snacks": "Blueberries with a handful of walnuts."
+#                         },
+#                         "videos": [
+#                             "https://www.youtube.com/watch?v=AsthmaDiet",
+#                             "https://www.youtube.com/watch?v=GlutenFreeRecipes"
+#                         ]
+#                     },
+#                     "thyroid": {
+#                         "name": "Thyroid Support Gluten-Free Diet",
+#                         "description": "A gluten-free diet designed to support thyroid function with nutrient-rich foods.",
+#                         "meals": {
+#                             "Breakfast": "Greek yogurt with chia seeds and a few slices of cucumber.",
+#                             "Lunch": "Grilled chicken breast with a side of steamed asparagus.",
+#                             "Dinner": "Baked cod with cauliflower mash and sautéed spinach.",
+#                             "Snacks": "Brazil nuts (rich in selenium)."
+#                         },
+#                         "videos": [
+#                             "https://www.youtube.com/watch?v=ThyroidDiet",
+#                             "https://www.youtube.com/watch?v=GlutenFreeSupport"
+#                         ]
+#                     }
+#                 },
+#                 "low_carb": {
+#                     "kidney_disease": {
+#                         "name": "Kidney-Friendly Low-Carb Diet",
+#                         "description": "A low-carb diet designed to support kidney health while managing carbohydrate intake.",
+#                         "meals": {
+#                             "Breakfast": "Scrambled eggs with bell peppers and onions.",
+#                             "Lunch": "Turkey and avocado lettuce wraps.",
+#                             "Dinner": "Grilled chicken with steamed broccoli and cauliflower rice.",
+#                             "Snacks": "Cucumber slices with hummus."
+#                         },
+#                         "videos": [
+#                             "https://www.youtube.com/watch?v=KidneyDiet",
+#                             "https://www.youtube.com/watch?v=LowCarbRecipes"
+#                         ]
+#                     },
+#                     "heart_disease": {
+#                         "name": "Heart-Healthy Low-Carb Diet",
+#                         "description": "A low-carb diet rich in heart-healthy fats and lean proteins.",
+#                         "meals": {
+#                             "Breakfast": "Smoothie with avocado, spinach, and protein powder.",
+#                             "Lunch": "Grilled salmon with a side of mixed greens and olive oil dressing.",
+#                             "Dinner": "Roasted chicken with asparagus and a side of mashed cauliflower.",
+#                             "Snacks": "Nuts and seeds with a piece of fruit."
+#                         },
+#                         "videos": [
+#                             "https://www.youtube.com/watch?v=HeartLowCarb",
+#                             "https://www.youtube.com/watch?v=LowCarbHeart"
+#                         ]
+#                     }
+#                 },
+#                 "high_protein": {
+#                     "previous_surgeries": {
+#                         "name": "Post-Surgery High-Protein Diet",
+#                         "description": "A high-protein diet to support recovery and tissue repair after surgery.",
+#                         "meals": {
+#                             "Breakfast": "Scrambled eggs with turkey bacon.",
+#                             "Lunch": "Grilled chicken breast with quinoa and steamed vegetables.",
+#                             "Dinner": "Baked fish with sweet potato and green beans.",
+#                             "Snacks": "Greek yogurt with a handful of almonds."
+#                         },
+#                         "videos": [
+#                             "https://www.youtube.com/watch?v=PostSurgeryDiet",
+#                             "https://www.youtube.com/watch?v=HighProteinRecovery"
+#                         ]
+#                     },
+#                     "chronic_illnesses": {
+#                         "name": "Chronic Illness Support High-Protein Diet",
+#                         "description": "A diet rich in protein to support overall health and manage chronic illnesses.",
+#                         "meals": {
+#                             "Breakfast": "Protein smoothie with whey protein, spinach, and berries.",
+#                             "Lunch": "Lean beef or turkey with a side of roasted vegetables.",
+#                             "Dinner": "Chicken stir-fry with mixed vegetables and quinoa.",
+#                             "Snacks": "Cottage cheese with sliced peaches."
+#                         },
+#                         "videos": [
+#                             "https://www.youtube.com/watch?v=ChronicIllnessDiet",
+#                             "https://www.youtube.com/watch?v=HighProteinHealth"
+#                         ]
+#                     }
+#                 },
+#                 "diabetic_friendly": {
+#                     "medications": {
+#                         "name": "Diabetic-Friendly Diet for Medication Management",
+#                         "description": "A diet designed to support blood sugar management while considering medication effects.",
+#                         "meals": {
+#                             "Breakfast": "Steel-cut oats with cinnamon and walnuts.",
+#                             "Lunch": "Chicken and vegetable soup with a side salad.",
+#                             "Dinner": "Grilled turkey with sautéed spinach and whole-grain pasta.",
+#                             "Snacks": "Celery sticks with peanut butter."
+#                         },
+#                         "videos": [
+#                             "https://www.youtube.com/watch?v=DiabeticDiet",
+#                             "https://www.youtube.com/watch?v=MedicationFriendly"
+#                         ]
+#                     },
+#                     "allergies": {
+#                         "name": "Allergy-Friendly Diabetic Diet",
+#                         "description": "A diabetic diet tailored to avoid allergens while managing blood sugar levels.",
+#                         "meals": {
+#                             "Breakfast": "Quinoa porridge with almond milk and berries.",
+#                             "Lunch": "Grilled chicken with a side of roasted Brussels sprouts.",
+#                             "Dinner": "Baked salmon with steamed green beans and brown rice.",
+#                             "Snacks": "Sliced apples with sunflower seed butter."
+#                         },
+#                         "videos": [
+#                             "https://www.youtube.com/watch?v=DiabeticAllergy",
+#                             "https://www.youtube.com/watch?v=AllergyDiabetic"
+#                         ]
+#                     }
+#                 }
+#             }
+
+#             # Return recommendations based on the user's dietary preference, health condition, and medical history
+#             if dietary_preference in recommendations:
+#                 if health_condition in recommendations[dietary_preference]:
+#                     return JsonResponse(recommendations[dietary_preference][health_condition], safe=False)
+#                 else:
+#                     return JsonResponse({"error": "Health condition not supported"}, status=400)
+#             else:
+#                 return JsonResponse({"error": "Dietary preference not supported"}, status=400)
+
+#         except json.JSONDecodeError:
+#             return JsonResponse({"error": "Invalid JSON"}, status=400)
+#     else:
+#         return JsonResponse({"error": "Invalid request method"}, status=405)
+
+
+
+# dietery_preference and health_condtion api
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+
+@csrf_exempt
+def get_diet_recommendations(request):
+    if request.method == 'POST':
+        try:
+            # Parse the JSON data from the request body
+            data = json.loads(request.body)
+            dietary_preference = data.get('dietary_preference')
+            health_condition = data.get('health_condition')
+            
+            # Detailed diet recommendations
+            dietary_recommendations = {
+                "Vegetarian": {
+                    "Breakfast": [
+                        "Smoothie Bowl: Spinach, banana, almond milk, protein powder, topped with berries, nuts, seeds.",
+                        "Overnight Oats: Rolled oats, almond milk, chia seeds, topped with fruits and nuts.",
+                        "Avocado Toast: Whole-grain toast with mashed avocado, cherry tomatoes.",
+                        "Greek Yogurt Parfait: Greek yogurt, granola, fresh berries, nuts."
+                    ],
+                    "Lunch": [
+                        "Quinoa Salad: Quinoa, black beans, corn, tomatoes, avocado, lime dressing.",
+                        "Chickpea Salad: Mashed chickpeas, vegan mayo, celery, onion, lettuce.",
+                        "Stuffed Bell Peppers: Bell peppers filled with rice, chickpeas, spinach, feta.",
+                        "Sweet Potato Bowl: Roasted sweet potatoes, black beans, avocado, salsa, Greek yogurt."
+                    ],
+                    "Dinner": [
+                        "Vegetable Stir-Fry: Mixed veggies, tofu, soy sauce, over brown rice.",
+                        "Lentil Soup: Lentils, carrots, celery, tomatoes, spinach.",
+                        "Vegetable Curry: Mixed veggies, chickpeas, coconut milk, served with rice.",
+                        "Spaghetti Marinara: Whole-grain spaghetti with marinara sauce, side salad."
+                    ],
+                    "Snacks": [
+                        "Apple Slices with Almond Butter",
+                        "Carrot and Celery Sticks with Hummus",
+                        "Chia Pudding: Chia seeds soaked in almond milk, topped with fruit.",
+                        "Trail Mix: Nuts, seeds, dried fruit.",
+                        "Greek Yogurt with Fruit",
+                        "Nuts and Seeds"
+                    ]
+                },
+                "Vegan": {
+                    "Breakfast": [
+                        "Smoothie Bowl: Kale, banana, almond milk, chia seeds, topped with berries and granola.",
+                        "Chia Pudding: Chia seeds soaked in coconut milk, topped with fresh fruit and nuts.",
+                        "Vegan Pancakes: Made with almond milk, served with maple syrup and fruit.",
+                        "Avocado Toast: Whole-grain toast with mashed avocado, cherry tomatoes, and a sprinkle of nutritional yeast."
+                    ],
+                    "Lunch": [
+                        "Quinoa Salad: Quinoa, black beans, corn, avocado, cherry tomatoes, lime dressing.",
+                        "Vegan Wrap: Whole-grain wrap with hummus, shredded carrots, cucumber, spinach, and avocado.",
+                        "Stuffed Sweet Potatoes: Sweet potatoes filled with black beans, corn, avocado, and salsa.",
+                        "Vegan Buddha Bowl: Brown rice, roasted chickpeas, mixed vegetables, tahini dressing."
+                    ],
+                    "Dinner": [
+                        "Vegan Stir-Fry: Mixed vegetables, tofu, soy sauce, served over rice or noodles.",
+                        "Lentil Curry: Lentils, coconut milk, tomatoes, and mixed spices, served with rice.",
+                        "Vegan Chili: Beans, tomatoes, bell peppers, onions, and spices.",
+                        "Stuffed Bell Peppers: Bell peppers filled with quinoa, black beans, corn, and avocado."
+                    ],
+                    "Snacks": [
+                        "Apple Slices with Peanut Butter",
+                        "Veggie Sticks with Hummus",
+                        "Mixed Nuts and Dried Fruit",
+                        "Vegan Yogurt with Fruit",
+                        "Rice Cakes with Avocado",
+                        "Energy Balls: Dates, nuts, seeds, cocoa powder."
+                    ]
+                },
+                "Gluten-Free": {
+                    "Breakfast": [
+                        "Greek Yogurt Parfait: Greek yogurt with fresh fruit and gluten-free granola.",
+                        "Smoothie: Spinach, banana, almond milk, chia seeds, and berries.",
+                        "Gluten-Free Oatmeal: Cooked with almond milk, topped with nuts, seeds, and fresh fruit.",
+                        "Egg Muffins: Eggs baked with spinach, bell peppers, and onions."
+                    ],
+                    "Lunch": [
+                        "Quinoa Salad: Quinoa, chickpeas, cucumber, cherry tomatoes, and olive oil dressing.",
+                        "Gluten-Free Wrap: Wrap with hummus, avocado, shredded carrots, and mixed greens.",
+                        "Stuffed Sweet Potatoes: Sweet potatoes filled with black beans, corn, and salsa.",
+                        "Grilled Chicken Salad: Mixed greens, grilled chicken, avocado, and a balsamic vinaigrette."
+                    ],
+                    "Dinner": [
+                        "Grilled Salmon: Served with quinoa and steamed broccoli.",
+                        "Chicken Stir-Fry: Chicken with mixed vegetables, gluten-free soy sauce, and rice.",
+                        "Zucchini Noodles: With marinara sauce and roasted vegetables.",
+                        "Gluten-Free Pasta: Tossed with tomato sauce, spinach, and grilled chicken."
+                    ],
+                    "Snacks": [
+                        "Apple Slices with Almond Butter",
+                        "Gluten-Free Rice Cakes with Avocado",
+                        "Nuts and Seeds Mix",
+                        "Carrot and Cucumber Sticks with Hummus",
+                        "Fresh Fruit or Fruit Smoothie",
+                        "Gluten-Free Energy Bars"
+                    ]
+                },
+                "Low-Carb": {
+                    "Breakfast": [
+                        "Avocado Eggs: Baked eggs in avocado halves.",
+                        "Greek Yogurt with Nuts: Unsweetened Greek yogurt with almonds or walnuts.",
+                        "Smoothie: Spinach, protein powder, almond milk, and a small handful of berries.",
+                        "Chia Seed Pudding: Made with chia seeds, almond milk, and a few slices of fruit."
+                    ],
+                    "Lunch": [
+                        "Grilled Chicken Salad: Mixed greens with grilled chicken, avocado, and olive oil dressing.",
+                        "Lettuce Wraps: Turkey or chicken with avocado, shredded veggies, and a low-carb sauce.",
+                        "Zucchini Noodles: Tossed with pesto sauce and grilled shrimp.",
+                        "Cauliflower Rice Bowl: Cauliflower rice with stir-fried veggies and a protein of choice."
+                    ],
+                    "Dinner": [
+                        "Baked Salmon: Served with roasted asparagus and a side salad.",
+                        "Stuffed Bell Peppers: Filled with ground beef, cauliflower rice, and cheese.",
+                        "Chicken Thighs: Roasted with rosemary and served with sautéed spinach.",
+                        "Beef Stir-Fry: Strips of beef with bell peppers, broccoli, and a low-carb sauce."
+                    ],
+                    "Snacks": [
+                        "Nuts and Seeds: Almonds, walnuts, or pumpkin seeds.",
+                        "Cheese Slices or Sticks",
+                        "Cucumber Slices with Hummus",
+                        "Hard-Boiled Eggs",
+                        "Celery Sticks with Cream Cheese"
+                    ]
+                },
+                "High-Protein": {
+                    "Breakfast": [
+                        "Egg White Omelette: With spinach, tomatoes, and mushrooms.",
+                        "Greek Yogurt: Plain, topped with a few nuts or seeds.",
+                        "Protein Smoothie: Whey or plant-based protein powder, almond milk, spinach, and berries.",
+                        "Cottage Cheese: With a slice of whole-grain toast or fruit."
+                    ],
+                    "Lunch": [
+                        "Grilled Chicken Breast: Served with quinoa and mixed vegetables.",
+                        "Tuna Salad: Tuna mixed with Greek yogurt, celery, and a side of leafy greens.",
+                        "Turkey and Avocado Wrap: Sliced turkey breast with avocado, lettuce, and tomato in a low-carb wrap.",
+                        "Lentil Soup: High in protein and fiber, served with a side of mixed greens."
+                    ],
+                    "Dinner": [
+                        "Baked Cod: With a side of steamed broccoli and sweet potato.",
+                        "Beef Stir-Fry: Lean beef strips with bell peppers, onions, and snap peas.",
+                        "Chicken Breast: Grilled or baked with a side of roasted Brussels sprouts and brown rice.",
+                        "Tofu Stir-Fry: Tofu with mixed vegetables and a low-sodium soy sauce."
+                    ],
+                    "Snacks": [
+                        "Hard-Boiled Eggs",
+                        "Protein Bars: Low sugar, high protein.",
+                        "Edamame: Steamed and lightly salted.",
+                        "Jerky: Beef or turkey, without added sugars.",
+                        "Hummus: With raw veggies like carrots or bell peppers."
+                    ]
+                },
+                "Diabetic-Friendly": {
+                    "Breakfast": [
+                        "Steel-Cut Oats: Cooked with cinnamon and topped with a few nuts or seeds.",
+                        "Greek Yogurt: Plain, with a small portion of fresh berries.",
+                        "Eggs: Scrambled with vegetables like spinach, tomatoes, and bell peppers.",
+                        "Chia Seed Pudding: Made with unsweetened almond milk and a small portion of fruit."
+                    ],
+                    "Lunch": [
+                        "Grilled Chicken Salad: With mixed greens, cucumbers, tomatoes, and a light vinaigrette.",
+                        "Lentil Soup: Rich in fiber and protein, paired with a side of non-starchy vegetables.",
+                        "Quinoa Salad: With black beans, corn, bell peppers, and a squeeze of lime.",
+                        "Turkey Wrap: In a whole grain or low-carb wrap, with avocado, lettuce, and tomato."
+                    ],
+                    "Dinner": [
+                        "Baked Salmon: Served with a side of steamed green beans and a small portion of quinoa.",
+                        "Stir-Fried Tofu: With mixed vegetables like broccoli, bell peppers, and snap peas.",
+                        "Grilled Turkey: With a side of roasted Brussels sprouts and sweet potato.",
+                        "Vegetable Stir-Fry: With a mix of non-starchy vegetables and a lean protein source like chicken or tofu."
+                    ],
+                    "Snacks": [
+                        "Raw Veggies: Like carrot sticks or bell pepper slices with hummus.",
+                        "Nuts: A small handful of almonds or walnuts.",
+                        "Apple Slices: With a thin spread of almond butter.",
+                        "Cottage Cheese: With a few fresh berries or sliced cucumber."
+                    ]
+                }
+            }
+
+            health_conditions = {
+                "Asthma": {
+                    "Eat More": [
+                        "Anti-Inflammatory Foods: Apples, berries, spinach, fatty fish (salmon).",
+                        "Antioxidant-Rich Foods: Blueberries, oranges, green tea.",
+                        "Magnesium-Rich Foods: Spinach, pumpkin seeds, brown rice.",
+                        "Hydrating Foods: Water, herbal teas (chamomile)."
+                    ],
+                    "Avoid": [
+                        "Processed Foods: High in preservatives.",
+                        "Sugary Foods: Can increase inflammation.",
+                        "Sulfites: Found in some dried fruits and wine."
+                    ],
+                    "Include": [
+                        "Omega-3 Fatty Acids: Fish like salmon, flaxseeds.",
+                        "Anti-Inflammatory Spices: Turmeric, ginger."
+                    ],
+                    "Sample Meal Plan": [
+                        "Breakfast: Spinach and berry smoothie.",
+                        "Lunch: Quinoa salad with mixed vegetables.",
+                        "Snack: Almonds and apple.",
+                        "Dinner: Baked salmon with broccoli and sweet potato."
+                    ]
+                },
+                "Heart Disease": {
+                    "Eat More": [
+                        "Fruits & Vegetables: Apples, leafy greens.",
+                        "Whole Grains: Brown rice, oats.",
+                        "Lean Proteins: Skinless chicken, legumes.",
+                        "Healthy Fats: Avocados, nuts, olive oil.",
+                        "Fatty Fish: Salmon, sardines."
+                    ],
+                    "Limit": [
+                        "Saturated Fats: Red meat, butter.",
+                        "Trans Fats: Processed foods.",
+                        "Sodium: Salt, processed snacks.",
+                        "Added Sugars: Sugary drinks, sweets."
+                    ],
+                    "Include": [
+                        "Fiber: Whole grains, legumes.",
+                        "Omega-3 Fatty Acids: Fatty fish, flaxseeds.",
+                        "Plant Sterols: Fortified foods."
+                    ],
+                    "Sample Meal Plan": [
+                        "Breakfast: Oatmeal with berries.",
+                        "Lunch: Grilled chicken salad with olive oil dressing.",
+                        "Snack: Almonds.",
+                        "Dinner: Baked salmon with quinoa and broccoli."
+                    ]
+                },
+                "Diabetes": {
+                    "Eat More": [
+                        "Non-Starchy Vegetables: Leafy greens, broccoli, bell peppers.",
+                        "Whole Grains: Brown rice, quinoa.",
+                        "Lean Proteins: Chicken, tofu, legumes.",
+                        "Healthy Fats: Avocado, nuts, olive oil.",
+                        "Low-Glycemic Fruits: Apples, berries, pears."
+                    ],
+                    "Limit": [
+                        "Refined Carbohydrates: White bread, pastries.",
+                        "Sugary Foods: Sweets, sugary drinks.",
+                        "High-Sodium Foods: Processed snacks, canned soups."
+                    ],
+                    "Include": [
+                        "Fiber: Whole grains, vegetables.",
+                        "Protein: Lean meats, legumes.",
+                        "Healthy Fats: Avocados, nuts."
+                    ],
+                    "Sample Meal Plan": [
+                        "Breakfast: Steel-cut oats with berries.",
+                        "Lunch: Grilled chicken salad with mixed greens.",
+                        "Snack: Greek yogurt with a few nuts.",
+                        "Dinner: Baked salmon with quinoa and green beans."
+                    ]
+                },
+                "High Blood Pressure": {
+                    "Eat More": [
+                        "Fruits & Vegetables: Apples, bananas, leafy greens.",
+                        "Whole Grains: Oats, barley.",
+                        "Lean Proteins: Chicken, fish.",
+                        "Low-Fat Dairy: Skim milk, yogurt.",
+                        "Potassium-Rich Foods: Bananas, sweet potatoes, tomatoes."
+                    ],
+                    "Limit": [
+                        "Sodium: Salt, processed foods.",
+                        "Saturated Fats: Red meat, butter.",
+                        "Alcohol: Limit intake."
+                    ],
+                    "Include": [
+                        "Potassium: Helps counteract the effects of sodium.",
+                        "Magnesium: Found in nuts, seeds, and leafy greens.",
+                        "Calcium: Low-fat dairy or fortified alternatives."
+                    ],
+                    "Sample Meal Plan": [
+                        "Breakfast: Smoothie with spinach, banana, and almond milk.",
+                        "Lunch: Salad with grilled chicken, mixed greens, and a lemon vinaigrette.",
+                        "Snack: Apple slices with almond butter.",
+                        "Dinner: Baked cod with roasted sweet potatoes and steamed broccoli."
+                    ]
+                },
+                "Cholesterol": {
+                    "Eat More": [
+                        "Oats: High in soluble fiber.",
+                        "Nuts: Almonds, walnuts.",
+                        "Fatty Fish: Salmon, mackerel.",
+                        "Fruits & Vegetables: Apples, berries, leafy greens.",
+                        "Legumes: Beans, lentils."
+                    ],
+                    "Limit": [
+                        "Saturated Fats: Red meat, butter.",
+                        "Trans Fats: Processed foods.",
+                        "Cholesterol-Rich Foods: Eggs, full-fat dairy."
+                    ],
+                    "Include": [
+                        "Fiber: Soluble fiber from oats, fruits, and vegetables.",
+                        "Omega-3 Fatty Acids: From fatty fish.",
+                        "Plant Sterols: Found in fortified foods."
+                    ],
+                    "Sample Meal Plan": [
+                        "Breakfast: Oatmeal with fresh berries.",
+                        "Lunch: Lentil soup with a side of mixed greens.",
+                        "Snack: A handful of almonds.",
+                        "Dinner: Grilled salmon with quinoa and steamed vegetables."
+                    ]
+                }
+            }
+            combined_recommendations = {
+    "Vegetarian": {
+        "Asthma": {
+            "Breakfast": [
+                "Smoothie Bowl: Spinach, banana, almond milk, protein powder, topped with berries, nuts, seeds.",
+                "Overnight Oats: Rolled oats, almond milk, chia seeds, topped with fruits and nuts."
+            ],
+            "Lunch": [
+                "Quinoa Salad: Quinoa, black beans, corn, tomatoes, avocado, lime dressing.",
+                "Chickpea Salad: Mashed chickpeas, vegan mayo, celery, onion, lettuce."
+            ],
+            "Dinner": [
+                "Vegetable Stir-Fry: Mixed veggies, tofu, soy sauce, over brown rice.",
+                "Lentil Soup: Lentils, carrots, celery, tomatoes, spinach."
+            ],
+            "Snacks": [
+                "Apple Slices with Almond Butter",
+                "Carrot and Celery Sticks with Hummus"
+            ]
+        },
+        "Heart Disease": {
+            "Breakfast": [
+                "Smoothie Bowl: Spinach, berries, almond milk, flaxseeds.",
+                "Overnight Oats: Rolled oats, almond milk, chia seeds, topped with fresh fruit."
+            ],
+            "Lunch": [
+                "Quinoa Salad: Quinoa, chickpeas, avocado, cherry tomatoes.",
+                "Stuffed Bell Peppers: Bell peppers filled with quinoa, black beans, spinach."
+            ],
+            "Dinner": [
+                "Vegetable Curry: Mixed veggies, chickpeas, coconut milk, served with rice.",
+                "Spaghetti Marinara: Whole-grain spaghetti with marinara sauce, side salad."
+            ],
+            "Snacks": [
+                "Apple Slices with Almond Butter",
+                "Chia Pudding: Chia seeds soaked in almond milk, topped with fruit."
+            ]
+        },
+        "Diabetes": {
+            "Breakfast": [
+                "Smoothie: Spinach, berries, almond milk, chia seeds.",
+                "Greek Yogurt: Plain, with a small portion of fresh berries."
+            ],
+            "Lunch": [
+                "Lentil Salad: Lentils, cucumbers, cherry tomatoes, and a lemon-tahini dressing.",
+                "Stuffed Zucchini: Zucchini filled with quinoa, black beans, corn."
+            ],
+            "Dinner": [
+                "Vegetable Soup: Mixed vegetables, beans, vegetable broth.",
+                "Stir-Fried Tofu: Tofu with bell peppers, broccoli, and snap peas."
+            ],
+            "Snacks": [
+                "Raw Veggies: Carrots, cucumbers, with a side of hummus.",
+                "Mixed Nuts: Almonds, walnuts."
+            ]
+        },
+        "Weight Loss": {
+            "Breakfast": [
+                "Green Smoothie: Spinach, banana, almond milk, protein powder.",
+                "Chia Pudding: Chia seeds with almond milk, topped with berries."
+            ],
+            "Lunch": [
+                "Mixed Bean Salad: Kidney beans, chickpeas, black beans, cherry tomatoes, and cucumbers.",
+                "Quinoa Bowl: Quinoa, kale, roasted vegetables, and a lemon vinaigrette."
+            ],
+            "Dinner": [
+                "Stuffed Bell Peppers: Filled with lentils, vegetables, and spices.",
+                "Zucchini Noodles: Tossed with marinara sauce and fresh basil."
+            ],
+            "Snacks": [
+                "Apple Slices with Almond Butter",
+                "Celery Sticks with Hummus"
+            ]
+        }
+    },
+    "Vegan": {
+        "Asthma": {
+            "Breakfast": [
+                "Smoothie Bowl: Kale, banana, almond milk, chia seeds, topped with berries and granola.",
+                "Chia Pudding: Chia seeds soaked in coconut milk, topped with fresh fruit and nuts."
+            ],
+            "Lunch": [
+                "Quinoa Salad: Quinoa, black beans, corn, avocado, cherry tomatoes.",
+                "Vegan Wrap: Whole-grain wrap with hummus, shredded carrots, cucumber, spinach, and avocado."
+            ],
+            "Dinner": [
+                "Vegan Stir-Fry: Mixed vegetables, tofu, soy sauce, served over rice or noodles.",
+                "Lentil Curry: Lentils, coconut milk, tomatoes, and mixed spices, served with rice."
+            ],
+            "Snacks": [
+                "Apple Slices with Peanut Butter",
+                "Mixed Nuts and Dried Fruit"
+            ]
+        },
+        "Heart Disease": {
+            "Breakfast": [
+                "Smoothie Bowl: Kale, banana, almond milk, chia seeds.",
+                "Vegan Pancakes: Made with almond milk, served with fruit."
+            ],
+            "Lunch": [
+                "Quinoa Salad: Quinoa, black beans, corn, avocado.",
+                "Stuffed Sweet Potatoes: Sweet potatoes filled with black beans, corn, avocado."
+            ],
+            "Dinner": [
+                "Vegan Chili: Beans, tomatoes, bell peppers, onions.",
+                "Stuffed Bell Peppers: Bell peppers filled with quinoa, black beans, corn."
+            ],
+            "Snacks": [
+                "Veggie Sticks with Hummus",
+                "Energy Balls: Dates, nuts, seeds, cocoa powder."
+            ]
+        },
+        "Diabetes": {
+            "Breakfast": [
+                "Green Smoothie: Kale, banana, almond milk, chia seeds.",
+                "Overnight Oats: Rolled oats with almond milk, chia seeds, and berries."
+            ],
+            "Lunch": [
+                "Vegan Buddha Bowl: Quinoa, chickpeas, avocado, mixed vegetables.",
+                "Stuffed Zucchini: Zucchini filled with lentils, tomatoes, and spinach."
+            ],
+            "Dinner": [
+                "Lentil Soup: Lentils, carrots, celery, tomatoes.",
+                "Vegan Tacos: Corn tortillas with black beans, avocado, salsa."
+            ],
+            "Snacks": [
+                "Fresh Fruit: Apple or pear.",
+                "Nuts and Seeds: Almonds, sunflower seeds."
+            ]
+        },
+        "Weight Loss": {
+            "Breakfast": [
+                "Smoothie Bowl: Spinach, banana, almond milk, protein powder.",
+                "Chia Pudding: Chia seeds soaked in almond milk, topped with fresh berries."
+            ],
+            "Lunch": [
+                "Vegan Salad: Mixed greens, chickpeas, avocado, cucumbers.",
+                "Quinoa Bowl: Quinoa, roasted vegetables, kale, and a lemon vinaigrette."
+            ],
+            "Dinner": [
+                "Stuffed Bell Peppers: Filled with quinoa, black beans, corn.",
+                "Cauliflower Rice Stir-Fry: Cauliflower rice with mixed vegetables and tofu."
+            ],
+            "Snacks": [
+                "Celery Sticks with Hummus",
+                "Apple Slices with Almond Butter"
+            ]
+        }
+    },
+    "Gluten-Free": {
+        "Asthma": {
+            "Breakfast": [
+                "Greek Yogurt Parfait: Greek yogurt with fresh fruit and gluten-free granola.",
+                "Smoothie: Spinach, banana, almond milk, chia seeds."
+            ],
+            "Lunch": [
+                "Gluten-Free Wrap: Wrap with hummus, avocado, shredded carrots, and mixed greens.",
+                "Stuffed Sweet Potatoes: Sweet potatoes filled with black beans, corn, and salsa."
+            ],
+            "Dinner": [
+                "Grilled Salmon: Served with quinoa and steamed broccoli.",
+                "Zucchini Noodles: With marinara sauce and roasted vegetables."
+            ],
+            "Snacks": [
+                "Apple Slices with Almond Butter",
+                "Gluten-Free Rice Cakes with Avocado"
+            ]
+        },
+        "Heart Disease": {
+            "Breakfast": [
+                "Smoothie: Spinach, banana, almond milk, chia seeds.",
+                "Gluten-Free Oatmeal: Cooked with almond milk, topped with nuts and fresh fruit."
+            ],
+            "Lunch": [
+                "Grilled Chicken Salad: Mixed greens, grilled chicken, avocado, balsamic vinaigrette.",
+                "Stuffed Sweet Potatoes: Filled with black beans, corn, avocado."
+            ],
+            "Dinner": [
+                "Chicken Stir-Fry: Chicken with mixed vegetables, gluten-free soy sauce, and rice.",
+                "Gluten-Free Pasta: Tossed with tomato sauce, spinach, and grilled chicken."
+            ],
+            "Snacks": [
+                "Nuts and Seeds Mix",
+                "Fresh Fruit or Fruit Smoothie"
+            ]
+        },
+        "Diabetes": {
+            "Breakfast": [
+                "Greek Yogurt: Plain, with a small portion of fresh berries.",
+                "Steel-Cut Oats: Cooked with almond milk and topped with nuts."
+            ],
+            "Lunch": [
+                "Grilled Chicken Salad: With mixed greens, cucumbers, and a light vinaigrette.",
+                "Lentil Soup: Rich in fiber and protein, paired with non-starchy vegetables."
+            ],
+            "Dinner": [
+                "Baked Cod: With a side of steamed green beans.",
+                "Stuffed Bell Peppers: With a mix of lean ground turkey and vegetables."
+            ],
+            "Snacks": [
+                "Sliced Apple with Peanut Butter",
+                "Veggie Sticks with Hummus"
+            ]
+        },
+        "Weight Loss": {
+            "Breakfast": [
+                "Greek Yogurt: Plain, with a handful of gluten-free granola.",
+                "Smoothie: Spinach, berries, almond milk, chia seeds."
+            ],
+            "Lunch": [
+                "Quinoa Salad: With cucumbers, cherry tomatoes, and a light dressing.",
+                "Stuffed Zucchini: With a mixture of quinoa, vegetables, and herbs."
+            ],
+            "Dinner": [
+                "Grilled Chicken: With a side of roasted Brussels sprouts.",
+                "Gluten-Free Veggie Stir-Fry: With a variety of colorful vegetables."
+            ],
+            "Snacks": [
+                "Apple Slices with Almond Butter",
+                "Gluten-Free Rice Cakes with Avocado"
+            ]
+        }
+    },
+    "Low-Carb": {
+        "Asthma": {
+            "Breakfast": [
+                "Egg Muffins: Eggs, spinach, bell peppers, and cheese, baked in muffin tins.",
+                "Chia Seed Pudding: Chia seeds soaked in almond milk, topped with berries."
+            ],
+            "Lunch": [
+                "Grilled Chicken Salad: Mixed greens, grilled chicken, avocado, and a light vinaigrette.",
+                "Zucchini Noodles: Tossed with pesto and cherry tomatoes."
+            ],
+            "Dinner": [
+                "Cauliflower Rice Stir-Fry: Cauliflower rice with mixed vegetables and tofu.",
+                "Baked Salmon: Served with steamed broccoli."
+            ],
+            "Snacks": [
+                "Cucumber Slices with Hummus",
+                "Mixed Nuts: Almonds, walnuts."
+            ]
+        },
+        "Heart Disease": {
+            "Breakfast": [
+                "Avocado Toast: Whole-grain bread with mashed avocado, topped with a poached egg.",
+                "Smoothie: Spinach, avocado, unsweetened almond milk."
+            ],
+            "Lunch": [
+                "Chicken Caesar Salad: Romaine lettuce, grilled chicken, parmesan cheese, Caesar dressing (low-carb).",
+                "Stuffed Bell Peppers: Filled with ground turkey, cauliflower rice, and spices."
+            ],
+            "Dinner": [
+                "Zucchini Noodles with Marinara Sauce: With a side of grilled chicken.",
+                "Baked Cod: With roasted Brussels sprouts."
+            ],
+            "Snacks": [
+                "Celery Sticks with Peanut Butter",
+                "Cheese Sticks"
+            ]
+        },
+        "Diabetes": {
+            "Breakfast": [
+                "Scrambled Eggs: With spinach and mushrooms.",
+                "Greek Yogurt: Plain, with a small portion of chia seeds."
+            ],
+            "Lunch": [
+                "Chicken Salad: With mixed greens, avocado, and a low-carb dressing.",
+                "Zucchini Noodles: Tossed with pesto and grilled chicken."
+            ],
+            "Dinner": [
+                "Baked Salmon: With a side of sautéed spinach.",
+                "Stuffed Bell Peppers: With a mix of lean ground turkey and vegetables."
+            ],
+            "Snacks": [
+                "Cucumber Slices with Hummus",
+                "Almonds and Walnuts Mix"
+            ]
+        },
+        "Weight Loss": {
+            "Breakfast": [
+                "Egg Muffins: With spinach, mushrooms, and cheese.",
+                "Smoothie: Spinach, avocado, almond milk, and protein powder."
+            ],
+            "Lunch": [
+                "Grilled Chicken Salad: With mixed greens, avocado, and a light vinaigrette.",
+                "Zucchini Noodles with Pesto: Topped with cherry tomatoes and grilled chicken."
+            ],
+            "Dinner": [
+                "Stuffed Bell Peppers: Filled with cauliflower rice and lean ground turkey.",
+                "Baked Salmon: With a side of roasted asparagus."
+            ],
+            "Snacks": [
+                "Celery Sticks with Almond Butter",
+                "Cheese Sticks"
+            ]
+        }
+    },
+    "High-Protein": {
+        "Asthma": {
+            "Breakfast": [
+                "Protein Smoothie: Spinach, banana, protein powder, almond milk.",
+                "Greek Yogurt: With a sprinkle of chia seeds and fresh berries."
+            ],
+            "Lunch": [
+                "Chicken Salad: Grilled chicken, mixed greens, avocado, and a light vinaigrette.",
+                "Quinoa and Black Bean Salad: With corn, tomatoes, and avocado."
+            ],
+            "Dinner": [
+                "Grilled Chicken: With a side of steamed broccoli and quinoa.",
+                "Lentil Soup: With mixed vegetables and herbs."
+            ],
+            "Snacks": [
+                "Protein Bars: Low sugar, high protein.",
+                "Greek Yogurt: Plain with a handful of nuts."
+            ]
+        },
+        "Heart Disease": {
+            "Breakfast": [
+                "Egg White Omelette: With spinach, mushrooms, and a side of fruit.",
+                "Smoothie: Spinach, banana, protein powder, almond milk."
+            ],
+            "Lunch": [
+                "Grilled Chicken Breast: With a side of quinoa and mixed vegetables.",
+                "Stuffed Bell Peppers: With lean ground turkey and quinoa."
+            ],
+            "Dinner": [
+                "Baked Salmon: Served with a side of steamed green beans.",
+                "Chicken Stir-Fry: With mixed vegetables and a low-sodium sauce."
+            ],
+            "Snacks": [
+                "Hard-Boiled Eggs",
+                "Nuts and Seeds: Almonds, pumpkin seeds."
+            ]
+        },
+        "Diabetes": {
+            "Breakfast": [
+                "Scrambled Eggs: With spinach and mushrooms.",
+                "Protein Smoothie: Spinach, berries, protein powder, almond milk."
+            ],
+            "Lunch": [
+                "Grilled Chicken Salad: With mixed greens, avocado, and a low-carb dressing.",
+                "Lentil Soup: Rich in protein and fiber."
+            ],
+            "Dinner": [
+                "Grilled Turkey Burgers: With a side of roasted Brussels sprouts.",
+                "Stuffed Bell Peppers: With a mixture of lean ground turkey and quinoa."
+            ],
+            "Snacks": [
+                "Greek Yogurt: Plain with a sprinkle of chia seeds.",
+                "Nuts and Seeds Mix"
+            ]
+        },
+        "Weight Loss": {
+            "Breakfast": [
+                "Protein Smoothie: Spinach, banana, protein powder, almond milk.",
+                "Egg Muffins: With spinach, mushrooms, and cheese."
+            ],
+            "Lunch": [
+                "Chicken Salad: Grilled chicken, mixed greens, avocado, and a light vinaigrette.",
+                "Quinoa Bowl: With roasted vegetables and a protein source like grilled chicken or tofu."
+            ],
+            "Dinner": [
+                "Baked Salmon: With a side of roasted asparagus.",
+                "Stuffed Bell Peppers: Filled with a mixture of lean ground turkey and quinoa."
+            ],
+            "Snacks": [
+                "Greek Yogurt: Plain with a handful of nuts.",
+                "Protein Bars: Low sugar, high protein."
+            ]
+        }
+    },
+    "Diabetic-Friendly": {
+        "Asthma": {
+            "Breakfast": [
+                "Smoothie: Spinach, berries, almond milk, chia seeds.",
+                "Greek Yogurt Parfait: Greek yogurt with fresh berries and chia seeds."
+            ],
+            "Lunch": [
+                "Quinoa Salad: Quinoa, black beans, corn, avocado.",
+                "Stuffed Bell Peppers: Filled with quinoa, black beans, and vegetables."
+            ],
+            "Dinner": [
+                "Lentil Soup: With mixed vegetables and herbs.",
+                "Grilled Chicken: Served with a side of steamed broccoli."
+            ],
+            "Snacks": [
+                "Fresh Fruit: Apple or pear.",
+                "Nuts and Seeds: Almonds, sunflower seeds."
+            ]
+        },
+        "Heart Disease": {
+            "Breakfast": [
+                "Smoothie: Spinach, berries, almond milk, chia seeds.",
+                "Greek Yogurt: Plain, with a small portion of chia seeds."
+            ],
+            "Lunch": [
+                "Grilled Chicken Salad: With mixed greens, cucumbers, and a light vinaigrette.",
+                "Lentil Soup: Rich in fiber and protein."
+            ],
+            "Dinner": [
+                "Baked Cod: With a side of steamed green beans.",
+                "Stuffed Bell Peppers: With a mix of lean ground turkey and vegetables."
+            ],
+            "Snacks": [
+                "Apple Slices with Peanut Butter",
+                "Mixed Nuts: Almonds, walnuts."
+            ]
+        },
+        "Diabetes": {
+            "Breakfast": [
+                "Greek Yogurt: Plain, with a small portion of fresh berries.",
+                "Scrambled Eggs: With spinach and mushrooms."
+            ],
+            "Lunch": [
+                "Chicken Salad: With mixed greens, avocado, and a low-carb dressing.",
+                "Lentil Soup: Rich in protein and fiber."
+            ],
+            "Dinner": [
+                "Grilled Turkey Burgers: With a side of roasted Brussels sprouts.",
+                "Stuffed Bell Peppers: With a mixture of lean ground turkey and quinoa."
+            ],
+            "Snacks": [
+                "Greek Yogurt: Plain with a sprinkle of chia seeds.",
+                "Nuts and Seeds Mix"
+            ]
+        },
+        "Weight Loss": {
+            "Breakfast": [
+                "Greek Yogurt: Plain, with a handful of gluten-free granola.",
+                "Smoothie: Spinach, berries, almond milk, chia seeds."
+            ],
+            "Lunch": [
+                "Quinoa Salad: With cucumbers, cherry tomatoes, and a light dressing.",
+                "Stuffed Zucchini: With a mixture of quinoa, vegetables, and herbs."
+            ],
+            "Dinner": [
+                "Grilled Chicken: With a side of roasted Brussels sprouts.",
+                "Gluten-Free Veggie Stir-Fry: With a variety of colorful vegetables."
+            ],
+            "Snacks": [
+                "Apple Slices with Almond Butter",
+                "Gluten-Free Rice Cakes with Avocado"
+            ]
+        }
+    }
+}
+            if dietary_preference and health_condition:
+                if dietary_preference in combined_recommendations and health_condition in combined_recommendations[dietary_preference]:
+                    return JsonResponse(combined_recommendations[dietary_preference][health_condition], safe=False)
+                else:
+                    return JsonResponse({"error": "No combined recommendations found for the given parameters"}, status=404)
+
+            # If only dietary preference or health condition is provided
+            if dietary_preference:
+                if dietary_preference in dietary_recommendations:
+                    return JsonResponse(dietary_recommendations[dietary_preference], safe=False)
+                else:
+                    return JsonResponse({"error": "Invalid dietary preference"}, status=400)
+
+            if health_condition:
+                if health_condition in health_conditions:
+                    return JsonResponse(health_conditions[health_condition], safe=False)
+                else:
+                    return JsonResponse({"error": "Invalid health condition"}, status=400)
+
+            # Missing parameters
+                return JsonResponse({"error": "Missing dietary preference or health condition"}, status=400)
+
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    else:
+        return JsonResponse({"error": "Invalid request method"}, status=405)
