@@ -2,6 +2,8 @@ from django.urls import path
 from . import views
 from django.views.generic import TemplateView
 from django.contrib.auth import views as auth_views
+from user.views import get_user_profile
+
 
 
 urlpatterns = [
@@ -75,4 +77,6 @@ urlpatterns = [
     # path('reset/<uidb64>/<token>/', views.password_reset_confirm, name='password-reset-confirm'),
     path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('', TemplateView.as_view(template_name='index.html')), 
+
+     path('api/get-user-profile/', get_user_profile, name='get_user_profile'),
     ]
