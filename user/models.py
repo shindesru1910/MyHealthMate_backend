@@ -36,6 +36,7 @@ class User(AbstractBaseUser):
     date_of_birth = models.DateField(null=True,blank=True)
     gender = models.CharField(max_length=6,null=True, choices=[('male', 'Male'), ('female', 'Female'), ('other', 'Other')])
     is_admin = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     USERNAME_FIELD = 'email'
@@ -166,11 +167,17 @@ class Appointment(models.Model):
         ('cancelled', 'Cancelled'),
     ]
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    phone = models.CharField(max_length=15,null=False,blank=True)
+    specialty = models.CharField(max_length=10, choices=STATUS_CHOICES,null=False,blank=True)
     doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE)
     appointment_date = models.DateTimeField()
     status = models.CharField(max_length=10, choices=STATUS_CHOICES)
+    message = models.TextField(null=True, blank=True) 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    def clean(self):
+        # validation 
+        pass
 
 class ExerciseReminder(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
