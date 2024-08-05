@@ -2,6 +2,8 @@ from django.urls import path
 from . import views
 from django.views.generic import TemplateView
 from django.contrib.auth import views as auth_views
+from user.views import get_user_profile
+
 
 
 urlpatterns = [
@@ -32,7 +34,8 @@ urlpatterns = [
     #Get appointmemnt for appointment form
     path('get-specialties',views.get_specialties, name="get_specialties"),
     # Form Submission of Appointment
-    # path('submit-appointment',views.submit_appointment, name="submit-appointment"),
+    path('submit-appointment',views.submit_appointment, name="submit-appointment"),
+    path('get-available-slots',views.get_available_slots, name="get-available-slots"),
 
     path('create-exercise-plan',views.create_exerciseplan, name='create-exercise-plan'),
     path('get-exercise-plan',views.get_exerciseplan, name='get-exercise-plan'),
@@ -78,5 +81,11 @@ urlpatterns = [
     # path('reset/<uidb64>/<token>/', views.password_reset_confirm, name='password-reset-confirm'),
     path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('', TemplateView.as_view(template_name='index.html')), 
-    
+
+
+     path('api/get-user-profile/', get_user_profile, name='get_user_profile'),
+    path('get-exercise-recommendations', views.get_exercise_recommendations, name='get-exercise-recommendations'),
+    path('get-diet-recommendations', views.get_diet_recommendations, name='get-diet-recommendations'),
+
+
     ]
