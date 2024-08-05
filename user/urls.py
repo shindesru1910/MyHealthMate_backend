@@ -12,6 +12,7 @@ urlpatterns = [
     
     #
     # path('accounts/login/', auth_views.LoginView.as_view(), name='login'),
+    path('', views.index, name='index'),
 
 
 
@@ -61,27 +62,30 @@ urlpatterns = [
     path('update-appointment',views.update_appointment, name='update-appointment'),
     path('delete-appointment',views.delete_appointment, name='delete-appointment'),
    
-    path('create-exercise-reminder',views.create_exercise_reminder, name='create-exercise-reminder'),
-    path('get-exercise-reminder',views.get_exercise_reminder, name='get-exercise-reminder'),
-    path('update-exercise-reminder',views.update_exercise_reminder, name='update-exercise-reminder'),
-    path('delete-exercise-reminder',views.delete_exercise_reminder, name='delete-exercise-reminder'),
+    # path('create-exercise-reminder',views.create_exercise_reminder, name='create-exercise-reminder'),
+    # path('get-exercise-reminder',views.get_exercise_reminder, name='get-exercise-reminder'),
+    # path('update-exercise-reminder',views.update_exercise_reminder, name='update-exercise-reminder'),
+    # path('delete-exercise-reminder',views.delete_exercise_reminder, name='delete-exercise-reminder'),
 
     path('create-feedback',views.create_feedback, name='create-feedback'),
     path('get-feedback',views.get_feedback, name='get-feedback'),
     path('update-feedback',views.update_feedback, name='update-feedback'),
     path('delete-feedback',views.delete_feedback, name='delete-feedback'),
 
-    path('get-all-emails',views.get_all_emails, name='get-all-emails'),
-    path('set-reminder', views.set_reminder, name='set-reminder'),
+    
+    # path('send-reminder-email', views.send_reminder_email, name='send-reminder-email'),
+    path('sendmail/',views.send_mail_to_all, name="sendmail"),
+
 
     path('password-reset-request', views.password_reset_request, name='password-reset-request'),
     # path('reset/<uidb64>/<token>/', views.password_reset_confirm, name='password-reset-confirm'),
     path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('', TemplateView.as_view(template_name='index.html')), 
 
-     path('api/get-user-profile/', get_user_profile, name='get_user_profile'),
 
+     path('api/get-user-profile/', get_user_profile, name='get_user_profile'),
     path('get-exercise-recommendations', views.get_exercise_recommendations, name='get-exercise-recommendations'),
     path('get-diet-recommendations', views.get_diet_recommendations, name='get-diet-recommendations'),
+
 
     ]
