@@ -1,3 +1,4 @@
+from datetime import time
 import json
 import logging
 from django.forms import ValidationError
@@ -10,7 +11,6 @@ from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from . models import *
 from django.contrib.auth.models import User
-from django.core.mail import send_mail
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.utils.encoding import force_bytes, force_str
@@ -41,13 +41,10 @@ from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from django.contrib.auth.models import User
 import logging
+from django.shortcuts import render
 
-# import os
-# from django.db.models import Sum
-# import jwt
-# from datetime import datetime,timezone,timedelta
-# from firebase_admin import credentials
-# from firebase_admin import firestore
+def index(request):
+    return render(request, 'index.html')
 
 
 logger = logging.getLogger(__name__)
@@ -849,76 +846,76 @@ def delete_appointment(request):
         return JsonResponse({'msg': str(e), 'status': 500}, status=500)
 
 # ExerciseReminder APIs
-@csrf_exempt
-def create_exercise_reminder(request):
-    if request.method != 'POST':
-        return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=403)
+# @csrf_exempt
+# def create_exercise_reminder(request):
+#     if request.method != 'POST':
+#         return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=403)
     
-    try:
-        user_id = request.POST['user_id']
-        reminder_time = request.POST['reminder_time']
-        reminder_message = request.POST['reminder_message']
+#     try:
+#         user_id = request.POST['user_id']
+#         reminder_time = request.POST['reminder_time']
+#         reminder_message = request.POST['reminder_message']
 
-        user = User.objects.get(id=user_id)
-        reminder = ExerciseReminder(user=user, reminder_time=reminder_time, reminder_message=reminder_message)
-        reminder.save()
+#         user = User.objects.get(id=user_id)
+#         reminder = ExerciseReminder(user=user, reminder_time=reminder_time, reminder_message=reminder_message)
+#         reminder.save()
 
-        return JsonResponse({'msg': 'Data has been successfully created', 'status': 200}, status=200)
-    except Exception as e:
-        return JsonResponse({'msg': str(e), 'status': 500}, status=500)
+#         return JsonResponse({'msg': 'Data has been successfully created', 'status': 200}, status=200)
+#     except Exception as e:
+#         return JsonResponse({'msg': str(e), 'status': 500}, status=500)
 
-@csrf_exempt
-def get_exercise_reminder(request):
-    try:
-        reminders = ExerciseReminder.objects.all()
-        data = []
+# @csrf_exempt
+# def get_exercise_reminder(request):
+#     try:
+#         reminders = ExerciseReminder.objects.all()
+#         data = []
 
-        for reminder in reminders:
-            reminder_dict = {}
-            reminder_dict['id'] = reminder.id
-            reminder_dict['user'] = reminder.user.id
-            reminder_dict['reminder_time'] = reminder.reminder_time
-            reminder_dict['reminder_message'] = reminder.reminder_message
-            reminder_dict['created_at'] = reminder.created_at
-            reminder_dict['updated_at'] = reminder.updated_at
+#         for reminder in reminders:
+#             reminder_dict = {}
+#             reminder_dict['id'] = reminder.id
+#             reminder_dict['user'] = reminder.user.id
+#             reminder_dict['reminder_time'] = reminder.reminder_time
+#             reminder_dict['reminder_message'] = reminder.reminder_message
+#             reminder_dict['created_at'] = reminder.created_at
+#             reminder_dict['updated_at'] = reminder.updated_at
 
-            data.append(reminder_dict)
-        return JsonResponse({'data': data, 'status': 200}, status=200)
-    except Exception as e:
-        return JsonResponse({'msg': str(e), 'status': 500}, status=500)
+#             data.append(reminder_dict)
+#         return JsonResponse({'data': data, 'status': 200}, status=200)
+#     except Exception as e:
+#         return JsonResponse({'msg': str(e), 'status': 500}, status=500)
 
 
-@csrf_exempt
-def update_exercise_reminder(request):
-    if request.method != 'POST':
-        return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=403)
-    try:
-        id = request.POST['id']
-        user_id = request.POST['user_id']
-        reminder_time = request.POST['reminder_time']
-        reminder_message = request.POST['reminder_message']
+# @csrf_exempt
+# def update_exercise_reminder(request):
+#     if request.method != 'POST':
+#         return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=403)
+#     try:
+#         id = request.POST['id']
+#         user_id = request.POST['user_id']
+#         reminder_time = request.POST['reminder_time']
+#         reminder_message = request.POST['reminder_message']
 
-        reminder = ExerciseReminder.objects.get(id=id)
-        reminder.user = User.objects.get(id=user_id)
-        reminder.reminder_time = reminder_time
-        reminder.reminder_message = reminder_message
-        reminder.save()
-        return JsonResponse({'msg': 'Data has been updated successfully', 'status': 200}, status=200)
-    except Exception as e:
-        return JsonResponse({'msg': str(e), 'status': 500}, status=500)
+#         reminder = ExerciseReminder.objects.get(id=id)
+#         reminder.user = User.objects.get(id=user_id)
+#         reminder.reminder_time = reminder_time
+#         reminder.reminder_message = reminder_message
+#         reminder.save()
+#         return JsonResponse({'msg': 'Data has been updated successfully', 'status': 200}, status=200)
+#     except Exception as e:
+#         return JsonResponse({'msg': str(e), 'status': 500}, status=500)
 
-@csrf_exempt
-def delete_exercise_reminder(request):
-    if request.method != 'POST':
-        return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=403)
+# @csrf_exempt
+# def delete_exercise_reminder(request):
+#     if request.method != 'POST':
+#         return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=403)
     
-    try:
-        id = request.POST['id']
-        reminder = ExerciseReminder.objects.get(id=id)
-        reminder.delete()
-        return JsonResponse({'msg': 'Data has been removed successfully', 'status': 200}, status=200)
-    except Exception as e:
-        return JsonResponse({'msg': str(e), 'status': 500}, status=500)
+#     try:
+#         id = request.POST['id']
+#         reminder = ExerciseReminder.objects.get(id=id)
+#         reminder.delete()
+#         return JsonResponse({'msg': 'Data has been removed successfully', 'status': 200}, status=200)
+#     except Exception as e:
+#         return JsonResponse({'msg': str(e), 'status': 500}, status=500)
 
 # Feedback APIs
 @csrf_exempt
@@ -938,26 +935,9 @@ def create_feedback(request):
     except Exception as e:
         return JsonResponse({'msg': str(e), 'status': 500}, status=500)
 
-# @csrf_exempt
-# def get_feedback(request):
-#     try:
-#         feedbacks = Feedback.objects.all()
-#         data = []
-
-#         for feedback in feedbacks:
-#             feedback_dict = {}
-#             feedback_dict['id'] = feedback.id
-#             feedback_dict['user'] = feedback.user.id
-#             feedback_dict['feedback_text'] = feedback.feedback_text
-#             feedback_dict['created_at'] = feedback.created_at
-
-#             data.append(feedback_dict)
-#         return JsonResponse({'data': data, 'status': 200}, status=200)
-#     except Exception as e:
-#         return JsonResponse({'msg': str(e), 'status': 500}, status=500)
 
 
-#new
+
 @csrf_exempt
 def get_feedback(request):
     try:
@@ -1013,50 +993,67 @@ def delete_feedback(request):
 
 logger = logging.getLogger(__name__)
 
+
+
+# import smtplib
+# from email.mime.text import MIMEText
+# from email.mime.multipart import MIMEMultipart
+# from email.utils import formataddr
+from user.tasks import send_mail_func
 @csrf_exempt
-@login_required
-def set_reminder(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            title = data.get('title')
-            name = data.get('name')
-            time = data.get('time')
+def send_mail_to_all(request):
+    send_mail_func.delay() 
+    return HttpResponse("Sent")
+#     if request.method == 'POST':
+#         try:
+#             # data = json.loads(request.body)
+#             email = request.POST.get('email')
+#             subject = request.POST.get('subject')
+#             message = request.POST.get('message')
+#             reminder_time_str = request.POST.get('reminder_time')  # Expecting a time string like 'HH:MM'
+#             reminder_time = time.fromisoformat(reminder_time_str)  # Convert string to time object
 
-            if not all([title, name, time]):
-                return JsonResponse({'status': 'error', 'message': 'Missing fields'}, status=400)
+#             if not all([email, subject, message, reminder_time]):
+#                 return JsonResponse({'status': 'failure', 'error': 'Missing required fields'}, status=400)
 
-            Reminder.objects.create(user=request.user, title=title, name=name, time=time)
-            return JsonResponse({'status': 'success'}, status=200)
-        except json.JSONDecodeError:
-            logger.error("JSON decode error: %s", request.body)
-            return JsonResponse({'status': 'error', 'message': 'Invalid JSON'}, status=400)
-        except Exception as e:
-            logger.error("Exception occurred: %s", e)
-            return JsonResponse({'status': 'error', 'message': 'Server error'}, status=500)
-    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+#             # Create and save the EmailReminder instance
+#             reminder = EmailReminder(
+#                 email=email,
+#                 subject=subject,
+#                 message=message,
+#                 reminder_time=reminder_time
+#             )
+#             reminder.save()
+            
+#             # Email settings
+#             SMTP_SERVER = 'smtp.gmail.com'
+#             SMTP_PORT = 587
+#             SMTP_USER = 'myhealthmate2002@gmail.com'
+#             SMTP_PASSWORD = 'aase utgi axcq aqwd'
+#             FROM_EMAIL = 'myhealthmate2002@gmail.com'
+
+#             # Create the email content
+#             msg = MIMEMultipart()
+#             msg['From'] = formataddr(('My Health Mate', FROM_EMAIL))
+#             msg['To'] = email
+#             msg['Subject'] = subject
+
+#             msg.attach(MIMEText(message, 'It is time for your Exercise, Stay Fit!'))
+
+#             # Connect to the SMTP server and send the email
+#             with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+#                 server.starttls()
+#                 server.login(SMTP_USER, SMTP_PASSWORD)
+#                 server.send_message(msg)
+            
+#             return JsonResponse({'status': 'success'})
+
+#         except Exception as e:
+#             return JsonResponse({'status': 'failure', 'error': str(e)}, status=400)
+
+#     return JsonResponse({'status': 'failure'}, status=400)
 
 
-def send_reminder_email(to_email, subject, body):
-    try:
-        send_mail(
-            subject,
-            body,
-            settings.DEFAULT_FROM_EMAIL,
-            [to_email],
-            fail_silently=False,
-        )
-        print(f"Email sent to {to_email}")
-    except Exception as e:
-        print(f"Failed to send email to {to_email}. Error: {e}")
-
-
-@login_required
-def get_all_emails(request):
-    if request.method == 'GET':
-        emails = list(User.objects.values_list('email', flat=True))
-        return JsonResponse({'emails': emails}, status=200)
-    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
 
 User = get_user_model()
 @csrf_exempt
@@ -1104,3 +1101,5 @@ def password_reset_confirm(request, uidb64=None, token=None):
             return JsonResponse({"errors": form.errors}, status=400)
     else:
         return render(request, 'password_reset_confirm.html', {'uidb64': uidb64, 'token': token})
+
+
