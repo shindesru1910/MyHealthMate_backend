@@ -5,6 +5,12 @@ from django.contrib.auth.models import User
 
 class CustomUserMangaer(BaseUserManager):
     def create_user(self,phone,email=None,password=None,address=None):
+        # c
+        if not email:
+            raise ValueError('Users must have an email address')
+        if not phone:
+            raise ValueError('Users must have a phone number')
+        
         user = self.model(
             email = email
         )

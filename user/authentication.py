@@ -1,7 +1,7 @@
 import jwt
 import datetime
 import uuid
-import jwt 
+
 
 def create_token(id, email,name,is_admin,activity_level,health_goals):
     return jwt.encode({
