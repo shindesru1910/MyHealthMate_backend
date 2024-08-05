@@ -3,8 +3,9 @@ from django.db import models
 from django.contrib.auth.models import(BaseUserManager, AbstractBaseUser)
 from django.contrib.auth.models import User
 
-class CustomUserMangaer(BaseUserManager):
+class CustomUserManager(BaseUserManager):
     def create_user(self,phone,email=None,password=None,address=None):
+        
         user = self.model(
             email = email
         )
@@ -18,6 +19,7 @@ class CustomUserMangaer(BaseUserManager):
             phone=phone,
 
         )
+        
         user.set_password(password)
         user.save(using=self._db)
         return user
@@ -33,7 +35,7 @@ class User(AbstractBaseUser):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     USERNAME_FIELD = 'email'
-    objects = CustomUserMangaer()
+    objects = CustomUserManager()
 
     def __str__(self):
         return self.email
@@ -166,23 +168,16 @@ class Appointment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-class ExerciseReminder(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    reminder_time = models.TimeField()
-    reminder_message = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
-class Reminder(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    title = models.CharField(max_length=255)
-    name = models.CharField(max_length=255)
-    time = models.TimeField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    sent = models.BooleanField(default=False)
+# exercise email reminder   
+class EmailReminder(models.Model):
+    email = models.EmailField()
+    subject = models.CharField(max_length=255)
+    message = models.TextField()
+    reminder_time = models.TimeField(blank=True, null=True)
 
     def __str__(self):
-        return f"{self.name} - {self.time}"
+        return f'Reminder for {self.email} at {self.reminder_time}'
 
 class Feedback(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
