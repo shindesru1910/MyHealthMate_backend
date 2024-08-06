@@ -29,7 +29,7 @@ def debug_task(self):
 app.conf.beat_schedule = {
     'send-mail-everyday':{
         'task': 'user.tasks.send_mail_func',
-        'schedule': crontab(hour=14, minute=21),
+        'schedule': crontab(hour=14, minute=50),
     }
 }
 
