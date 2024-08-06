@@ -2300,7 +2300,8 @@ def get_diet_recommendations(request):
                         ],
                         "Lunch": [
                             "Quinoa & Black Bean Salad: Quinoa, black beans, corn, bell peppers, avocado, and a lime-cilantro dressing.",
-                            "Vegetable & Hummus Wrap: Whole wheat wrap filled with hummus, spinach, shredded carrots, cucumbers, and bell peppers."
+                            "Vegetable & Hummus Wrap: Whole wheat wrap filled with hummus, spinach, shredded carrots, cucumbers, and bell peppers.",
+                            
                         ],
                         "Dinner": [
                             "Stuffed Bell Peppers: Bell peppers stuffed with a mixture of quinoa, black beans, corn, tomatoes, and spices.",
