@@ -29,9 +29,9 @@ urlpatterns = [
 
     path('create-doctor',views.create_doctor, name='create-doctor'),
     path('get-doctor',views.get_doctor, name='get-doctor'),
+    path('get-doctor/<int:doctor_id>', views.get_doctor_by_id, name='get_doctor_by_id'),    #Get appointmemnt for appointment form
     path('update-doctor',views.update_doctor, name='update-doctor'),
     path('delete-doctor',views.delete_doctor, name='delete-doctor'),
-    #Get appointmemnt for appointment form
     path('get-specialties',views.get_specialties, name="get_specialties"),
     # Form Submission of Appointment
     path('submit-appointment',views.submit_appointment, name="submit-appointment"),
@@ -59,6 +59,7 @@ urlpatterns = [
 
     path('create-appointment',views.create_appointment, name='create-appointment'),
     path('get-appointment',views.get_appointment, name='get-appointment'),
+    path('get-appointments-by-user', views.get_appointments_by_user, name='get_appointments_by_user'),
     path('update-appointment',views.update_appointment, name='update-appointment'),
     path('delete-appointment',views.delete_appointment, name='delete-appointment'),
    

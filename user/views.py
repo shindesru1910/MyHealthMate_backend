@@ -400,6 +400,26 @@ def get_doctor(request):
     except Exception as e:
         return JsonResponse({'data':str(e),'status':500},status = 200)
     
+
+@csrf_exempt
+def get_doctor_by_id(request, doctor_id):
+    try:
+        doctor = Doctor.objects.get(id=doctor_id)
+        doctor_dict = {
+            'id': doctor.id,
+            'first_name': doctor.first_name,
+            'last_name': doctor.last_name,
+            'specialty': doctor.specialty,
+            'contact_info': doctor.contact_info,
+            'reviews': doctor.reviews,
+            'location': doctor.location
+        }
+        return JsonResponse({'data': doctor_dict, 'status': 200}, status=200)
+    except Doctor.DoesNotExist:
+        return JsonResponse({'data': 'Doctor not found', 'status': 404}, status=404)
+    except Exception as e:
+        return JsonResponse({'data': str(e), 'status': 500}, status=500)
+    
 @csrf_exempt
 def update_doctor(request):
     if request.method != 'POST':
@@ -874,6 +894,32 @@ def get_appointment(request):
         return JsonResponse({'data': data, 'status': 200}, status=200)
     except Exception as e:
         return JsonResponse({'msg': str(e), 'status': 500}, status=500)
+    
+@csrf_exempt
+def get_appointments_by_user(request):
+    if request.method == 'GET':
+        try:
+            user_id = request.GET.get('user_id')
+            if not user_id:
+                return JsonResponse({'error': 'User ID not provided'}, status=400)
+
+            appointments = Appointment.objects.filter(user_id=user_id)
+            data = []
+            for appointment in appointments:
+                data.append({
+                    'id': appointment.id,
+                    'appointment_date': appointment.appointment_date,
+                    'status': appointment.status,
+                    'doctor': appointment.doctor_id,  # Use doctor_id to fetch doctor details separately
+                    'created_at': appointment.created_at,
+                    'updated_at': appointment.updated_at,
+                })
+
+            return JsonResponse({'data': data, 'status': 200}, status=200)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 
 @csrf_exempt
