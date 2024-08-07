@@ -956,77 +956,6 @@ def delete_appointment(request):
     except Exception as e:
         return JsonResponse({'msg': str(e), 'status': 500}, status=500)
 
-# ExerciseReminder APIs
-# @csrf_exempt
-# def create_exercise_reminder(request):
-#     if request.method != 'POST':
-#         return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=403)
-    
-#     try:
-#         user_id = request.POST['user_id']
-#         reminder_time = request.POST['reminder_time']
-#         reminder_message = request.POST['reminder_message']
-
-#         user = User.objects.get(id=user_id)
-#         reminder = ExerciseReminder(user=user, reminder_time=reminder_time, reminder_message=reminder_message)
-#         reminder.save()
-
-#         return JsonResponse({'msg': 'Data has been successfully created', 'status': 200}, status=200)
-#     except Exception as e:
-#         return JsonResponse({'msg': str(e), 'status': 500}, status=500)
-
-# @csrf_exempt
-# def get_exercise_reminder(request):
-#     try:
-#         reminders = ExerciseReminder.objects.all()
-#         data = []
-
-#         for reminder in reminders:
-#             reminder_dict = {}
-#             reminder_dict['id'] = reminder.id
-#             reminder_dict['user'] = reminder.user.id
-#             reminder_dict['reminder_time'] = reminder.reminder_time
-#             reminder_dict['reminder_message'] = reminder.reminder_message
-#             reminder_dict['created_at'] = reminder.created_at
-#             reminder_dict['updated_at'] = reminder.updated_at
-
-#             data.append(reminder_dict)
-#         return JsonResponse({'data': data, 'status': 200}, status=200)
-#     except Exception as e:
-#         return JsonResponse({'msg': str(e), 'status': 500}, status=500)
-
-
-# @csrf_exempt
-# def update_exercise_reminder(request):
-#     if request.method != 'POST':
-#         return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=403)
-#     try:
-#         id = request.POST['id']
-#         user_id = request.POST['user_id']
-#         reminder_time = request.POST['reminder_time']
-#         reminder_message = request.POST['reminder_message']
-
-#         reminder = ExerciseReminder.objects.get(id=id)
-#         reminder.user = User.objects.get(id=user_id)
-#         reminder.reminder_time = reminder_time
-#         reminder.reminder_message = reminder_message
-#         reminder.save()
-#         return JsonResponse({'msg': 'Data has been updated successfully', 'status': 200}, status=200)
-#     except Exception as e:
-#         return JsonResponse({'msg': str(e), 'status': 500}, status=500)
-
-# @csrf_exempt
-# def delete_exercise_reminder(request):
-#     if request.method != 'POST':
-#         return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=403)
-    
-#     try:
-#         id = request.POST['id']
-#         reminder = ExerciseReminder.objects.get(id=id)
-#         reminder.delete()
-#         return JsonResponse({'msg': 'Data has been removed successfully', 'status': 200}, status=200)
-#     except Exception as e:
-#         return JsonResponse({'msg': str(e), 'status': 500}, status=500)
 
 # Feedback APIs
 @csrf_exempt
@@ -3145,3 +3074,32 @@ def get_diet_recommendations(request):
 
     else:
         return JsonResponse({"error": "Invalid request method"}, status=405)
+
+
+
+#Medical file upload
+#uploaded by user
+from django.core.files.storage import default_storage
+@csrf_exempt
+def upload_file(request):
+    if request.method == 'POST' and request.FILES:
+        file_urls = []
+        for file_key in request.FILES:
+            file = request.FILES[file_key]
+            file_name = default_storage.save(file.name, file)
+            file_urls.append(default_storage.url(file_name))
+        return JsonResponse({'file_urls': file_urls}, status=201)
+    return JsonResponse({'error': 'No files uploaded'}, status=400)
+
+#accessed by admin
+@csrf_exempt
+def get_user_files(request):
+    users = User.objects.all()
+    user_files = []
+    for user in users:
+        files = UploadedFile.objects.filter(user=user)
+        user_files.append({
+            'username': user.first_name + user.last_name,
+            'files': [{'name': file.file.name, 'url': file.file.url} for file in files]
+        })
+    return JsonResponse({'user_files': user_files})

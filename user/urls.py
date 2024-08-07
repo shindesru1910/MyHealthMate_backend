@@ -3,7 +3,8 @@ from . import views
 from django.views.generic import TemplateView
 from django.contrib.auth import views as auth_views
 from user.views import get_user_profile
-
+from django.conf import settings
+from django.conf.urls.static import static
 
 
 urlpatterns = [
@@ -88,5 +89,8 @@ urlpatterns = [
     path('get-exercise-recommendations', views.get_exercise_recommendations, name='get-exercise-recommendations'),
     path('get-diet-recommendations', views.get_diet_recommendations, name='get-diet-recommendations'),
 
+    path('upload-file', views.upload_file, name='upload-file'),
+    path('get-user-files',views.get_user_files, name= 'get-user-files'),
 
-    ]
+
+    ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

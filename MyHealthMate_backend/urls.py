@@ -16,8 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path,include
+# from .views import get_user_files
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('',include('user.urls')),
+
+    # path('admin/user-files/', get_user_files, name='get_user_files'),
+
 ]
