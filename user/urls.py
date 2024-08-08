@@ -3,7 +3,8 @@ from . import views
 from django.views.generic import TemplateView
 from django.contrib.auth import views as auth_views
 from user.views import get_user_profile
-
+from django.conf import settings
+from django.conf.urls.static import static
 
 
 urlpatterns = [
@@ -29,9 +30,9 @@ urlpatterns = [
 
     path('create-doctor',views.create_doctor, name='create-doctor'),
     path('get-doctor',views.get_doctor, name='get-doctor'),
+    path('get-doctor/<int:doctor_id>', views.get_doctor_by_id, name='get_doctor_by_id'),    #Get appointmemnt for appointment form
     path('update-doctor',views.update_doctor, name='update-doctor'),
     path('delete-doctor',views.delete_doctor, name='delete-doctor'),
-    #Get appointmemnt for appointment form
     path('get-specialties',views.get_specialties, name="get_specialties"),
     # Form Submission of Appointment
     path('submit-appointment',views.submit_appointment, name="submit-appointment"),
@@ -59,6 +60,7 @@ urlpatterns = [
 
     path('create-appointment',views.create_appointment, name='create-appointment'),
     path('get-appointment',views.get_appointment, name='get-appointment'),
+    path('get-appointments-by-user', views.get_appointments_by_user, name='get_appointments_by_user'),
     path('update-appointment',views.update_appointment, name='update-appointment'),
     path('delete-appointment',views.delete_appointment, name='delete-appointment'),
    
@@ -87,5 +89,8 @@ urlpatterns = [
     path('get-exercise-recommendations', views.get_exercise_recommendations, name='get-exercise-recommendations'),
     path('get-diet-recommendations', views.get_diet_recommendations, name='get-diet-recommendations'),
 
+    path('upload-file', views.upload_file, name='upload-file'),
+    path('get-user-files',views.get_user_files, name= 'get-user-files'),
 
-    ]
+
+    ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

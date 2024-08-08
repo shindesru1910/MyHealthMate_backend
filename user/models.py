@@ -195,4 +195,26 @@ class Feedback(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     feedback_text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.first_name} - {self.user.last_name} - {self.feedback_text}"
+
+#medical history file upload
+class MedicalFile(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    file = models.FileField(upload_to='medical_files/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.first_name} - {self.user.last_name} - {self.file.name}"
+    
+class UploadedFile(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    file = models.FileField(upload_to='uploads/')
+    upload_date = models.DateTimeField(auto_now_add=True)
+    # description = models.CharField(max_length=255, blank=True, null=True)
+
+    def __str__(self):
+        return self.file.name
+    
 # Create your models here.
