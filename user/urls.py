@@ -92,5 +92,12 @@ urlpatterns = [
     path('upload-file', views.upload_file, name='upload-file'),
     path('get-user-files',views.get_user_files, name= 'get-user-files'),
 
+    path('generate-system-report',views.generate_system_report, name= 'generate-system-report'),
+
+    path('api/users/<int:user_id>/',views.get_user_for_appointment, name='get_user'),
+    path('api/doctors/<int:doctor_id>/',views.get_doctor_for_appointment, name='get_doctor'),
+    path('api/delete-appointment/', views.delete_appointments, name='delete_appointment'),
+    path('api/appointments/', views.get_appointments, name='get_appointments'),
+
 
     ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

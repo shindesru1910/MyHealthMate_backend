@@ -3103,3 +3103,96 @@ def get_user_files(request):
             'files': [{'name': file.file.name, 'url': file.file.url} for file in files]
         })
     return JsonResponse({'user_files': user_files})
+
+# for generating the system report
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .models import User, Doctor, Appointment, Feedback
+
+@csrf_exempt
+def generate_system_report(request):
+    # Fetch data from your models (e.g., User, Appointment, Feedback)
+    users = User.objects.all()
+    doctors = Doctor.objects.all()
+    appointments = Appointment.objects.all()
+    feedbacks = Feedback.objects.all()
+
+    # Adjust the queries to reflect your custom User model fields
+    total_users = users.count()
+    total_doctors = doctors.count()
+    total_appointments = appointments.count()
+    upcoming_appointments = appointments.filter(status='upcoming').count()
+    total_feedback = feedbacks.count()
+
+    # If your User model has an is_superuser field, you might use that to check for admin users
+    admin_users = users.filter(is_superuser=True).count()
+
+    # Prepare the data for JSON response
+    data = {
+        'users': {
+            'total': total_users,
+            'admin_users': admin_users,  # Example: Count of admin users
+        },
+        'doctors': {
+            'total': total_doctors,
+        },
+        'appointments': {
+            'total': total_appointments,
+            'upcoming': upcoming_appointments,
+        },
+        'feedbacks': {
+            'total': total_feedback,
+        }
+    }
+
+    # Return the response as JSON
+    return JsonResponse(data)
+
+@csrf_exempt
+def get_user_for_appointment(request, user_id):
+    try:
+        user = User.objects.get(id=user_id)
+        return JsonResponse({'name': f"{user.first_name} {user.last_name}"})
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'User not found'}, status=404)
+
+@csrf_exempt
+def get_doctor_for_appointment(request, doctor_id):
+    try:
+        doctor = Doctor.objects.get(id=doctor_id)
+        return JsonResponse({
+            'first_name': doctor.first_name,
+            'last_name': doctor.last_name,
+            'specialty': doctor.specialty,
+            'location': doctor.location
+        })
+    except Doctor.DoesNotExist:
+        return JsonResponse({'error': 'Doctor not found'}, status=404)
+
+@csrf_exempt
+def delete_appointments(request):
+    if request.method == 'POST':
+        appointment_id = request.POST.get('id')
+        try:
+            appointment = Appointment.objects.get(id=appointment_id)
+            appointment.delete()
+            return JsonResponse({'status': 200, 'msg': 'Appointment deleted successfully'})
+        except Appointment.DoesNotExist:
+            return JsonResponse({'status': 404, 'msg': 'Appointment not found'})
+    return JsonResponse({'status': 405, 'msg': 'Method not allowed'}, status=405)
+
+def get_appointments(request):
+    appointments = Appointment.objects.all()
+    data = [
+        {
+            'id': appt.id,
+            'user': appt.user.id,
+            'doctor': appt.doctor.id,
+            'appointment_date': appt.appointment_date,
+            'status': appt.status,
+            'created_at': appt.created_at,
+            'updated_at': appt.updated_at
+        }
+        for appt in appointments
+    ]
+    return JsonResponse({'status': 200, 'data': data})
