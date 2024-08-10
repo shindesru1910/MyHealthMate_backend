@@ -3196,3 +3196,37 @@ def get_appointments(request):
         for appt in appointments
     ]
     return JsonResponse({'status': 200, 'data': data})
+
+from django.utils import timezone
+from datetime import datetime
+import pytz
+
+@csrf_exempt
+def get_upcoming_appointments(request):
+    try:
+        # Get the current time in IST
+        ist = pytz.timezone('Asia/Kolkata')
+        now_ist = timezone.now().astimezone(ist)  # Get the current time in IST
+
+        # Convert appointment_date to IST before filtering
+        upcoming_appointments = Appointment.objects.all()
+        filtered_appointments = []
+
+        for appointment in upcoming_appointments:
+            # Convert appointment_date to IST
+            appointment_ist = appointment.appointment_date.astimezone(ist)
+            if appointment_ist >= now_ist:
+                appointment_dict = {
+                    'id': appointment.id,
+                    'user': appointment.user.id,
+                    'doctor': appointment.doctor.id,
+                    'appointment_date': appointment.appointment_date,
+                    'status': appointment.status,
+                    'created_at': appointment.created_at,
+                    'updated_at': appointment.updated_at,
+                }
+                filtered_appointments.append(appointment_dict)
+
+        return JsonResponse({'total': len(filtered_appointments), 'data': filtered_appointments, 'status': 200}, status=200)
+    except Exception as e:
+        return JsonResponse({'msg': str(e), 'status': 500}, status=500)
