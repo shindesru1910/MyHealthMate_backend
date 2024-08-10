@@ -20,7 +20,6 @@ from django.contrib.auth.tokens import default_token_generator
 from django.shortcuts import render, redirect
 from django.contrib.auth.forms import SetPasswordForm
 from django.contrib.auth import get_user_model
-from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_decode
 from django.http import JsonResponse
 
@@ -32,7 +31,6 @@ from django.core.mail import send_mail
 
 from django.contrib.auth.decorators import login_required
 
-from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail, BadHeaderError
 from django.http import JsonResponse, HttpResponse
 from django.template.loader import render_to_string
@@ -43,6 +41,8 @@ from django.conf import settings
 from django.contrib.auth.models import User
 import logging
 from django.shortcuts import render
+import jwt
+from django.utils.decorators import method_decorator
 
 def index(request):
     return render(request, 'index.html')
@@ -52,7 +52,6 @@ def index(request):
 
 # import os
 # from django.db.models import Sum
-# import jwt
 # from datetime import datetime,timezone,timedelta
 # from firebase_admin import credentials
 # from firebase_admin import firestore
@@ -3081,21 +3080,60 @@ def get_diet_recommendations(request):
 #Medical file upload
 #uploaded by user
 from django.core.files.storage import default_storage
+from .authentication import decode_token
 @csrf_exempt
 def upload_file(request):
     if request.method == 'POST' and request.FILES:
+        # Extract the token from the 'Authorization' header
+        token = request.headers.get('Authorization')
+        if not token or not token.startswith('Bearer '):
+            return JsonResponse({'error': 'Token missing or malformed'}, status=401)
+
+        # Remove the 'Bearer ' prefix from the token
+        token = token.split(' ')[1]
+
+        # Decode the token and get the user information
+        payload = decode_token(token)
+        if 'error' in payload:
+            return JsonResponse({'error': payload['error']}, status=401)
+
+        user_id = payload.get('user_id')
+        try:
+            # Retrieve the user based on the ID from the token
+            user = User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            return JsonResponse({'error': 'User not found'}, status=401)
+
         file_urls = []
         for file_key in request.FILES:
             file = request.FILES[file_key]
-            # Safely construct the file name
             file_name = os.path.join('medical_files/', file.name)
             file_name = default_storage.save(file_name, file)
             file_url = default_storage.url(file_name)
             file_urls.append(file_url)
 
-            MedicalFile.objects.create(user= request.user, file=file)
+            # Create a MedicalFile object associated with the user
+            MedicalFile.objects.create(user=user, file=file)
+
         return JsonResponse({'file_urls': file_urls}, status=201)
+
     return JsonResponse({'error': 'No files uploaded'}, status=400)
+
+# @csrf_exempt
+# def upload_file(request):
+#     if request.method == 'POST' and request.FILES:
+#         file_urls = []
+#         for file_key in request.FILES:
+#             file = request.FILES[file_key]
+#             # Safely construct the file name
+#             file_name = os.path.join('medical_files/', file.name)
+#             file_name = default_storage.save(file_name, file)
+#             file_url = default_storage.url(file_name)
+#             file_urls.append(file_url)
+
+#             MedicalFile.objects.create(user= request.user, file=file)
+#         return JsonResponse({'file_urls': file_urls}, status=201)
+#     return JsonResponse({'error': 'No files uploaded'}, status=400)
 
 
 #accessed by admin
@@ -3103,9 +3141,28 @@ def upload_file(request):
 def get_user_files(request):
     if request.method == 'GET':
         files = MedicalFile.objects.all()
-        file_list = [{'name': file.file.name, 'url': file.file.url} for file in files]
-        return JsonResponse({'files': file_list}, status=200)
+        file_list = [
+            {
+                'id': file.id,
+                'file': file.file.url,
+                'user': {
+                    'first_name': file.user.first_name,
+                    'last_name': file.user.last_name
+                }
+            } 
+            for file in files
+        ]
+        return JsonResponse(file_list, status=200, safe=False)
     return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+
+# @csrf_exempt
+# def get_user_files(request):
+#     if request.method == 'GET':
+#         files = MedicalFile.objects.all()
+#         file_list = [{'name': file.file.name, 'url': file.file.url} for file in files]
+#         return JsonResponse({'files': file_list}, status=200)
+#     return JsonResponse({'error': 'Invalid request method'}, status=400)
 
 # def get_user_files(request):
 #     if request.user.email == 'admin@gmail.com':

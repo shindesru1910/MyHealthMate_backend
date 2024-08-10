@@ -16,3 +16,18 @@ def create_token(id, email,name,is_admin,activity_level,health_goals,dietary_pre
         'exp': datetime.datetime.now() + datetime.timedelta(days=7),
         'iat': datetime.datetime.now()
     }, 'srushti', algorithm='HS256')
+
+
+#for decoding the token
+# SECRET_KEY = 'srushti'  
+# ALGORITHM = 'HS256'
+def decode_token(token):
+    try:
+        payload = jwt.decode(token, 'srushti', algorithm='HS256')
+        return payload
+    except jwt.ExpiredSignatureError:
+        return {'error': 'Token has expired'}
+    except jwt.InvalidTokenError:
+        return {'error': 'Invalid token'}
+    except Exception as e:
+        return {'error': str(e)}
