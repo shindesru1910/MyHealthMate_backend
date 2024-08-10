@@ -189,3 +189,4 @@ CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 TIME_ZONE = 'Asia/Kolkata'
 USE_TZ = True
+

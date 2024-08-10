@@ -90,6 +90,7 @@ urlpatterns = [
 
 
     path('generate-system-report',views.generate_system_report, name= 'generate-system-report'),
+    path('get-upcoming-appointments',views.get_upcoming_appointments, name= 'get-upcoming-appointments'),
 
     path('api/users/<int:user_id>/',views.get_user_for_appointment, name='get_user'),
     path('api/doctors/<int:doctor_id>/',views.get_doctor_for_appointment, name='get_doctor'),
