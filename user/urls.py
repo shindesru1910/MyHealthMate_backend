@@ -89,5 +89,12 @@ urlpatterns = [
     path('get-diet-recommendations', views.get_diet_recommendations, name='get-diet-recommendations'),
 
 
+    path('generate-system-report',views.generate_system_report, name= 'generate-system-report'),
+
+    path('api/users/<int:user_id>/',views.get_user_for_appointment, name='get_user'),
+    path('api/doctors/<int:doctor_id>/',views.get_doctor_for_appointment, name='get_doctor'),
+    path('api/delete-appointment/', views.delete_appointments, name='delete_appointment'),
+    path('api/appointments/', views.get_appointments, name='get_appointments'),
+
 
     ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
