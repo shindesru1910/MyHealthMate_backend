@@ -16,7 +16,6 @@ urlpatterns = [
     path('', views.index, name='index'),
 
 
-
     path('create-user',views.create_user, name='create-user'),
     path('get-user',views.get_user, name='get-user'),
     path('update-user',views.update_user, name='update-user'),
@@ -63,11 +62,7 @@ urlpatterns = [
     path('get-appointments-by-user', views.get_appointments_by_user, name='get_appointments_by_user'),
     path('update-appointment',views.update_appointment, name='update-appointment'),
     path('delete-appointment',views.delete_appointment, name='delete-appointment'),
-   
-    # path('create-exercise-reminder',views.create_exercise_reminder, name='create-exercise-reminder'),
-    # path('get-exercise-reminder',views.get_exercise_reminder, name='get-exercise-reminder'),
-    # path('update-exercise-reminder',views.update_exercise_reminder, name='update-exercise-reminder'),
-    # path('delete-exercise-reminder',views.delete_exercise_reminder, name='delete-exercise-reminder'),
+
 
     path('create-feedback',views.create_feedback, name='create-feedback'),
     path('get-feedback',views.get_feedback, name='get-feedback'),
@@ -77,6 +72,10 @@ urlpatterns = [
     
     # path('send-reminder-email', views.send_reminder_email, name='send-reminder-email'),
     path('sendmail/',views.send_mail_to_all, name="sendmail"),
+
+    
+    path('upload-file', views.upload_file, name='upload-file'),
+    path('get-user-files',views.get_user_files, name= 'get-user-files'),
 
 
     path('password-reset-request', views.password_reset_request, name='password-reset-request'),
@@ -89,8 +88,6 @@ urlpatterns = [
     path('get-exercise-recommendations', views.get_exercise_recommendations, name='get-exercise-recommendations'),
     path('get-diet-recommendations', views.get_diet_recommendations, name='get-diet-recommendations'),
 
-    path('upload-file', views.upload_file, name='upload-file'),
-    path('get-user-files',views.get_user_files, name= 'get-user-files'),
 
     path('generate-system-report',views.generate_system_report, name= 'generate-system-report'),
     path('get-upcoming-appointments',views.get_upcoming_appointments, name= 'get-upcoming-appointments'),

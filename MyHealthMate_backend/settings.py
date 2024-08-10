@@ -124,9 +124,11 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+LOGIN_URL = '/login/'
+
+# For user's uploaded files
 # Base URL to serve media files
 MEDIA_URL = '/media/'
-
 # Directory where uploaded files will be stored
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
@@ -185,7 +187,6 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Asia/Kolkata'
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
-
 TIME_ZONE = 'Asia/Kolkata'
 USE_TZ = True
 

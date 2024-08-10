@@ -1,13 +1,14 @@
 from datetime import time
 import json
 import logging
+import os
 from django.forms import ValidationError
 from django.utils.dateparse import parse_datetime
 import pytz
 from django.contrib.auth import authenticate, login
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from django.conf import settings
 from . models import *
 from django.contrib.auth.models import User
@@ -3086,23 +3087,46 @@ def upload_file(request):
         file_urls = []
         for file_key in request.FILES:
             file = request.FILES[file_key]
-            file_name = default_storage.save(file.name, file)
-            file_urls.append(default_storage.url(file_name))
+            # Safely construct the file name
+            file_name = os.path.join('medical_files/', file.name)
+            file_name = default_storage.save(file_name, file)
+            file_url = default_storage.url(file_name)
+            file_urls.append(file_url)
+
+            MedicalFile.objects.create(user= request.user, file=file)
         return JsonResponse({'file_urls': file_urls}, status=201)
     return JsonResponse({'error': 'No files uploaded'}, status=400)
+
 
 #accessed by admin
 @csrf_exempt
 def get_user_files(request):
-    users = User.objects.all()
-    user_files = []
-    for user in users:
-        files = UploadedFile.objects.filter(user=user)
-        user_files.append({
-            'username': user.first_name + user.last_name,
-            'files': [{'name': file.file.name, 'url': file.file.url} for file in files]
-        })
-    return JsonResponse({'user_files': user_files})
+    if request.method == 'GET':
+        files = MedicalFile.objects.all()
+        file_list = [{'name': file.file.name, 'url': file.file.url} for file in files]
+        return JsonResponse({'files': file_list}, status=200)
+    return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+# def get_user_files(request):
+#     if request.user.email == 'admin@gmail.com':
+#         files = MedicalFile.objects.all()
+#     else:
+#         files = MedicalFile.objects.filter(user=request.user)
+    
+#     file_list = []
+#     for file in files:
+#         user = file.user  
+#         file_info = {
+#             'id': file.id,
+#             'file': file.file.url,
+#             'uploaded_at': file.uploaded_at,
+#             'first_name': user.first_name,
+#             'last_name': user.last_name
+#         }
+#         file_list.append(file_info)
+    
+#     return JsonResponse({'files': file_list}, status=200)
+
 
 # for generating the system report
 from django.http import JsonResponse
@@ -3230,3 +3254,4 @@ def get_upcoming_appointments(request):
         return JsonResponse({'total': len(filtered_appointments), 'data': filtered_appointments, 'status': 200}, status=200)
     except Exception as e:
         return JsonResponse({'msg': str(e), 'status': 500}, status=500)
+
