@@ -3379,3 +3379,22 @@ def download_file(request, filename):
             response['Content-Disposition'] = f'attachment; filename={filename}'
             return response
     return JsonResponse({"error": "File not found."}, status=404)
+
+@csrf_exempt
+def delete_file(request, filename):
+    file_path = os.path.join(FILE_STORAGE_DIR, filename)
+
+    if os.path.exists(file_path):
+        os.remove(file_path)
+
+        # Also update the records
+        records_file = os.path.join(FILE_STORAGE_DIR, 'upload_records.json')
+        if os.path.exists(records_file):
+            with open(records_file, 'r') as f:
+                records = json.load(f)
+            records = [record for record in records if record['filename'] != filename]
+            with open(records_file, 'w') as f:
+                json.dump(records, f)
+
+        return JsonResponse({"message": "File deleted successfully!"})
+    return JsonResponse({"error": "File not found."}, status=404)
