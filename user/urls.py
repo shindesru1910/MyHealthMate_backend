@@ -97,4 +97,4 @@ urlpatterns = [
     path('files/', views.list_files, name='list_files'),
     path('download/<str:filename>/', views.download_file, name='download_file'),
 
-    ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    ] 
