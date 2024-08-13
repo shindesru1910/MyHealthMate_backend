@@ -2,7 +2,7 @@ from django.urls import path
 from . import views
 from django.views.generic import TemplateView
 from django.contrib.auth import views as auth_views
-from user.views import get_user_profile
+# from user.views import get_user_profile
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -73,10 +73,6 @@ urlpatterns = [
     # path('send-reminder-email', views.send_reminder_email, name='send-reminder-email'),
     path('sendmail/',views.send_mail_to_all, name="sendmail"),
 
-    
-    path('upload-file', views.upload_file, name='upload-file'),
-    path('get-user-files',views.get_user_files, name= 'get-user-files'),
-
 
     path('password-reset-request', views.password_reset_request, name='password-reset-request'),
     # path('reset/<uidb64>/<token>/', views.password_reset_confirm, name='password-reset-confirm'),
@@ -84,7 +80,7 @@ urlpatterns = [
     path('', TemplateView.as_view(template_name='index.html')), 
 
 
-    path('api/get-user-profile/', get_user_profile, name='get_user_profile'),
+    path('api/get-user-profile/',views.get_user_profile, name='get_user_profile'),
     path('get-exercise-recommendations', views.get_exercise_recommendations, name='get-exercise-recommendations'),
     path('get-diet-recommendations', views.get_diet_recommendations, name='get-diet-recommendations'),
 
