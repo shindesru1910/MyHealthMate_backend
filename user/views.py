@@ -3204,3 +3204,70 @@ def get_upcoming_appointments(request):
     except Exception as e:
         return JsonResponse({'msg': str(e), 'status': 500}, status=500)
 
+import os
+import json
+from django.http import JsonResponse, HttpResponse
+from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
+
+FILE_STORAGE_DIR = os.path.join(settings.BASE_DIR, 'uploaded_files')
+
+if not os.path.exists(FILE_STORAGE_DIR):
+    os.makedirs(FILE_STORAGE_DIR)
+
+@csrf_exempt
+def upload_file(request):
+    if request.method == 'POST':
+        file = request.FILES['file']
+        username = request.POST.get('username', 'anonymous')  # Get the username from the form data
+
+        file_path = os.path.join(FILE_STORAGE_DIR, file.name)
+
+        # Save the uploaded file
+        with open(file_path, 'wb+') as destination:
+            for chunk in file.chunks():
+                destination.write(chunk)
+
+        # Record the file upload with the username
+        upload_record = {
+            'username': username,
+            'filename': file.name
+        }
+
+        # Save the record in a simple JSON file (or a database if needed)
+        records_file = os.path.join(FILE_STORAGE_DIR, 'upload_records.json')
+
+        if os.path.exists(records_file):
+            with open(records_file, 'r') as f:
+                records = json.load(f)
+        else:
+            records = []
+
+        records.append(upload_record)
+
+        with open(records_file, 'w') as f:
+            json.dump(records, f)
+
+        return JsonResponse({"message": "File uploaded successfully!"})
+    return JsonResponse({"error": "Invalid request method."}, status=400)
+
+def list_files(request):
+    records_file = os.path.join(FILE_STORAGE_DIR, 'upload_records.json')
+
+    if os.path.exists(records_file):
+        with open(records_file, 'r') as f:
+            records = json.load(f)
+    else:
+        records = []
+
+    return JsonResponse(records, safe=False)
+
+def download_file(request, filename):
+    file_path = os.path.join(FILE_STORAGE_DIR, filename)
+
+    if os.path.exists(file_path):
+        with open(file_path, 'rb') as file:
+            response = HttpResponse(file.read(), content_type="application/octet-stream")
+            response['Content-Disposition'] = f'attachment; filename={filename}'
+            return response
+    return JsonResponse({"error": "File not found."}, status=404)
