@@ -97,5 +97,8 @@ urlpatterns = [
     path('api/delete-appointment/', views.delete_appointments, name='delete_appointment'),
     path('api/appointments/', views.get_appointments, name='get_appointments'),
 
+    path('upload/', views.upload_file, name='upload_file'),
+    path('files/', views.list_files, name='list_files'),
+    path('download/<str:filename>/', views.download_file, name='download_file'),
 
     ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
