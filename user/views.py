@@ -3238,7 +3238,8 @@ def upload_file(request):
         # Record the file upload with the username
         upload_record = {
             'username': username,
-            'filename': file.name
+            'filename': file.name,
+            'upload_date': datetime.now().strftime('%Y-%m-%d %H:%M:%S')  
         }
 
         # Save the record in a simple JSON file
@@ -3261,6 +3262,29 @@ def upload_file(request):
         return JsonResponse({"message": "File uploaded successfully!"})
     return JsonResponse({"error": "Invalid request method."}, status=400)
 
+#for user's view
+@csrf_exempt
+def get_uploaded_files(request):
+    if request.method == 'GET':
+        username = request.GET.get('username', '')
+        records_file = os.path.join(FILE_STORAGE_DIR, 'upload_records.json')
+
+        if os.path.exists(records_file):
+            try:
+                with open(records_file, 'r') as f:
+                    records = json.load(f)
+                    # Filter records by username
+                    if username:
+                        records = [record for record in records if record.get('username') == username]
+            except json.JSONDecodeError as e:
+                # Handle JSON decoding errors
+                return JsonResponse({"error": "Error reading records."}, status=500)
+        else:
+            records = []
+
+        return JsonResponse({'files': records})
+    
+    return JsonResponse({"error": "Invalid request method."}, status=400)
 
 def list_files(request):
     records_file = os.path.join(FILE_STORAGE_DIR, 'upload_records.json')
