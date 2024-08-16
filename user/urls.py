@@ -98,5 +98,8 @@ urlpatterns = [
     path('download/<str:filename>/', views.download_file, name='download_file'),
     path('delete/<str:filename>/', views.delete_file, name='delete_file'),
     path('get_uploaded_files/', views.get_uploaded_files, name='get_uploaded_files'), #for user's view
+    
+    path('get-specialties-and-locations', views.get_specialties_and_locations, name='get_specialties_and_locations'),
+    path('get-doctors', views.get_doctors, name='get_doctors'),
 
     ] 

@@ -123,6 +123,9 @@ class Doctor(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return f"{self.first_name} {self.last_name} - {self.specialty}"
+
 class HealthRecommendation(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     diet_plan = models.ForeignKey(DietPlan, on_delete=models.SET_NULL, null=True, blank=True)
