@@ -3372,3 +3372,28 @@ def get_doctors(request):
         'status': 200,
         'data': doctor_data
     })
+
+
+
+# @csrf_exempt
+# def get_health_overview(request, user_id):
+#     try:
+#         # Fetch the UserProfile using the user_id
+#         user_profile = UserProfile.objects.get(user_id=user_id)
+        
+#         heart_rate_data = list(HeartRateData.objects.filter(user_profile=user_profile).values('date', 'heart_rate'))
+#         blood_pressure_data = list(BloodPressureData.objects.filter(user_profile=user_profile).values('date', 'systolic', 'diastolic'))
+#         step_count_data = list(StepCountData.objects.filter(user_profile=user_profile).values('date', 'steps'))
+
+#         data = {
+#             'heartRateData': heart_rate_data,
+#             'bloodPressureData': blood_pressure_data,
+#             'stepCountData': step_count_data,
+#         }
+
+#         return JsonResponse({'data': data, 'status': 200}, status=200)
+
+#     except UserProfile.DoesNotExist:
+#         return JsonResponse({'error': 'UserProfile not found', 'status': 404}, status=404)
+#     except Exception as e:
+#         return JsonResponse({'error': str(e), 'status': 500}, status=500)

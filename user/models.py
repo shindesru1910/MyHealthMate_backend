@@ -92,7 +92,24 @@ class UserProfile(models.Model):
     membership_status = models.CharField(max_length=7, choices=MEMBERSHIP_STATUS, default='regular')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
+
+# class HeartRateData(models.Model):
+#     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='heart_rate_data')
+#     date = models.DateField()
+#     heart_rate = models.IntegerField()
+
+# class BloodPressureData(models.Model):
+#     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='blood_pressure_data')
+#     date = models.DateField()
+#     systolic = models.IntegerField()
+#     diastolic = models.IntegerField()
+
+# class StepCountData(models.Model):
+#     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='step_count_data')
+#     date = models.DateField()
+#     steps = models.IntegerField()
+
 
 class Profile(models.Model):
     user = models.OneToOneField(User,on_delete=models.CASCADE)
@@ -163,6 +180,17 @@ class HealthReport(models.Model):
 #     def clean(self):
 #         #validation 
 #         pass
+
+
+
+# class UserTimeslot(models.Model):
+#     start_time = models.TimeField()
+#     end_time = models.TimeField()
+#     date = models.DateField()
+
+#     def __str__(self):
+#         return f"{self.date} from {self.start_time} to {self.end_time}"
+
 class Appointment(models.Model):
     STATUS_CHOICES = [
         ('scheduled', 'Scheduled'),
@@ -175,6 +203,7 @@ class Appointment(models.Model):
     specialty = models.CharField(max_length=10, choices=STATUS_CHOICES,null=False,blank=True)
     doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE)
     appointment_date = models.DateTimeField()
+    # time_slot = models.ForeignKey(UserTimeslot, on_delete=models.CASCADE,null=True, blank=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES)
     message = models.TextField(null=True, blank=True) 
     created_at = models.DateTimeField(auto_now_add=True)

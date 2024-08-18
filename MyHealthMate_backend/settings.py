@@ -185,3 +185,7 @@ CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 TIME_ZONE = 'Asia/Kolkata'
 USE_TZ = True
 
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'frontend/build/static'),
+]

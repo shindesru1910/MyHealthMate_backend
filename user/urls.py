@@ -102,4 +102,5 @@ urlpatterns = [
     path('get-specialties-and-locations', views.get_specialties_and_locations, name='get_specialties_and_locations'),
     path('get-doctors', views.get_doctors, name='get_doctors'),
 
+    # path('api/health-overview/<int:user_id>/', views.get_health_overview, name='get_health_overview'),
     ] 
