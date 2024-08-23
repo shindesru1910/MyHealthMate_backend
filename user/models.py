@@ -231,5 +231,18 @@ class Feedback(models.Model):
     def __str__(self):
         return f"{self.user.first_name} - {self.user.last_name} - {self.feedback_text}"
 
+# models.py
+
+
+class HealthData(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    date = models.DateField(auto_now_add=True)
+    heart_rate = models.IntegerField()
+    systolic = models.IntegerField()
+    diastolic = models.IntegerField()
+    step_count = models.IntegerField()
     
+    def __str__(self):
+        return f"{self.user.username} - {self.date}"
+  
 # Create your models here.

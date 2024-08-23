@@ -3397,3 +3397,65 @@ def get_doctors(request):
 #         return JsonResponse({'error': 'UserProfile not found', 'status': 404}, status=404)
 #     except Exception as e:
 #         return JsonResponse({'error': str(e), 'status': 500}, status=500)
+
+
+import json
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from datetime import datetime, timedelta
+from .models import HealthData
+
+User = get_user_model()
+
+@csrf_exempt
+def save_health_data(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            user_id = data.get('user_id')
+            heart_rate = data.get('heart_rate')
+            systolic = data.get('systolic')
+            diastolic = data.get('diastolic')
+            step_count = data.get('step_count')
+
+            # Ensure user exists
+            user = User.objects.get(id=user_id)
+
+            HealthData.objects.create(
+                user=user,
+                heart_rate=heart_rate,
+                systolic=systolic,
+                diastolic=diastolic,
+                step_count=step_count
+            )
+            
+            return JsonResponse({'message': 'Health data saved successfully'}, status=201)
+        except User.DoesNotExist:
+            return JsonResponse({'error': 'User not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+@csrf_exempt
+def fetch_health_data(request):
+    if request.method == 'GET':
+        try:
+            user_id = request.GET.get('user_id')
+            timeframe = request.GET.get('timeframe', 'monthly')
+            
+            if timeframe == 'weekly':
+                start_date = datetime.now() - timedelta(weeks=1)
+            elif timeframe == 'monthly':
+                start_date = datetime.now() - timedelta(days=30)
+            else:
+                return JsonResponse({'error': 'Invalid timeframe'}, status=400)
+            
+            user = User.objects.get(id=user_id)
+            health_data = HealthData.objects.filter(user=user, date__gte=start_date).values('date', 'heart_rate', 'systolic', 'diastolic', 'step_count')
+            
+            return JsonResponse(list(health_data), safe=False, status=200)
+        except User.DoesNotExist:
+            return JsonResponse({'error': 'User not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
