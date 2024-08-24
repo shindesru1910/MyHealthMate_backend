@@ -35,7 +35,7 @@ urlpatterns = [
     path('get-specialties',views.get_specialties, name="get_specialties"),
     # Form Submission of Appointment
     path('submit-appointment',views.submit_appointment, name="submit-appointment"),
-    path('get-available-slots',views.get_available_slots, name="get-available-slots"),
+    path('get-available-time-slots',views.get_available_time_slots, name="get-available-slots"),
 
     path('create-exercise-plan',views.create_exerciseplan, name='create-exercise-plan'),
     path('get-exercise-plan',views.get_exerciseplan, name='get-exercise-plan'),

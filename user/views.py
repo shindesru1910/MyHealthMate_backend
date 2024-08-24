@@ -474,6 +474,53 @@ def get_specialties(request):
         return JsonResponse({'msg': str(e), 'status': 500}, status=200)
     
 # For Submitting the Appointment form, Submit API
+# @csrf_exempt
+# def submit_appointment(request):
+#     if request.method == 'POST':
+#         name = request.POST.get('name')
+#         email = request.POST.get('email')
+#         phone = request.POST.get('phone')
+#         date = request.POST.get('date')
+#         specialty = request.POST.get('speciality')
+#         doctor_id = request.POST.get('doctor')
+#         message = request.POST.get('message')
+
+#         print(f'Received data: {name}, {email}, {phone}, {date}, {specialty}, {doctor_id}, {message}')
+
+#         if not all([name, email, phone, date, specialty, doctor_id, message]):
+#             return JsonResponse({'error': 'Missing required fields', 'data': {'name': name, 'email': email, 'phone': phone, 'date': date, 'specialty': specialty, 'doctor_id': doctor_id, 'message': message}}, status=400)
+
+#         try:
+#             user = User.objects.get(email=email)
+#             doctor = Doctor.objects.get(id=doctor_id)
+
+#             if Appointment.objects.filter(doctor=doctor, appointment_date=date).exists():
+#                 return JsonResponse({'error': 'This date slot is already booked'}, status=400)
+
+#             appointment = Appointment(
+#                 user=user,
+#                 doctor=doctor,
+#                 appointment_date=date,
+#                 status='scheduled',
+#                 phone=phone,
+#                 specialty=specialty,
+#                 message=message 
+#             )
+#             appointment.clean()
+#             appointment.save()
+
+#             return JsonResponse({'status': 'OK'})
+#         except User.DoesNotExist:
+#             return JsonResponse({'error': 'User not found'}, status=404)
+#         except Doctor.DoesNotExist:
+#             return JsonResponse({'error': 'Doctor not found'}, status=404)
+#         except ValidationError as e:
+#             return JsonResponse({'error': str(e)}, status=400)
+#         except Exception as e:
+#             return JsonResponse({'error': f'An unexpected error occurred: {str(e)}'}, status=500)
+
+#     return JsonResponse({'error': 'Method not allowed'}, status=405)
+
 @csrf_exempt
 def submit_appointment(request):
     if request.method == 'POST':
@@ -483,24 +530,29 @@ def submit_appointment(request):
         date = request.POST.get('date')
         specialty = request.POST.get('speciality')
         doctor_id = request.POST.get('doctor')
+        time_slot = request.POST.get('time_slot')  # Get the time slot from the request
         message = request.POST.get('message')
 
-        print(f'Received data: {name}, {email}, {phone}, {date}, {specialty}, {doctor_id}, {message}')
+        print(f'Received data: {name}, {email}, {phone}, {date}, {specialty}, {doctor_id}, {time_slot}, {message}')
 
-        if not all([name, email, phone, date, specialty, doctor_id, message]):
-            return JsonResponse({'error': 'Missing required fields', 'data': {'name': name, 'email': email, 'phone': phone, 'date': date, 'specialty': specialty, 'doctor_id': doctor_id, 'message': message}}, status=400)
+        # Ensure all required fields are provided
+        if not all([name, email, phone, date, specialty, doctor_id, time_slot, message]):
+            return JsonResponse({'error': 'Missing required fields'}, status=400)
 
         try:
             user = User.objects.get(email=email)
             doctor = Doctor.objects.get(id=doctor_id)
 
-            if Appointment.objects.filter(doctor=doctor, appointment_date=date).exists():
-                return JsonResponse({'error': 'This date slot is already booked'}, status=400)
+            # Check if an appointment already exists for this doctor, date, and time slot
+            if Appointment.objects.filter(doctor=doctor, appointment_date=date, time_slot=time_slot).exists():
+                return JsonResponse({'error': 'This time slot is already booked'}, status=400)
 
+            # Create a new appointment
             appointment = Appointment(
                 user=user,
                 doctor=doctor,
                 appointment_date=date,
+                time_slot=time_slot,  # Save the time slot in the appointment
                 status='scheduled',
                 phone=phone,
                 specialty=specialty,
@@ -522,24 +574,24 @@ def submit_appointment(request):
     return JsonResponse({'error': 'Method not allowed'}, status=405)
 
 @csrf_exempt
-def get_available_slots(request):
+def get_available_time_slots(request):
     doctor_id = request.GET.get('doctor_id')
-    date = request.GET.get('date')
+    appointment_date = request.GET.get('appointment_date')
 
-    if not doctor_id or not date:
-        return JsonResponse({'error': 'Missing required parameters'}, status=400)
+    booked_slots = Appointment.objects.filter(
+        doctor_id=doctor_id,
+        appointment_date=appointment_date,
+        status='scheduled'
+    ).values_list('time_slot', flat=True)
 
-    try:
-        doctor = Doctor.objects.get(id=doctor_id)
-        booked_slots = Appointment.objects.filter(doctor=doctor, appointment_date=date).values_list('appointment_time', flat=True)
+    all_slots = dict(Appointment.TIME_SLOTS)
+    available_slots = {slot: label for slot, label in all_slots.items()}
 
-        # Example available slots, assuming 30-minute intervals
-        all_slots = ['09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '13:00', '13:30', '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00', '17:30']
-        available_slots = [slot for slot in all_slots if slot not in booked_slots]
+    for slot in booked_slots:
+        if slot in available_slots:
+            available_slots[slot] = 'Booked'
 
-        return JsonResponse({'available_slots': available_slots})
-    except Doctor.DoesNotExist:
-        return JsonResponse({'error': 'Doctor not found'}, status=404)
+    return JsonResponse({'available_slots': available_slots})
 
 
 
@@ -906,9 +958,11 @@ def get_appointments_by_user(request):
             appointments = Appointment.objects.filter(user_id=user_id)
             data = []
             for appointment in appointments:
+                logger.debug(f"Appointment ID: {appointment.id}, Time Slot: {appointment.time_slot}")
                 data.append({
                     'id': appointment.id,
                     'appointment_date': appointment.appointment_date,
+                    'time_slot': appointment.time_slot,  # Include time_slot
                     'status': appointment.status,
                     'doctor': appointment.doctor_id,  # Use doctor_id to fetch doctor details separately
                     'created_at': appointment.created_at,

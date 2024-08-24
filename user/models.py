@@ -2,6 +2,7 @@ from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import(BaseUserManager, AbstractBaseUser)
 from django.contrib.auth.models import User
+from django.forms import ValidationError
 
 class CustomUserManager(BaseUserManager):
     def create_user(self,phone,email=None,password=None,address=None):
@@ -198,19 +199,33 @@ class Appointment(models.Model):
         ('completed', 'Completed'),
         ('cancelled', 'Cancelled'),
     ]
+    TIME_SLOTS = [
+        ('12:00 PM', '12:00 PM'),
+        ('1:00 PM', '1:00 PM'),
+        ('2:00 PM', '2:00 PM'),
+        ('3:00 PM', '3:00 PM'),
+        ('4:00 PM', '4:00 PM'),
+        ('5:00 PM', '5:00 PM'),
+    ]
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     phone = models.CharField(max_length=15,null=False,blank=True)
     specialty = models.CharField(max_length=10, choices=STATUS_CHOICES,null=False,blank=True)
     doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE)
     appointment_date = models.DateTimeField()
-    # time_slot = models.ForeignKey(UserTimeslot, on_delete=models.CASCADE,null=True, blank=True)
+    time_slot = models.CharField(max_length=10, choices=TIME_SLOTS, null=False, blank=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES)
     message = models.TextField(null=True, blank=True) 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     def clean(self):
-        # validation 
-        pass
+        # Custom validation logic to ensure a time slot isn't double booked
+        if Appointment.objects.filter(
+            doctor=self.doctor,
+            appointment_date=self.appointment_date,
+            time_slot=self.time_slot,
+            status='scheduled'
+        ).exists():
+            raise ValidationError(f'The time slot {self.time_slot} on {self.appointment_date} is already booked.')
 
 
 # exercise email reminder   
