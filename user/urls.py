@@ -33,6 +33,7 @@ urlpatterns = [
     path('update-doctor',views.update_doctor, name='update-doctor'),
     path('delete-doctor',views.delete_doctor, name='delete-doctor'),
     path('get-specialties',views.get_specialties, name="get_specialties"),
+    path('get-locations',views.get_locations, name="get_locations"),
     # Form Submission of Appointment
     path('submit-appointment',views.submit_appointment, name="submit-appointment"),
     path('get-available-time-slots',views.get_available_time_slots, name="get-available-slots"),

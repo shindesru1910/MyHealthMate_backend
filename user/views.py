@@ -472,6 +472,17 @@ def get_specialties(request):
         return JsonResponse({'specialties': list(specialties), 'status': 200}, status=200)
     except Exception as e:
         return JsonResponse({'msg': str(e), 'status': 500}, status=200)
+@csrf_exempt
+def get_locations(request):
+    if request.method != 'GET':
+        return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=200)
+    
+    try:
+        # Retrieve unique specialties from the Doctor model
+        locations = Doctor.objects.values_list('location', flat=True).distinct()
+        return JsonResponse({'locations': list(locations), 'status': 200}, status=200)
+    except Exception as e:
+        return JsonResponse({'msg': str(e), 'status': 500}, status=200)
     
 # For Submitting the Appointment form, Submit API
 # @csrf_exempt
@@ -3426,32 +3437,6 @@ def get_doctors(request):
         'status': 200,
         'data': doctor_data
     })
-
-
-
-# @csrf_exempt
-# def get_health_overview(request, user_id):
-#     try:
-#         # Fetch the UserProfile using the user_id
-#         user_profile = UserProfile.objects.get(user_id=user_id)
-        
-#         heart_rate_data = list(HeartRateData.objects.filter(user_profile=user_profile).values('date', 'heart_rate'))
-#         blood_pressure_data = list(BloodPressureData.objects.filter(user_profile=user_profile).values('date', 'systolic', 'diastolic'))
-#         step_count_data = list(StepCountData.objects.filter(user_profile=user_profile).values('date', 'steps'))
-
-#         data = {
-#             'heartRateData': heart_rate_data,
-#             'bloodPressureData': blood_pressure_data,
-#             'stepCountData': step_count_data,
-#         }
-
-#         return JsonResponse({'data': data, 'status': 200}, status=200)
-
-#     except UserProfile.DoesNotExist:
-#         return JsonResponse({'error': 'UserProfile not found', 'status': 404}, status=404)
-#     except Exception as e:
-#         return JsonResponse({'error': str(e), 'status': 500}, status=500)
-
 
 import json
 from django.http import JsonResponse
