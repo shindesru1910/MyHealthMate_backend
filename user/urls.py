@@ -33,9 +33,10 @@ urlpatterns = [
     path('update-doctor',views.update_doctor, name='update-doctor'),
     path('delete-doctor',views.delete_doctor, name='delete-doctor'),
     path('get-specialties',views.get_specialties, name="get_specialties"),
+    path('get-locations',views.get_locations, name="get_locations"),
     # Form Submission of Appointment
     path('submit-appointment',views.submit_appointment, name="submit-appointment"),
-    path('get-available-slots',views.get_available_slots, name="get-available-slots"),
+    path('get-available-time-slots',views.get_available_time_slots, name="get-available-slots"),
 
     path('create-exercise-plan',views.create_exerciseplan, name='create-exercise-plan'),
     path('get-exercise-plan',views.get_exerciseplan, name='get-exercise-plan'),
@@ -102,4 +103,8 @@ urlpatterns = [
     path('get-specialties-and-locations', views.get_specialties_and_locations, name='get-specialties-and-locations'),
     path('get-doctors', views.get_doctors, name='get-doctors'),
 
+    path('save-health-data/', views.save_health_data, name='save_health_data'),
+    path('fetch-health-data/', views.fetch_health_data, name='fetch_health_data'),
+
+    # path('api/health-overview/<int:user_id>/', views.get_health_overview, name='get_health_overview'),
     ] 
