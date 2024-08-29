@@ -98,10 +98,10 @@ urlpatterns = [
     path('files/', views.list_files, name='list_files'),
     path('download/<str:filename>/', views.download_file, name='download_file'),
     path('delete/<str:filename>/', views.delete_file, name='delete_file'),
-    path('get_uploaded_files/', views.get_uploaded_files, name='get_uploaded_files'), #for user's view
+    path('get_uploaded_files/', views.get_uploaded_files, name='get_uploaded_files'), 
     
-    path('get-specialties-and-locations', views.get_specialties_and_locations, name='get_specialties_and_locations'),
-    path('get-doctors', views.get_doctors, name='get_doctors'),
+    path('get-specialties-and-locations', views.get_specialties_and_locations, name='get-specialties-and-locations'),
+    path('get-doctors', views.get_doctors, name='get-doctors'),
 
     path('save-health-data/', views.save_health_data, name='save_health_data'),
     path('fetch-health-data/', views.fetch_health_data, name='fetch_health_data'),

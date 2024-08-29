@@ -3393,28 +3393,7 @@ def delete_file(request, filename):
 
 
 
-
-# View to fetch unique specialties and locations
-@csrf_exempt
-def get_specialties_and_locations(request):
-    specialty = request.GET.get('specialty', '')
-    
-    if specialty:
-        # Filter locations based on the selected specialty
-        locations = Doctor.objects.filter(specialty__iexact=specialty).values_list('location', flat=True).distinct()
-    else:
-        # Get all locations if no specialty is selected
-        locations = Doctor.objects.values_list('location', flat=True).distinct()
-
-    specialties = Doctor.objects.values_list('specialty', flat=True).distinct()
-
-    return JsonResponse({
-        'status': 200,
-        'specialties': list(specialties),
-        'locations': list(locations)
-    })
-
-# View to fetch doctors based on filters
+# # View to fetch doctors based on filters
 @csrf_exempt
 def get_doctors(request):
     specialty = request.GET.get('specialty', '')
@@ -3437,6 +3416,18 @@ def get_doctors(request):
         'status': 200,
         'data': doctor_data
     })
+
+# for the user chatbot filtering speciality and location.
+@csrf_exempt
+def get_specialties_and_locations(request):
+    specialties = Doctor.objects.values_list('specialty', flat=True).distinct()
+    locations = Doctor.objects.values_list('location', flat=True).distinct()
+    
+    data = {
+        'specialties': list(specialties),
+        'locations': list(locations)
+    }
+    return JsonResponse({'status': 200, 'data': data})
 
 import json
 from django.http import JsonResponse
