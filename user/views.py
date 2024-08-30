@@ -1246,8 +1246,9 @@ def get_exercise_recommendations(request):
                     },
                     "Rest Days": "Ensure 1-2 rest days per week to allow the body to recover.",
                     "videos": [
-                        "https://www.youtube.com/watch?v=DK2Erw90gMw",
-                        "https://www.youtube.com/watch?v=7zPiD3ibvCc"
+                        "https://www.youtube.com/watch?v=s8CT1yk0a6o",
+                        "https://www.youtube.com/watch?v=_qffTVRCWmY",
+                        "https://www.youtube.com/watch?v=FB5-7tIiX-I"
                     ]
                 },
                 "lightly_active": {
@@ -1284,7 +1285,8 @@ def get_exercise_recommendations(request):
                         "Activities": "Engage in light activities like walking, stretching, or recreational sports to stay active without stressing the body."
                     },"videos": [
                         "https://www.youtube.com/watch?v=KIxb-y3CaFk",
-                        "https://www.youtube.com/watch?v=UFP5xIk2RhA"
+                        "https://www.youtube.com/watch?v=UFP5xIk2RhA",
+                        "https://www.youtube.com/watch?v=NhTgbEKadnk"
                     ]
                 },
                 "moderately_active": {
@@ -1327,7 +1329,8 @@ def get_exercise_recommendations(request):
                     },
                     "videos": [
                         "https://www.youtube.com/watch?v=uHYjN6Ou2-M",
-                        "https://www.youtube.com/watch?v=rYlLXrKhRAc"
+                        "https://www.youtube.com/watch?v=rYlLXrKhRAc",
+                        "https://www.youtube.com/watch?v=_qffTVRCWmY"
                     ]
                 },
                 "very_active": {
@@ -1369,8 +1372,9 @@ def get_exercise_recommendations(request):
                         "Activities": "Light activities like yoga, stretching, walking, or swimming at a relaxed pace to allow recovery without total inactivity.",
                         "Focus": "Incorporate adequate sleep, hydration, and nutrition to support the high activity level."
                     },"videos": [
-                        "https://www.youtube.com/watch?v=DK2Erw90gMw",
-                        "https://www.youtube.com/watch?v=7zPiD3ibvCc"
+                        "https://www.youtube.com/watch?v=FB5-7tIiX-I",
+                        "https://www.youtube.com/watch?v=_qffTVRCWmY",
+                        "https://www.youtube.com/watch?v=ddFkUzp3GwI",
                     ]
                 }
             }
@@ -1445,7 +1449,8 @@ def get_exercise_recommendations(request):
                     },
                     "videos": [
                         "https://www.youtube.com/watch?v=HUx7GTeSoJw",
-                        "https://www.youtube.com/watch?v=meQwgZzVczc"
+                        "https://www.youtube.com/watch?v=meQwgZzVczc",
+                        "https://www.youtube.com/watch?v=ddFkUzp3GwI"
                     ]
                 },
                 "flexibility": {
@@ -1461,7 +1466,8 @@ def get_exercise_recommendations(request):
                     },
                     "videos": [
                         "https://www.youtube.com/watch?v=v7AYKMP6rOE",
-                        "https://www.youtube.com/watch?v=VaoV1PrYft4"
+                        "https://www.youtube.com/watch?v=VaoV1PrYft4",
+                        "https://www.youtube.com/watch?v=nbiBfhmHJhw"
                     ]
                 },
                 "general_fitness": {
@@ -1478,7 +1484,8 @@ def get_exercise_recommendations(request):
                     },
                     "videos": [
                         "https://www.youtube.com/watch?v=MLqgL81V87A",
-                        "https://www.youtube.com/watch?v=X3-gKPNyrTA"
+                        "https://www.youtube.com/watch?v=X3-gKPNyrTA",
+                        "https://www.youtube.com/watch?v=oDPOHMFcFsA"
                     ]
                 },
                 "stress_relief": {
@@ -1499,7 +1506,8 @@ def get_exercise_recommendations(request):
                     },
                     "videos": [
                         "https://www.youtube.com/watch?v=aNXKjGFUlMs",
-                        "https://www.youtube.com/watch?v=SEfs5TJZ6Nk"
+                        "https://www.youtube.com/watch?v=SEfs5TJZ6Nk",
+                        "https://www.youtube.com/watch?v=A2CjvqsptiU"
                     ]
                 }
             },
@@ -1519,7 +1527,8 @@ def get_exercise_recommendations(request):
                     },
                     "videos": [
                         "https://www.youtube.com/watch?v=sVdQ2q8ZStI",
-                        "https://www.youtube.com/watch?v=UFP5xIk2RhA"
+                        "https://www.youtube.com/watch?v=UFP5xIk2RhA",
+                        "https://www.youtube.com/watch?v=YCLY7YQA7MQ"
                     ]
                 },
                 "muscle_gain": {
@@ -1535,7 +1544,8 @@ def get_exercise_recommendations(request):
                     },
                     "videos": [
                         "https://www.youtube.com/watch?v=7zPiD3ibvCc",
-                        "https://www.youtube.com/watch?v=HUx7GTeSoJw"
+                        "https://www.youtube.com/watch?v=HUx7GTeSoJw",
+                        "https://www.youtube.com/watch?v=ze-VVHYfP9c"
                     ]
                 },
                 "flexibility": {
@@ -1551,7 +1561,8 @@ def get_exercise_recommendations(request):
                     },
                     "videos": [
                         "https://www.youtube.com/watch?v=KIxb-y3CaFk",
-                        "https://www.youtube.com/watch?v=uHYjN6Ou2-M"
+                        "https://www.youtube.com/watch?v=uHYjN6Ou2-M",
+                        "https://www.youtube.com/watch?v=s8CT1yk0a6o"
                     ]
                 },
                 "general_fitness": {
@@ -1568,7 +1579,8 @@ def get_exercise_recommendations(request):
                     },
                     "videos": [
                         "https://www.youtube.com/watch?v=e3-zpBc_hg8",
-                        "https://www.youtube.com/watch?v=iZ-PywX9roo"
+                        "https://www.youtube.com/watch?v=iZ-PywX9roo",
+                        "https://www.youtube.com/watch?v=s8CT1yk0a6o"
                     ]
                 },
                 "stress_relief": {
@@ -1584,7 +1596,8 @@ def get_exercise_recommendations(request):
                     },
                     "videos": [
                         "https://www.youtube.com/watch?v=rYlLXrKhRAc",
-                        "https://www.youtube.com/watch?v=MLqgL81V87A"
+                        "https://www.youtube.com/watch?v=MLqgL81V87A",
+                        "https://www.youtube.com/watch?v=YCLY7YQA7MQ"
                     ]
                 }
             },
@@ -1604,7 +1617,8 @@ def get_exercise_recommendations(request):
                     },
                     "videos": [
                         "https://www.youtube.com/watch?v=UFP5xIk2RhA",
-                        "https://www.youtube.com/watch?v=meQwgZzVczc"
+                        "https://www.youtube.com/watch?v=meQwgZzVczc",
+                        "https://www.youtube.com/watch?v=A2CjvqsptiU"
                     ]
                 },
                 "muscle_gain": {
@@ -1620,7 +1634,8 @@ def get_exercise_recommendations(request):
                     },
                     "videos": [
                         "https://www.youtube.com/watch?v=KIxb-y3CaFk",
-                        "https://www.youtube.com/watch?v=HUx7GTeSoJw"
+                        "https://www.youtube.com/watch?v=HUx7GTeSoJw",
+                        "https://www.youtube.com/watch?v=FB5-7tIiX-I"
                     ]
                 },
                 "flexibility": {
@@ -1636,7 +1651,8 @@ def get_exercise_recommendations(request):
                     },
                     "videos": [
                         "https://www.youtube.com/watch?v=3jiL6bhR64Y",
-                        "https://www.youtube.com/watch?v=KIxb-y3CaFk"
+                        "https://www.youtube.com/watch?v=KIxb-y3CaFk",
+                        "https://www.youtube.com/watch?v=FB5-7tIiX-I"
                     ]
                 },
                 "general_fitness": {
@@ -1653,7 +1669,8 @@ def get_exercise_recommendations(request):
                     },
                     "videos": [
                         "https://www.youtube.com/watch?v=1DYH5ud3zHo",
-                        "https://www.youtube.com/watch?v=UFP5xIk2RhA"
+                        "https://www.youtube.com/watch?v=UFP5xIk2RhA",
+                        "https://www.youtube.com/watch?v=NhTgbEKadnk"
                     ]
                 },
                 "stress_relief": {
@@ -1669,7 +1686,8 @@ def get_exercise_recommendations(request):
                     },
                     "videos": [
                         "https://www.youtube.com/watch?v=aNXKjGFUlMs",
-                        "https://www.youtube.com/watch?v=X3-gKPNyrTA"
+                        "https://www.youtube.com/watch?v=X3-gKPNyrTA",
+                        "https://www.youtube.com/watch?v=_qffTVRCWmY"
                     ]
                 }
             },
@@ -1689,7 +1707,8 @@ def get_exercise_recommendations(request):
                     },
                     "videos": [
                         "https://www.youtube.com/watch?v=4o2Bqdm6wm8",
-                        "https://www.youtube.com/watch?v=kjdXYdj2X2s"
+                        "https://www.youtube.com/watch?v=kjdXYdj2X2s",
+                        "https://www.youtube.com/watch?v=ddFkUzp3GwI"
                     ]
                 },
                 "muscle_gain": {
@@ -1705,7 +1724,8 @@ def get_exercise_recommendations(request):
                     },
                     "videos": [
                         "https://www.youtube.com/watch?v=HUx7GTeSoJw",
-                        "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                        "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                        "https://www.youtube.com/watch?v=nbiBfhmHJhw"
                     ]
                 },
                 "flexibility": {
@@ -1721,7 +1741,8 @@ def get_exercise_recommendations(request):
                     },
                     "videos": [
                         "https://www.youtube.com/watch?v=KIxb-y3CaFk",
-                        "https://www.youtube.com/watch?v=VaoV1PrYft4"
+                        "https://www.youtube.com/watch?v=VaoV1PrYft4",
+                        "https://www.youtube.com/watch?v=s8CT1yk0a6o"
                     ]
                 },
                 "general_fitness": {
@@ -1738,7 +1759,8 @@ def get_exercise_recommendations(request):
                     },
                     "videos": [
                         "https://www.youtube.com/watch?v=UFP5xIk2RhA",
-                        "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                        "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                        "https://www.youtube.com/watch?v=FB5-7tIiX-I"
                     ]
                 },
                 "stress_relief": {
@@ -1754,7 +1776,8 @@ def get_exercise_recommendations(request):
                     },
                     "videos": [
                         "https://www.youtube.com/watch?v=aNXKjGFUlMs",
-                        "https://www.youtube.com/watch?v=X3-gKPNyrTA"
+                        "https://www.youtube.com/watch?v=X3-gKPNyrTA",
+                        "https://www.youtube.com/watch?v=NhTgbEKadnk"
                     ]
                 }
             }
@@ -3420,14 +3443,22 @@ def get_doctors(request):
 # for the user chatbot filtering speciality and location.
 @csrf_exempt
 def get_specialties_and_locations(request):
-    specialties = Doctor.objects.values_list('specialty', flat=True).distinct()
-    locations = Doctor.objects.values_list('location', flat=True).distinct()
+    specialty = request.GET.get('specialty', '')
     
-    data = {
+    if specialty:
+        # Filter locations based on the selected specialty
+        locations = Doctor.objects.filter(specialty__iexact=specialty).values_list('location', flat=True).distinct()
+    else:
+        # Get all locations if no specialty is selected
+        locations = Doctor.objects.values_list('location', flat=True).distinct()
+
+    specialties = Doctor.objects.values_list('specialty', flat=True).distinct()
+
+    return JsonResponse({
+        'status': 200,
         'specialties': list(specialties),
         'locations': list(locations)
-    }
-    return JsonResponse({'status': 200, 'data': data})
+    })
 
 import json
 from django.http import JsonResponse
