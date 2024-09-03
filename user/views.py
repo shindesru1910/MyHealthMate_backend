@@ -1,13 +1,14 @@
 from datetime import time
 import json
 import logging
+import os
 from django.forms import ValidationError
 from django.utils.dateparse import parse_datetime
 import pytz
 from django.contrib.auth import authenticate, login
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from django.conf import settings
 from . models import *
 from django.contrib.auth.models import User
@@ -19,7 +20,6 @@ from django.contrib.auth.tokens import default_token_generator
 from django.shortcuts import render, redirect
 from django.contrib.auth.forms import SetPasswordForm
 from django.contrib.auth import get_user_model
-from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_decode
 from django.http import JsonResponse
 
@@ -31,7 +31,6 @@ from django.core.mail import send_mail
 
 from django.contrib.auth.decorators import login_required
 
-from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail, BadHeaderError
 from django.http import JsonResponse, HttpResponse
 from django.template.loader import render_to_string
@@ -42,6 +41,8 @@ from django.conf import settings
 from django.contrib.auth.models import User
 import logging
 from django.shortcuts import render
+import jwt
+from django.utils.decorators import method_decorator
 
 def index(request):
     return render(request, 'index.html')
@@ -51,7 +52,6 @@ def index(request):
 
 # import os
 # from django.db.models import Sum
-# import jwt
 # from datetime import datetime,timezone,timedelta
 # from firebase_admin import credentials
 # from firebase_admin import firestore
@@ -472,8 +472,66 @@ def get_specialties(request):
         return JsonResponse({'specialties': list(specialties), 'status': 200}, status=200)
     except Exception as e:
         return JsonResponse({'msg': str(e), 'status': 500}, status=200)
+@csrf_exempt
+def get_locations(request):
+    if request.method != 'GET':
+        return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=200)
+    
+    try:
+        # Retrieve unique specialties from the Doctor model
+        locations = Doctor.objects.values_list('location', flat=True).distinct()
+        return JsonResponse({'locations': list(locations), 'status': 200}, status=200)
+    except Exception as e:
+        return JsonResponse({'msg': str(e), 'status': 500}, status=200)
     
 # For Submitting the Appointment form, Submit API
+# @csrf_exempt
+# def submit_appointment(request):
+#     if request.method == 'POST':
+#         name = request.POST.get('name')
+#         email = request.POST.get('email')
+#         phone = request.POST.get('phone')
+#         date = request.POST.get('date')
+#         specialty = request.POST.get('speciality')
+#         doctor_id = request.POST.get('doctor')
+#         message = request.POST.get('message')
+
+#         print(f'Received data: {name}, {email}, {phone}, {date}, {specialty}, {doctor_id}, {message}')
+
+#         if not all([name, email, phone, date, specialty, doctor_id, message]):
+#             return JsonResponse({'error': 'Missing required fields', 'data': {'name': name, 'email': email, 'phone': phone, 'date': date, 'specialty': specialty, 'doctor_id': doctor_id, 'message': message}}, status=400)
+
+#         try:
+#             user = User.objects.get(email=email)
+#             doctor = Doctor.objects.get(id=doctor_id)
+
+#             if Appointment.objects.filter(doctor=doctor, appointment_date=date).exists():
+#                 return JsonResponse({'error': 'This date slot is already booked'}, status=400)
+
+#             appointment = Appointment(
+#                 user=user,
+#                 doctor=doctor,
+#                 appointment_date=date,
+#                 status='scheduled',
+#                 phone=phone,
+#                 specialty=specialty,
+#                 message=message 
+#             )
+#             appointment.clean()
+#             appointment.save()
+
+#             return JsonResponse({'status': 'OK'})
+#         except User.DoesNotExist:
+#             return JsonResponse({'error': 'User not found'}, status=404)
+#         except Doctor.DoesNotExist:
+#             return JsonResponse({'error': 'Doctor not found'}, status=404)
+#         except ValidationError as e:
+#             return JsonResponse({'error': str(e)}, status=400)
+#         except Exception as e:
+#             return JsonResponse({'error': f'An unexpected error occurred: {str(e)}'}, status=500)
+
+#     return JsonResponse({'error': 'Method not allowed'}, status=405)
+
 @csrf_exempt
 def submit_appointment(request):
     if request.method == 'POST':
@@ -483,24 +541,29 @@ def submit_appointment(request):
         date = request.POST.get('date')
         specialty = request.POST.get('speciality')
         doctor_id = request.POST.get('doctor')
+        time_slot = request.POST.get('time_slot')  # Get the time slot from the request
         message = request.POST.get('message')
 
-        print(f'Received data: {name}, {email}, {phone}, {date}, {specialty}, {doctor_id}, {message}')
+        print(f'Received data: {name}, {email}, {phone}, {date}, {specialty}, {doctor_id}, {time_slot}, {message}')
 
-        if not all([name, email, phone, date, specialty, doctor_id, message]):
-            return JsonResponse({'error': 'Missing required fields', 'data': {'name': name, 'email': email, 'phone': phone, 'date': date, 'specialty': specialty, 'doctor_id': doctor_id, 'message': message}}, status=400)
+        # Ensure all required fields are provided
+        if not all([name, email, phone, date, specialty, doctor_id, time_slot, message]):
+            return JsonResponse({'error': 'Missing required fields'}, status=400)
 
         try:
             user = User.objects.get(email=email)
             doctor = Doctor.objects.get(id=doctor_id)
 
-            if Appointment.objects.filter(doctor=doctor, appointment_date=date).exists():
-                return JsonResponse({'error': 'This date slot is already booked'}, status=400)
+            # Check if an appointment already exists for this doctor, date, and time slot
+            if Appointment.objects.filter(doctor=doctor, appointment_date=date, time_slot=time_slot).exists():
+                return JsonResponse({'error': 'This time slot is already booked'}, status=400)
 
+            # Create a new appointment
             appointment = Appointment(
                 user=user,
                 doctor=doctor,
                 appointment_date=date,
+                time_slot=time_slot,  # Save the time slot in the appointment
                 status='scheduled',
                 phone=phone,
                 specialty=specialty,
@@ -522,24 +585,24 @@ def submit_appointment(request):
     return JsonResponse({'error': 'Method not allowed'}, status=405)
 
 @csrf_exempt
-def get_available_slots(request):
+def get_available_time_slots(request):
     doctor_id = request.GET.get('doctor_id')
-    date = request.GET.get('date')
+    appointment_date = request.GET.get('appointment_date')
 
-    if not doctor_id or not date:
-        return JsonResponse({'error': 'Missing required parameters'}, status=400)
+    booked_slots = Appointment.objects.filter(
+        doctor_id=doctor_id,
+        appointment_date=appointment_date,
+        status='scheduled'
+    ).values_list('time_slot', flat=True)
 
-    try:
-        doctor = Doctor.objects.get(id=doctor_id)
-        booked_slots = Appointment.objects.filter(doctor=doctor, appointment_date=date).values_list('appointment_time', flat=True)
+    all_slots = dict(Appointment.TIME_SLOTS)
+    available_slots = {slot: label for slot, label in all_slots.items()}
 
-        # Example available slots, assuming 30-minute intervals
-        all_slots = ['09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '13:00', '13:30', '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00', '17:30']
-        available_slots = [slot for slot in all_slots if slot not in booked_slots]
+    for slot in booked_slots:
+        if slot in available_slots:
+            available_slots[slot] = 'Booked'
 
-        return JsonResponse({'available_slots': available_slots})
-    except Doctor.DoesNotExist:
-        return JsonResponse({'error': 'Doctor not found'}, status=404)
+    return JsonResponse({'available_slots': available_slots})
 
 
 
@@ -906,9 +969,11 @@ def get_appointments_by_user(request):
             appointments = Appointment.objects.filter(user_id=user_id)
             data = []
             for appointment in appointments:
+                logger.debug(f"Appointment ID: {appointment.id}, Time Slot: {appointment.time_slot}")
                 data.append({
                     'id': appointment.id,
                     'appointment_date': appointment.appointment_date,
+                    'time_slot': appointment.time_slot,  # Include time_slot
                     'status': appointment.status,
                     'doctor': appointment.doctor_id,  # Use doctor_id to fetch doctor details separately
                     'created_at': appointment.created_at,
@@ -1181,8 +1246,9 @@ def get_exercise_recommendations(request):
                     },
                     "Rest Days": "Ensure 1-2 rest days per week to allow the body to recover.",
                     "videos": [
-                        "https://www.youtube.com/watch?v=DK2Erw90gMw",
-                        "https://www.youtube.com/watch?v=7zPiD3ibvCc"
+                        "https://www.youtube.com/watch?v=s8CT1yk0a6o",
+                        "https://www.youtube.com/watch?v=_qffTVRCWmY",
+                        "https://www.youtube.com/watch?v=FB5-7tIiX-I"
                     ]
                 },
                 "lightly_active": {
@@ -1219,7 +1285,8 @@ def get_exercise_recommendations(request):
                         "Activities": "Engage in light activities like walking, stretching, or recreational sports to stay active without stressing the body."
                     },"videos": [
                         "https://www.youtube.com/watch?v=KIxb-y3CaFk",
-                        "https://www.youtube.com/watch?v=UFP5xIk2RhA"
+                        "https://www.youtube.com/watch?v=UFP5xIk2RhA",
+                        "https://www.youtube.com/watch?v=NhTgbEKadnk"
                     ]
                 },
                 "moderately_active": {
@@ -1262,7 +1329,8 @@ def get_exercise_recommendations(request):
                     },
                     "videos": [
                         "https://www.youtube.com/watch?v=uHYjN6Ou2-M",
-                        "https://www.youtube.com/watch?v=rYlLXrKhRAc"
+                        "https://www.youtube.com/watch?v=rYlLXrKhRAc",
+                        "https://www.youtube.com/watch?v=_qffTVRCWmY"
                     ]
                 },
                 "very_active": {
@@ -1304,8 +1372,9 @@ def get_exercise_recommendations(request):
                         "Activities": "Light activities like yoga, stretching, walking, or swimming at a relaxed pace to allow recovery without total inactivity.",
                         "Focus": "Incorporate adequate sleep, hydration, and nutrition to support the high activity level."
                     },"videos": [
-                        "https://www.youtube.com/watch?v=DK2Erw90gMw",
-                        "https://www.youtube.com/watch?v=7zPiD3ibvCc"
+                        "https://www.youtube.com/watch?v=FB5-7tIiX-I",
+                        "https://www.youtube.com/watch?v=_qffTVRCWmY",
+                        "https://www.youtube.com/watch?v=ddFkUzp3GwI",
                     ]
                 }
             }
@@ -1380,7 +1449,8 @@ def get_exercise_recommendations(request):
                     },
                     "videos": [
                         "https://www.youtube.com/watch?v=HUx7GTeSoJw",
-                        "https://www.youtube.com/watch?v=meQwgZzVczc"
+                        "https://www.youtube.com/watch?v=meQwgZzVczc",
+                        "https://www.youtube.com/watch?v=ddFkUzp3GwI"
                     ]
                 },
                 "flexibility": {
@@ -1396,7 +1466,8 @@ def get_exercise_recommendations(request):
                     },
                     "videos": [
                         "https://www.youtube.com/watch?v=v7AYKMP6rOE",
-                        "https://www.youtube.com/watch?v=VaoV1PrYft4"
+                        "https://www.youtube.com/watch?v=VaoV1PrYft4",
+                        "https://www.youtube.com/watch?v=nbiBfhmHJhw"
                     ]
                 },
                 "general_fitness": {
@@ -1413,7 +1484,8 @@ def get_exercise_recommendations(request):
                     },
                     "videos": [
                         "https://www.youtube.com/watch?v=MLqgL81V87A",
-                        "https://www.youtube.com/watch?v=X3-gKPNyrTA"
+                        "https://www.youtube.com/watch?v=X3-gKPNyrTA",
+                        "https://www.youtube.com/watch?v=oDPOHMFcFsA"
                     ]
                 },
                 "stress_relief": {
@@ -1434,7 +1506,8 @@ def get_exercise_recommendations(request):
                     },
                     "videos": [
                         "https://www.youtube.com/watch?v=aNXKjGFUlMs",
-                        "https://www.youtube.com/watch?v=SEfs5TJZ6Nk"
+                        "https://www.youtube.com/watch?v=SEfs5TJZ6Nk",
+                        "https://www.youtube.com/watch?v=A2CjvqsptiU"
                     ]
                 }
             },
@@ -1454,7 +1527,8 @@ def get_exercise_recommendations(request):
                     },
                     "videos": [
                         "https://www.youtube.com/watch?v=sVdQ2q8ZStI",
-                        "https://www.youtube.com/watch?v=UFP5xIk2RhA"
+                        "https://www.youtube.com/watch?v=UFP5xIk2RhA",
+                        "https://www.youtube.com/watch?v=YCLY7YQA7MQ"
                     ]
                 },
                 "muscle_gain": {
@@ -1470,7 +1544,8 @@ def get_exercise_recommendations(request):
                     },
                     "videos": [
                         "https://www.youtube.com/watch?v=7zPiD3ibvCc",
-                        "https://www.youtube.com/watch?v=HUx7GTeSoJw"
+                        "https://www.youtube.com/watch?v=HUx7GTeSoJw",
+                        "https://www.youtube.com/watch?v=ze-VVHYfP9c"
                     ]
                 },
                 "flexibility": {
@@ -1486,7 +1561,8 @@ def get_exercise_recommendations(request):
                     },
                     "videos": [
                         "https://www.youtube.com/watch?v=KIxb-y3CaFk",
-                        "https://www.youtube.com/watch?v=uHYjN6Ou2-M"
+                        "https://www.youtube.com/watch?v=uHYjN6Ou2-M",
+                        "https://www.youtube.com/watch?v=s8CT1yk0a6o"
                     ]
                 },
                 "general_fitness": {
@@ -1503,7 +1579,8 @@ def get_exercise_recommendations(request):
                     },
                     "videos": [
                         "https://www.youtube.com/watch?v=e3-zpBc_hg8",
-                        "https://www.youtube.com/watch?v=iZ-PywX9roo"
+                        "https://www.youtube.com/watch?v=iZ-PywX9roo",
+                        "https://www.youtube.com/watch?v=s8CT1yk0a6o"
                     ]
                 },
                 "stress_relief": {
@@ -1519,7 +1596,8 @@ def get_exercise_recommendations(request):
                     },
                     "videos": [
                         "https://www.youtube.com/watch?v=rYlLXrKhRAc",
-                        "https://www.youtube.com/watch?v=MLqgL81V87A"
+                        "https://www.youtube.com/watch?v=MLqgL81V87A",
+                        "https://www.youtube.com/watch?v=YCLY7YQA7MQ"
                     ]
                 }
             },
@@ -1539,7 +1617,8 @@ def get_exercise_recommendations(request):
                     },
                     "videos": [
                         "https://www.youtube.com/watch?v=UFP5xIk2RhA",
-                        "https://www.youtube.com/watch?v=meQwgZzVczc"
+                        "https://www.youtube.com/watch?v=meQwgZzVczc",
+                        "https://www.youtube.com/watch?v=A2CjvqsptiU"
                     ]
                 },
                 "muscle_gain": {
@@ -1555,7 +1634,8 @@ def get_exercise_recommendations(request):
                     },
                     "videos": [
                         "https://www.youtube.com/watch?v=KIxb-y3CaFk",
-                        "https://www.youtube.com/watch?v=HUx7GTeSoJw"
+                        "https://www.youtube.com/watch?v=HUx7GTeSoJw",
+                        "https://www.youtube.com/watch?v=FB5-7tIiX-I"
                     ]
                 },
                 "flexibility": {
@@ -1571,7 +1651,8 @@ def get_exercise_recommendations(request):
                     },
                     "videos": [
                         "https://www.youtube.com/watch?v=3jiL6bhR64Y",
-                        "https://www.youtube.com/watch?v=KIxb-y3CaFk"
+                        "https://www.youtube.com/watch?v=KIxb-y3CaFk",
+                        "https://www.youtube.com/watch?v=FB5-7tIiX-I"
                     ]
                 },
                 "general_fitness": {
@@ -1588,7 +1669,8 @@ def get_exercise_recommendations(request):
                     },
                     "videos": [
                         "https://www.youtube.com/watch?v=1DYH5ud3zHo",
-                        "https://www.youtube.com/watch?v=UFP5xIk2RhA"
+                        "https://www.youtube.com/watch?v=UFP5xIk2RhA",
+                        "https://www.youtube.com/watch?v=NhTgbEKadnk"
                     ]
                 },
                 "stress_relief": {
@@ -1604,7 +1686,8 @@ def get_exercise_recommendations(request):
                     },
                     "videos": [
                         "https://www.youtube.com/watch?v=aNXKjGFUlMs",
-                        "https://www.youtube.com/watch?v=X3-gKPNyrTA"
+                        "https://www.youtube.com/watch?v=X3-gKPNyrTA",
+                        "https://www.youtube.com/watch?v=_qffTVRCWmY"
                     ]
                 }
             },
@@ -1624,7 +1707,8 @@ def get_exercise_recommendations(request):
                     },
                     "videos": [
                         "https://www.youtube.com/watch?v=4o2Bqdm6wm8",
-                        "https://www.youtube.com/watch?v=kjdXYdj2X2s"
+                        "https://www.youtube.com/watch?v=kjdXYdj2X2s",
+                        "https://www.youtube.com/watch?v=ddFkUzp3GwI"
                     ]
                 },
                 "muscle_gain": {
@@ -1640,7 +1724,8 @@ def get_exercise_recommendations(request):
                     },
                     "videos": [
                         "https://www.youtube.com/watch?v=HUx7GTeSoJw",
-                        "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                        "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                        "https://www.youtube.com/watch?v=nbiBfhmHJhw"
                     ]
                 },
                 "flexibility": {
@@ -1656,7 +1741,8 @@ def get_exercise_recommendations(request):
                     },
                     "videos": [
                         "https://www.youtube.com/watch?v=KIxb-y3CaFk",
-                        "https://www.youtube.com/watch?v=VaoV1PrYft4"
+                        "https://www.youtube.com/watch?v=VaoV1PrYft4",
+                        "https://www.youtube.com/watch?v=s8CT1yk0a6o"
                     ]
                 },
                 "general_fitness": {
@@ -1673,7 +1759,8 @@ def get_exercise_recommendations(request):
                     },
                     "videos": [
                         "https://www.youtube.com/watch?v=UFP5xIk2RhA",
-                        "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                        "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                        "https://www.youtube.com/watch?v=FB5-7tIiX-I"
                     ]
                 },
                 "stress_relief": {
@@ -1689,7 +1776,8 @@ def get_exercise_recommendations(request):
                     },
                     "videos": [
                         "https://www.youtube.com/watch?v=aNXKjGFUlMs",
-                        "https://www.youtube.com/watch?v=X3-gKPNyrTA"
+                        "https://www.youtube.com/watch?v=X3-gKPNyrTA",
+                        "https://www.youtube.com/watch?v=NhTgbEKadnk"
                     ]
                 }
             }
@@ -3077,29 +3165,358 @@ def get_diet_recommendations(request):
 
 
 
-#Medical file upload
-#uploaded by user
-from django.core.files.storage import default_storage
+# for generating the system report
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .models import User, Doctor, Appointment, Feedback
+
+@csrf_exempt
+def generate_system_report(request):
+    # Fetch data from your models (e.g., User, Appointment, Feedback)
+    users = User.objects.all()
+    doctors = Doctor.objects.all()
+    appointments = Appointment.objects.all()
+    feedbacks = Feedback.objects.all()
+
+    # Adjust the queries to reflect your custom User model fields
+    total_users = users.count()
+    total_doctors = doctors.count()
+    total_appointments = appointments.count()
+    upcoming_appointments = appointments.filter(status='upcoming').count()
+    total_feedback = feedbacks.count()
+
+    # If your User model has an is_superuser field, you might use that to check for admin users
+    admin_users = users.filter(is_superuser=True).count()
+
+    # Prepare the data for JSON response
+    data = {
+        'users': {
+            'total': total_users,
+            'admin_users': admin_users,  # Example: Count of admin users
+        },
+        'doctors': {
+            'total': total_doctors,
+        },
+        'appointments': {
+            'total': total_appointments,
+            'upcoming': upcoming_appointments,
+        },
+        'feedbacks': {
+            'total': total_feedback,
+        }
+    }
+
+    # Return the response as JSON
+    return JsonResponse(data)
+
+@csrf_exempt
+def get_user_for_appointment(request, user_id):
+    try:
+        user = User.objects.get(id=user_id)
+        return JsonResponse({'name': f"{user.first_name} {user.last_name}"})
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'User not found'}, status=404)
+
+@csrf_exempt
+def get_doctor_for_appointment(request, doctor_id):
+    try:
+        doctor = Doctor.objects.get(id=doctor_id)
+        return JsonResponse({
+            'first_name': doctor.first_name,
+            'last_name': doctor.last_name,
+            'specialty': doctor.specialty,
+            'location': doctor.location
+        })
+    except Doctor.DoesNotExist:
+        return JsonResponse({'error': 'Doctor not found'}, status=404)
+
+@csrf_exempt
+def delete_appointments(request):
+    if request.method == 'POST':
+        appointment_id = request.POST.get('id')
+        try:
+            appointment = Appointment.objects.get(id=appointment_id)
+            appointment.delete()
+            return JsonResponse({'status': 200, 'msg': 'Appointment deleted successfully'})
+        except Appointment.DoesNotExist:
+            return JsonResponse({'status': 404, 'msg': 'Appointment not found'})
+    return JsonResponse({'status': 405, 'msg': 'Method not allowed'}, status=405)
+
+def get_appointments(request):
+    appointments = Appointment.objects.all()
+    data = [
+        {
+            'id': appt.id,
+            'user': appt.user.id,
+            'doctor': appt.doctor.id,
+            'appointment_date': appt.appointment_date,
+            'status': appt.status,
+            'created_at': appt.created_at,
+            'updated_at': appt.updated_at
+        }
+        for appt in appointments
+    ]
+    return JsonResponse({'status': 200, 'data': data})
+
+from django.utils import timezone
+from datetime import datetime
+import pytz
+
+@csrf_exempt
+def get_upcoming_appointments(request):
+    try:
+        # Get the current time in IST
+        ist = pytz.timezone('Asia/Kolkata')
+        now_ist = timezone.now().astimezone(ist)  # Get the current time in IST
+
+        # Convert appointment_date to IST before filtering
+        upcoming_appointments = Appointment.objects.all()
+        filtered_appointments = []
+
+        for appointment in upcoming_appointments:
+            # Convert appointment_date to IST
+            appointment_ist = appointment.appointment_date.astimezone(ist)
+            if appointment_ist >= now_ist:
+                appointment_dict = {
+                    'id': appointment.id,
+                    'user': appointment.user.id,
+                    'doctor': appointment.doctor.id,
+                    'appointment_date': appointment.appointment_date,
+                    'status': appointment.status,
+                    'created_at': appointment.created_at,
+                    'updated_at': appointment.updated_at,
+                }
+                filtered_appointments.append(appointment_dict)
+
+        return JsonResponse({'total': len(filtered_appointments), 'data': filtered_appointments, 'status': 200}, status=200)
+    except Exception as e:
+        return JsonResponse({'msg': str(e), 'status': 500}, status=500)
+
+import os
+import json
+from django.http import JsonResponse, HttpResponse
+from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
+
+FILE_STORAGE_DIR = os.path.join(settings.BASE_DIR, 'uploaded_files')
+
+if not os.path.exists(FILE_STORAGE_DIR):
+    os.makedirs(FILE_STORAGE_DIR)
+
+
 @csrf_exempt
 def upload_file(request):
-    if request.method == 'POST' and request.FILES:
-        file_urls = []
-        for file_key in request.FILES:
-            file = request.FILES[file_key]
-            file_name = default_storage.save(file.name, file)
-            file_urls.append(default_storage.url(file_name))
-        return JsonResponse({'file_urls': file_urls}, status=201)
-    return JsonResponse({'error': 'No files uploaded'}, status=400)
+    if request.method == 'POST':
+        if 'file' not in request.FILES:
+            return JsonResponse({"error": "No file uploaded."}, status=400)
+        
+        file = request.FILES['file']
+        username = request.POST.get('username', 'anonymous')  # Get the username from the form data
 
-#accessed by admin
+        file_path = os.path.join(FILE_STORAGE_DIR, file.name)
+
+        try:
+            # Save the uploaded file
+            with open(file_path, 'wb+') as destination:
+                for chunk in file.chunks():
+                    destination.write(chunk)
+        except Exception as e:
+            return JsonResponse({"error": f"File save error: {str(e)}"}, status=500)
+
+        # Record the file upload with the username
+        upload_record = {
+            'username': username,
+            'filename': file.name,
+            'upload_date': datetime.now().strftime('%Y-%m-%d %H:%M:%S')  
+        }
+
+        # Save the record in a simple JSON file
+        records_file = os.path.join(FILE_STORAGE_DIR, 'upload_records.json')
+
+        try:
+            if os.path.exists(records_file):
+                with open(records_file, 'r') as f:
+                    records = json.load(f)
+            else:
+                records = []
+
+            records.append(upload_record)
+
+            with open(records_file, 'w') as f:
+                json.dump(records, f)
+        except Exception as e:
+            return JsonResponse({"error": f"Records save error: {str(e)}"}, status=500)
+
+        return JsonResponse({"message": "File uploaded successfully!"})
+    return JsonResponse({"error": "Invalid request method."}, status=400)
+
+#for user's view
 @csrf_exempt
-def get_user_files(request):
-    users = User.objects.all()
-    user_files = []
-    for user in users:
-        files = UploadedFile.objects.filter(user=user)
-        user_files.append({
-            'username': user.first_name + user.last_name,
-            'files': [{'name': file.file.name, 'url': file.file.url} for file in files]
-        })
-    return JsonResponse({'user_files': user_files})
+def get_uploaded_files(request):
+    if request.method == 'GET':
+        username = request.GET.get('username', '')
+        records_file = os.path.join(FILE_STORAGE_DIR, 'upload_records.json')
+
+        if os.path.exists(records_file):
+            try:
+                with open(records_file, 'r') as f:
+                    records = json.load(f)
+                    # Filter records by username
+                    if username:
+                        records = [record for record in records if record.get('username') == username]
+            except json.JSONDecodeError as e:
+                # Handle JSON decoding errors
+                return JsonResponse({"error": "Error reading records."}, status=500)
+        else:
+            records = []
+
+        return JsonResponse({'files': records})
+    
+    return JsonResponse({"error": "Invalid request method."}, status=400)
+
+def list_files(request):
+    records_file = os.path.join(FILE_STORAGE_DIR, 'upload_records.json')
+
+    if os.path.exists(records_file):
+        with open(records_file, 'r') as f:
+            records = json.load(f)
+    else:
+        records = []
+
+    return JsonResponse(records, safe=False)
+
+def download_file(request, filename):
+    file_path = os.path.join(FILE_STORAGE_DIR, filename)
+
+    if os.path.exists(file_path):
+        with open(file_path, 'rb') as file:
+            response = HttpResponse(file.read(), content_type="application/octet-stream")
+            response['Content-Disposition'] = f'attachment; filename={filename}'
+            return response
+    return JsonResponse({"error": "File not found."}, status=404)
+
+@csrf_exempt
+def delete_file(request, filename):
+    file_path = os.path.join(FILE_STORAGE_DIR, filename)
+
+    if os.path.exists(file_path):
+        os.remove(file_path)
+
+        # Also update the records
+        records_file = os.path.join(FILE_STORAGE_DIR, 'upload_records.json')
+        if os.path.exists(records_file):
+            with open(records_file, 'r') as f:
+                records = json.load(f)
+            records = [record for record in records if record['filename'] != filename]
+            with open(records_file, 'w') as f:
+                json.dump(records, f)
+
+        return JsonResponse({"message": "File deleted successfully!"})
+    return JsonResponse({"error": "File not found."}, status=404)
+
+
+
+# # View to fetch doctors based on filters
+@csrf_exempt
+def get_doctors(request):
+    specialty = request.GET.get('specialty', '')
+    location = request.GET.get('location', '')
+
+    # Filter doctors based on the specialty and location
+    doctors = Doctor.objects.filter(specialty__iexact=specialty, location__icontains=location)
+
+    doctor_data = [
+        {
+            'first_name': doctor.first_name,
+            'last_name': doctor.last_name,
+            'specialty': doctor.specialty,
+            'contact_info': doctor.contact_info,
+            'location': doctor.location
+        } for doctor in doctors
+    ]
+
+    return JsonResponse({
+        'status': 200,
+        'data': doctor_data
+    })
+
+# for the user chatbot filtering speciality and location.
+@csrf_exempt
+def get_specialties_and_locations(request):
+    specialty = request.GET.get('specialty', '')
+    
+    if specialty:
+        # Filter locations based on the selected specialty
+        locations = Doctor.objects.filter(specialty__iexact=specialty).values_list('location', flat=True).distinct()
+    else:
+        # Get all locations if no specialty is selected
+        locations = Doctor.objects.values_list('location', flat=True).distinct()
+
+    specialties = Doctor.objects.values_list('specialty', flat=True).distinct()
+
+    return JsonResponse({
+        'status': 200,
+        'specialties': list(specialties),
+        'locations': list(locations)
+    })
+
+import json
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from datetime import datetime, timedelta
+from .models import HealthData
+
+User = get_user_model()
+
+@csrf_exempt
+def save_health_data(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            user_id = data.get('user_id')
+            heart_rate = data.get('heart_rate')
+            systolic = data.get('systolic')
+            diastolic = data.get('diastolic')
+            step_count = data.get('step_count')
+
+            # Ensure user exists
+            user = User.objects.get(id=user_id)
+
+            HealthData.objects.create(
+                user=user,
+                heart_rate=heart_rate,
+                systolic=systolic,
+                diastolic=diastolic,
+                step_count=step_count
+            )
+            
+            return JsonResponse({'message': 'Health data saved successfully'}, status=201)
+        except User.DoesNotExist:
+            return JsonResponse({'error': 'User not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+@csrf_exempt
+def fetch_health_data(request):
+    if request.method == 'GET':
+        try:
+            user_id = request.GET.get('user_id')
+            timeframe = request.GET.get('timeframe', 'monthly')
+            
+            if timeframe == 'weekly':
+                start_date = datetime.now() - timedelta(weeks=1)
+            elif timeframe == 'monthly':
+                start_date = datetime.now() - timedelta(days=30)
+            else:
+                return JsonResponse({'error': 'Invalid timeframe'}, status=400)
+            
+            user = User.objects.get(id=user_id)
+            health_data = HealthData.objects.filter(user=user, date__gte=start_date).values('date', 'heart_rate', 'systolic', 'diastolic', 'step_count')
+            
+            return JsonResponse(list(health_data), safe=False, status=200)
+        except User.DoesNotExist:
+            return JsonResponse({'error': 'User not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)

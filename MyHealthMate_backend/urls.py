@@ -22,6 +22,4 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('',include('user.urls')),
 
-    # path('admin/user-files/', get_user_files, name='get_user_files'),
-
 ]

@@ -2,7 +2,7 @@ from django.urls import path
 from . import views
 from django.views.generic import TemplateView
 from django.contrib.auth import views as auth_views
-from user.views import get_user_profile
+# from user.views import get_user_profile
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -14,7 +14,6 @@ urlpatterns = [
     #
     # path('accounts/login/', auth_views.LoginView.as_view(), name='login'),
     path('', views.index, name='index'),
-
 
 
     path('create-user',views.create_user, name='create-user'),
@@ -34,9 +33,10 @@ urlpatterns = [
     path('update-doctor',views.update_doctor, name='update-doctor'),
     path('delete-doctor',views.delete_doctor, name='delete-doctor'),
     path('get-specialties',views.get_specialties, name="get_specialties"),
+    path('get-locations',views.get_locations, name="get_locations"),
     # Form Submission of Appointment
     path('submit-appointment',views.submit_appointment, name="submit-appointment"),
-    path('get-available-slots',views.get_available_slots, name="get-available-slots"),
+    path('get-available-time-slots',views.get_available_time_slots, name="get-available-slots"),
 
     path('create-exercise-plan',views.create_exerciseplan, name='create-exercise-plan'),
     path('get-exercise-plan',views.get_exerciseplan, name='get-exercise-plan'),
@@ -63,11 +63,7 @@ urlpatterns = [
     path('get-appointments-by-user', views.get_appointments_by_user, name='get_appointments_by_user'),
     path('update-appointment',views.update_appointment, name='update-appointment'),
     path('delete-appointment',views.delete_appointment, name='delete-appointment'),
-   
-    # path('create-exercise-reminder',views.create_exercise_reminder, name='create-exercise-reminder'),
-    # path('get-exercise-reminder',views.get_exercise_reminder, name='get-exercise-reminder'),
-    # path('update-exercise-reminder',views.update_exercise_reminder, name='update-exercise-reminder'),
-    # path('delete-exercise-reminder',views.delete_exercise_reminder, name='delete-exercise-reminder'),
+
 
     path('create-feedback',views.create_feedback, name='create-feedback'),
     path('get-feedback',views.get_feedback, name='get-feedback'),
@@ -85,12 +81,30 @@ urlpatterns = [
     path('', TemplateView.as_view(template_name='index.html')), 
 
 
-    path('api/get-user-profile/', get_user_profile, name='get_user_profile'),
+    path('api/get-user-profile/',views.get_user_profile, name='get_user_profile'),
     path('get-exercise-recommendations', views.get_exercise_recommendations, name='get-exercise-recommendations'),
     path('get-diet-recommendations', views.get_diet_recommendations, name='get-diet-recommendations'),
 
-    path('upload-file', views.upload_file, name='upload-file'),
-    path('get-user-files',views.get_user_files, name= 'get-user-files'),
 
+    path('generate-system-report',views.generate_system_report, name= 'generate-system-report'),
+    path('get-upcoming-appointments',views.get_upcoming_appointments, name= 'get-upcoming-appointments'),
 
-    ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    path('api/users/<int:user_id>/',views.get_user_for_appointment, name='get_user'),
+    path('api/doctors/<int:doctor_id>/',views.get_doctor_for_appointment, name='get_doctor'),
+    path('api/delete-appointment/', views.delete_appointments, name='delete_appointment'),
+    path('api/appointments/', views.get_appointments, name='get_appointments'),
+
+    path('upload/', views.upload_file, name='upload_file'),
+    path('files/', views.list_files, name='list_files'),
+    path('download/<str:filename>/', views.download_file, name='download_file'),
+    path('delete/<str:filename>/', views.delete_file, name='delete_file'),
+    path('get_uploaded_files/', views.get_uploaded_files, name='get_uploaded_files'), 
+    
+    path('get-specialties-and-locations', views.get_specialties_and_locations, name='get-specialties-and-locations'),
+    path('get-doctors', views.get_doctors, name='get-doctors'),
+
+    path('save-health-data/', views.save_health_data, name='save_health_data'),
+    path('fetch-health-data/', views.fetch_health_data, name='fetch_health_data'),
+
+    # path('api/health-overview/<int:user_id>/', views.get_health_overview, name='get_health_overview'),
+    ] 
