@@ -547,7 +547,7 @@ def submit_appointment(request):
         print(f'Received data: {name}, {email}, {phone}, {date}, {specialty}, {doctor_id}, {time_slot}, {message}')
 
         # Ensure all required fields are provided
-        if not all([name, email, phone, date, specialty, doctor_id, time_slot, message]):
+        if not all([name, email, phone, date, specialty, doctor_id, time_slot]):
             return JsonResponse({'error': 'Missing required fields'}, status=400)
 
         try:
