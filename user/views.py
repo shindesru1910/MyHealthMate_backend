@@ -95,6 +95,7 @@ def login(request):
     else:
         return JsonResponse({'status': 400, 'msg': 'Check your email or password!!'}, status=400)
 
+
 @csrf_exempt
 def create_user(request):
     if request.method != 'POST':
@@ -535,6 +536,59 @@ def get_locations(request):
 
 #     return JsonResponse({'error': 'Method not allowed'}, status=405)
 
+# @csrf_exempt
+# def submit_appointment(request):
+#     if request.method == 'POST':
+#         name = request.POST.get('name')
+#         email = request.POST.get('email')
+#         phone = request.POST.get('phone')
+#         date = request.POST.get('date')
+#         specialty = request.POST.get('speciality')
+#         doctor_id = request.POST.get('doctor')
+#         time_slot = request.POST.get('time_slot')  # Get the time slot from the request
+#         message = request.POST.get('message')
+
+#         print(f'Received data: {name}, {email}, {phone}, {date}, {specialty}, {doctor_id}, {time_slot}, {message}')
+
+#         # Ensure all required fields are provided
+#         if not all([name, email, phone, date, specialty, doctor_id, time_slot]):
+#             return JsonResponse({'error': 'Missing required fields'}, status=400)
+
+#         try:
+#             user = User.objects.get(email=email)
+#             doctor = Doctor.objects.get(id=doctor_id)
+
+#             # Check if an appointment already exists for this doctor, date, and time slot
+#             if Appointment.objects.filter(doctor=doctor, appointment_date=date, time_slot=time_slot).exists():
+#                 return JsonResponse({'error': 'This time slot is already booked'}, status=400)
+
+#             # Create a new appointment
+#             appointment = Appointment(
+#                 user=user,
+#                 doctor=doctor,
+#                 appointment_date=date,
+#                 time_slot=time_slot,  # Save the time slot in the appointment
+#                 status='scheduled',
+#                 phone=phone,
+#                 specialty=specialty,
+#                 message=message 
+#             )
+#             appointment.clean()
+#             appointment.save()
+
+#             return JsonResponse({'status': 'OK'})
+#         except User.DoesNotExist:
+#             return JsonResponse({'error': 'User not found'}, status=404)
+#         except Doctor.DoesNotExist:
+#             return JsonResponse({'error': 'Doctor not found'}, status=404)
+#         except ValidationError as e:
+#             return JsonResponse({'error': str(e)}, status=400)
+#         except Exception as e:
+#             return JsonResponse({'error': f'An unexpected error occurred: {str(e)}'}, status=500)
+
+#     return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+from django.core.mail import EmailMessage
 @csrf_exempt
 def submit_appointment(request):
     if request.method == 'POST':
@@ -544,12 +598,9 @@ def submit_appointment(request):
         date = request.POST.get('date')
         specialty = request.POST.get('speciality')
         doctor_id = request.POST.get('doctor')
-        time_slot = request.POST.get('time_slot')  # Get the time slot from the request
+        time_slot = request.POST.get('time_slot')
         message = request.POST.get('message')
 
-        print(f'Received data: {name}, {email}, {phone}, {date}, {specialty}, {doctor_id}, {time_slot}, {message}')
-
-        # Ensure all required fields are provided
         if not all([name, email, phone, date, specialty, doctor_id, time_slot]):
             return JsonResponse({'error': 'Missing required fields'}, status=400)
 
@@ -557,25 +608,41 @@ def submit_appointment(request):
             user = User.objects.get(email=email)
             doctor = Doctor.objects.get(id=doctor_id)
 
-            # Check if an appointment already exists for this doctor, date, and time slot
             if Appointment.objects.filter(doctor=doctor, appointment_date=date, time_slot=time_slot).exists():
                 return JsonResponse({'error': 'This time slot is already booked'}, status=400)
 
-            # Create a new appointment
             appointment = Appointment(
                 user=user,
                 doctor=doctor,
                 appointment_date=date,
-                time_slot=time_slot,  # Save the time slot in the appointment
+                time_slot=time_slot,
                 status='scheduled',
                 phone=phone,
                 specialty=specialty,
-                message=message 
+                message=message
             )
             appointment.clean()
             appointment.save()
 
+            # Send confirmation email
+            subject = 'Appointment Booked Successfully'
+            html_message = render_to_string('appointment_email.html', {
+                'name': name,
+                'date': date,
+                'time_slot': time_slot,
+                'doctor': doctor,
+                'specialty': specialty,
+                'phone': phone,
+            })
+            from_email = settings.DEFAULT_FROM_EMAIL
+            recipient_list = [email]
+            
+            message = EmailMessage(subject, html_message, from_email, recipient_list)
+            message.content_subtype = 'html'  # Main content is now text/html
+            message.send()
+
             return JsonResponse({'status': 'OK'})
+        
         except User.DoesNotExist:
             return JsonResponse({'error': 'User not found'}, status=404)
         except Doctor.DoesNotExist:
@@ -586,6 +653,7 @@ def submit_appointment(request):
             return JsonResponse({'error': f'An unexpected error occurred: {str(e)}'}, status=500)
 
     return JsonResponse({'error': 'Method not allowed'}, status=405)
+
 
 @csrf_exempt
 def get_available_time_slots(request):
