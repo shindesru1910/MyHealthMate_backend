@@ -120,8 +120,8 @@ class Doctor(models.Model):
     last_name = models.CharField(max_length=50)
     specialty = models.CharField(max_length=100)
     contact_info = models.CharField(max_length=255)
-    reviews = models.TextField(blank=True, null=True)
-    location = models.CharField(max_length=255)
+    # reviews = models.TextField(blank=True, null=True)
+    location = models.CharField(max_length=255,blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
