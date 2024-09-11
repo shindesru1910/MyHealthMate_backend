@@ -10,6 +10,7 @@ from django.conf.urls.static import static
 urlpatterns = [
     # path('',views.user,name='user'),
     path('login',views.login,name='login'),
+    path('send-email', views.register_user, name='register_user'),
     
     #
     # path('accounts/login/', auth_views.LoginView.as_view(), name='login'),

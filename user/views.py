@@ -101,23 +101,26 @@ def create_user(request):
         return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=403)
     
     try:
+        # Parse JSON data
+        data = json.loads(request.body)
         print("POST Request")
-        phone = request.POST.get('phone')
-        email = request.POST.get('email')
-        first_name = request.POST.get('first_name')
-        last_name = request.POST.get('last_name')
-        date_of_birth = request.POST.get('date_of_birth')
-        gender = request.POST.get('gender')
-        password = request.POST.get('password')
+        
+        phone = data.get('phone')
+        email = data.get('email')
+        first_name = data.get('first_name')
+        last_name = data.get('last_name')
+        date_of_birth = data.get('date_of_birth')
+        gender = data.get('gender')
+        password = data.get('password')
 
-        weight = request.POST.get('weight')
-        height = request.POST.get('height')
-        activity_level = request.POST.get('activity_level')
-        dietary_preferences = request.POST.get('dietary_preferences')
-        health_conditions = request.POST.get('health_conditions')
-        medical_history = request.POST.get('medical_history')
-        health_goals = request.POST.get('health_goals')
-        membership_status = request.POST.get('membership_status')
+        weight = data.get('weight')
+        height = data.get('height')
+        activity_level = data.get('activity_level')
+        dietary_preferences = data.get('dietary_preferences')
+        health_conditions = data.get('health_conditions')
+        medical_history = data.get('medical_history')
+        health_goals = data.get('health_goals')
+        membership_status = data.get('membership_status')
 
         # Validate required fields
         if not phone or not email:
@@ -3520,3 +3523,37 @@ def fetch_health_data(request):
             return JsonResponse({'error': 'User not found'}, status=404)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
+
+# views.py
+from django.core.mail import send_mail
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+
+import logging
+logger = logging.getLogger(__name__)
+
+@csrf_exempt
+def register_user(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            logger.info(f"Received data: {data}")
+            # Process user registration here
+
+            # Extract email from the request
+            email = data.get('email')
+            first_name = data.get('first_name')
+
+            # Send thank you email
+            subject = 'Thank You for Registering!'
+            message = f'Hi {first_name},\n\nThank you for registering on our site!'
+            from_email = 'your-email@example.com'
+
+            send_mail(subject, message, from_email, [email])
+
+            return JsonResponse({'status': 200, 'msg': 'User registered and email sent'})
+        except json.JSONDecodeError:
+            logger.error("JSONDecodeError: Invalid JSON data")
+            return JsonResponse({'status': 400, 'msg': 'Invalid JSON data'})
+    return JsonResponse({'status': 400, 'msg': 'Invalid request'})
