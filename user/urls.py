@@ -107,5 +107,4 @@ urlpatterns = [
     path('save-health-data/', views.save_health_data, name='save_health_data'),
     path('fetch-health-data/', views.fetch_health_data, name='fetch_health_data'),
 
-    # path('api/health-overview/<int:user_id>/', views.get_health_overview, name='get_health_overview'),
     ] 
