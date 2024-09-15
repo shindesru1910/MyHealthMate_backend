@@ -95,22 +95,6 @@ class UserProfile(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
-# class HeartRateData(models.Model):
-#     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='heart_rate_data')
-#     date = models.DateField()
-#     heart_rate = models.IntegerField()
-
-# class BloodPressureData(models.Model):
-#     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='blood_pressure_data')
-#     date = models.DateField()
-#     systolic = models.IntegerField()
-#     diastolic = models.IntegerField()
-
-# class StepCountData(models.Model):
-#     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='step_count_data')
-#     date = models.DateField()
-#     steps = models.IntegerField()
-
 
 class Profile(models.Model):
     user = models.OneToOneField(User,on_delete=models.CASCADE)
@@ -136,8 +120,8 @@ class Doctor(models.Model):
     last_name = models.CharField(max_length=50)
     specialty = models.CharField(max_length=100)
     contact_info = models.CharField(max_length=255)
-    reviews = models.TextField(blank=True, null=True)
-    location = models.CharField(max_length=255)
+    # reviews = models.TextField(blank=True, null=True)
+    location = models.CharField(max_length=255,blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

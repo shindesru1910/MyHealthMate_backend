@@ -95,29 +95,33 @@ def login(request):
     else:
         return JsonResponse({'status': 400, 'msg': 'Check your email or password!!'}, status=400)
 
+
 @csrf_exempt
 def create_user(request):
     if request.method != 'POST':
         return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=403)
     
     try:
+        # Parse JSON data
+        data = json.loads(request.body)
         print("POST Request")
-        phone = request.POST.get('phone')
-        email = request.POST.get('email')
-        first_name = request.POST.get('first_name')
-        last_name = request.POST.get('last_name')
-        date_of_birth = request.POST.get('date_of_birth')
-        gender = request.POST.get('gender')
-        password = request.POST.get('password')
+        
+        phone = data.get('phone')
+        email = data.get('email')
+        first_name = data.get('first_name')
+        last_name = data.get('last_name')
+        date_of_birth = data.get('date_of_birth')
+        gender = data.get('gender')
+        password = data.get('password')
 
-        weight = request.POST.get('weight')
-        height = request.POST.get('height')
-        activity_level = request.POST.get('activity_level')
-        dietary_preferences = request.POST.get('dietary_preferences')
-        health_conditions = request.POST.get('health_conditions')
-        medical_history = request.POST.get('medical_history')
-        health_goals = request.POST.get('health_goals')
-        membership_status = request.POST.get('membership_status')
+        weight = data.get('weight')
+        height = data.get('height')
+        activity_level = data.get('activity_level')
+        dietary_preferences = data.get('dietary_preferences')
+        health_conditions = data.get('health_conditions')
+        medical_history = data.get('medical_history')
+        health_goals = data.get('health_goals')
+        membership_status = data.get('membership_status')
 
         # Validate required fields
         if not phone or not email:
@@ -367,11 +371,11 @@ def create_doctor(request):
         last_name = request.POST['last_name']
         specialty = request.POST['specialty']
         contact_info = request.POST['contact_info']
-        reviews = request.POST['reviews']
+        # reviews = request.POST['reviews']
         location = request.POST['location']
 
         # Create a Doctor object and save it
-        doctor_obj = Doctor(first_name=first_name, last_name=last_name, specialty=specialty, contact_info=contact_info, reviews=reviews, location=location)
+        doctor_obj = Doctor(first_name=first_name, last_name=last_name, specialty=specialty, contact_info=contact_info,  location=location)
         doctor_obj.save()
 
         return JsonResponse({'msg': 'Data has been successfully created', 'status': 200}, status=200)
@@ -391,7 +395,7 @@ def get_doctor(request):
             doctor_dict['last_name'] = doctor.last_name
             doctor_dict['specialty'] = doctor.specialty
             doctor_dict['contact_info'] = doctor.contact_info
-            doctor_dict['reviews'] = doctor.reviews
+            # doctor_dict['reviews'] = doctor.reviews
             doctor_dict['location'] = doctor.location
 
 
@@ -411,7 +415,7 @@ def get_doctor_by_id(request, doctor_id):
             'last_name': doctor.last_name,
             'specialty': doctor.specialty,
             'contact_info': doctor.contact_info,
-            'reviews': doctor.reviews,
+            # 'reviews': doctor.reviews,
             'location': doctor.location
         }
         return JsonResponse({'data': doctor_dict, 'status': 200}, status=200)
@@ -430,7 +434,7 @@ def update_doctor(request):
         last_name = request.POST['last_name']
         specialty = request.POST['specialty']
         contact_info = request.POST['contact_info']
-        reviews = request.POST['reviews']
+        # reviews = request.POST['reviews']
         location = request.POST['location']
 
         doctor = Doctor.objects.get(id = id)
@@ -438,7 +442,7 @@ def update_doctor(request):
         doctor.last_name = last_name
         doctor.specialty = specialty
         doctor.contact_info = contact_info
-        doctor.reviews = reviews
+        # doctor.reviews = reviews
         doctor.location = location
         doctor.save()
         return JsonResponse({'msg':'Data has been updated successfully','status':200},status = 200)
@@ -532,6 +536,59 @@ def get_locations(request):
 
 #     return JsonResponse({'error': 'Method not allowed'}, status=405)
 
+# @csrf_exempt
+# def submit_appointment(request):
+#     if request.method == 'POST':
+#         name = request.POST.get('name')
+#         email = request.POST.get('email')
+#         phone = request.POST.get('phone')
+#         date = request.POST.get('date')
+#         specialty = request.POST.get('speciality')
+#         doctor_id = request.POST.get('doctor')
+#         time_slot = request.POST.get('time_slot')  # Get the time slot from the request
+#         message = request.POST.get('message')
+
+#         print(f'Received data: {name}, {email}, {phone}, {date}, {specialty}, {doctor_id}, {time_slot}, {message}')
+
+#         # Ensure all required fields are provided
+#         if not all([name, email, phone, date, specialty, doctor_id, time_slot]):
+#             return JsonResponse({'error': 'Missing required fields'}, status=400)
+
+#         try:
+#             user = User.objects.get(email=email)
+#             doctor = Doctor.objects.get(id=doctor_id)
+
+#             # Check if an appointment already exists for this doctor, date, and time slot
+#             if Appointment.objects.filter(doctor=doctor, appointment_date=date, time_slot=time_slot).exists():
+#                 return JsonResponse({'error': 'This time slot is already booked'}, status=400)
+
+#             # Create a new appointment
+#             appointment = Appointment(
+#                 user=user,
+#                 doctor=doctor,
+#                 appointment_date=date,
+#                 time_slot=time_slot,  # Save the time slot in the appointment
+#                 status='scheduled',
+#                 phone=phone,
+#                 specialty=specialty,
+#                 message=message 
+#             )
+#             appointment.clean()
+#             appointment.save()
+
+#             return JsonResponse({'status': 'OK'})
+#         except User.DoesNotExist:
+#             return JsonResponse({'error': 'User not found'}, status=404)
+#         except Doctor.DoesNotExist:
+#             return JsonResponse({'error': 'Doctor not found'}, status=404)
+#         except ValidationError as e:
+#             return JsonResponse({'error': str(e)}, status=400)
+#         except Exception as e:
+#             return JsonResponse({'error': f'An unexpected error occurred: {str(e)}'}, status=500)
+
+#     return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+from django.core.mail import EmailMessage
 @csrf_exempt
 def submit_appointment(request):
     if request.method == 'POST':
@@ -541,12 +598,9 @@ def submit_appointment(request):
         date = request.POST.get('date')
         specialty = request.POST.get('speciality')
         doctor_id = request.POST.get('doctor')
-        time_slot = request.POST.get('time_slot')  # Get the time slot from the request
+        time_slot = request.POST.get('time_slot')
         message = request.POST.get('message')
 
-        print(f'Received data: {name}, {email}, {phone}, {date}, {specialty}, {doctor_id}, {time_slot}, {message}')
-
-        # Ensure all required fields are provided
         if not all([name, email, phone, date, specialty, doctor_id, time_slot]):
             return JsonResponse({'error': 'Missing required fields'}, status=400)
 
@@ -554,25 +608,41 @@ def submit_appointment(request):
             user = User.objects.get(email=email)
             doctor = Doctor.objects.get(id=doctor_id)
 
-            # Check if an appointment already exists for this doctor, date, and time slot
             if Appointment.objects.filter(doctor=doctor, appointment_date=date, time_slot=time_slot).exists():
                 return JsonResponse({'error': 'This time slot is already booked'}, status=400)
 
-            # Create a new appointment
             appointment = Appointment(
                 user=user,
                 doctor=doctor,
                 appointment_date=date,
-                time_slot=time_slot,  # Save the time slot in the appointment
+                time_slot=time_slot,
                 status='scheduled',
                 phone=phone,
                 specialty=specialty,
-                message=message 
+                message=message
             )
             appointment.clean()
             appointment.save()
 
+            # Send confirmation email
+            subject = 'Appointment Booked Successfully'
+            html_message = render_to_string('appointment_email.html', {
+                'name': name,
+                'date': date,
+                'time_slot': time_slot,
+                'doctor': doctor,
+                'specialty': specialty,
+                'phone': phone,
+            })
+            from_email = settings.DEFAULT_FROM_EMAIL
+            recipient_list = [email]
+            
+            message = EmailMessage(subject, html_message, from_email, recipient_list)
+            message.content_subtype = 'html'  # Main content is now text/html
+            message.send()
+
             return JsonResponse({'status': 'OK'})
+        
         except User.DoesNotExist:
             return JsonResponse({'error': 'User not found'}, status=404)
         except Doctor.DoesNotExist:
@@ -583,6 +653,7 @@ def submit_appointment(request):
             return JsonResponse({'error': f'An unexpected error occurred: {str(e)}'}, status=500)
 
     return JsonResponse({'error': 'Method not allowed'}, status=405)
+
 
 @csrf_exempt
 def get_available_time_slots(request):
@@ -3520,3 +3591,37 @@ def fetch_health_data(request):
             return JsonResponse({'error': 'User not found'}, status=404)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
+
+# views.py
+from django.core.mail import send_mail
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+
+import logging
+logger = logging.getLogger(__name__)
+
+@csrf_exempt
+def register_user(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            logger.info(f"Received data: {data}")
+            # Process user registration here
+
+            # Extract email from the request
+            email = data.get('email')
+            first_name = data.get('first_name')
+
+            # Send thank you email
+            subject = 'Thank You for Registering!'
+            message = f'Hi {first_name},\n\nThank you for registering on our site!'
+            from_email = 'your-email@example.com'
+
+            send_mail(subject, message, from_email, [email])
+
+            return JsonResponse({'status': 200, 'msg': 'User registered and email sent'})
+        except json.JSONDecodeError:
+            logger.error("JSONDecodeError: Invalid JSON data")
+            return JsonResponse({'status': 400, 'msg': 'Invalid JSON data'})
+    return JsonResponse({'status': 400, 'msg': 'Invalid request'})
