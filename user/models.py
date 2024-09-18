@@ -38,6 +38,7 @@ class User(AbstractBaseUser):
     date_of_birth = models.DateField(null=True,blank=True)
     gender = models.CharField(max_length=6,null=True, choices=[('male', 'Male'), ('female', 'Female'), ('other', 'Other')])
     is_admin = models.BooleanField(default=False)
+    is_doctor = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
