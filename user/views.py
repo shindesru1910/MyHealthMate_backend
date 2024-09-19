@@ -1161,18 +1161,73 @@ def update_appointment(request):
     except Exception as e:
         return JsonResponse({'msg': str(e), 'status': 500}, status=500)
 
+# @csrf_exempt
+# def delete_appointment(request):
+#     if request.method != 'POST':
+#         return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=403)
+    
+#     try:
+#         id = request.POST['id']
+#         appointment = Appointment.objects.get(id=id)
+#         appointment.delete()
+#         return JsonResponse({'msg': 'Data has been removed successfully', 'status': 200}, status=200)
+#     except Exception as e:
+#         return JsonResponse({'msg': str(e), 'status': 500}, status=500)
+
+from django.core.mail import EmailMultiAlternatives
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.template.loader import render_to_string
+from .models import Appointment
+
 @csrf_exempt
 def delete_appointment(request):
     if request.method != 'POST':
         return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=403)
     
     try:
+        # Get the appointment ID from the POST request
         id = request.POST['id']
         appointment = Appointment.objects.get(id=id)
+        
+        # Extract appointment details
+        user_email = appointment.user.email
+        appointment_date = appointment.appointment_date.strftime('%Y-%m-%d')
+        time_slot = appointment.time_slot
+        doctor_name = f"{appointment.doctor.first_name} {appointment.doctor.last_name}"
+        specialty = appointment.specialty
+        phone = appointment.phone
+
+        # Delete the appointment
         appointment.delete()
-        return JsonResponse({'msg': 'Data has been removed successfully', 'status': 200}, status=200)
+
+        # Render the HTML email template with dynamic data
+        html_content = render_to_string('appointment_cancellation_email.html', {
+            'name': appointment.user.first_name,
+            'date': appointment_date,
+            'time_slot': time_slot,
+            'doctor': {'first_name': appointment.doctor.first_name, 'last_name': appointment.doctor.last_name},
+            'specialty': specialty,
+            'phone': phone
+        })
+        
+        # Send cancellation email
+        subject = 'Appointment Cancellation'
+        from_email = 'your-email@example.com'
+        to = [user_email]
+        
+        # Create the email object and attach the HTML content
+        email = EmailMultiAlternatives(subject, '', from_email, to)
+        email.attach_alternative(html_content, "text/html")
+        email.send()
+
+        return JsonResponse({'msg': 'Data has been removed successfully and email sent', 'status': 200}, status=200)
+    
+    except Appointment.DoesNotExist:
+        return JsonResponse({'msg': 'Appointment not found', 'status': 404}, status=404)
     except Exception as e:
         return JsonResponse({'msg': str(e), 'status': 500}, status=500)
+
 
 
 # Feedback APIs
