@@ -24,7 +24,7 @@ from django.utils.http import urlsafe_base64_decode
 from django.http import JsonResponse
 
 from django.contrib.auth import authenticate
-from .authentication import create_token
+from .authentication import create_doctor_token, create_token
 
 from django.utils.dateparse import parse_time
 from django.core.mail import send_mail
@@ -3762,3 +3762,144 @@ def register_user(request):
             logger.error("JSONDecodeError: Invalid JSON data")
             return JsonResponse({'status': 400, 'msg': 'Invalid JSON data'})
     return JsonResponse({'status': 400, 'msg': 'Invalid request'})
+
+import logging
+import pytz
+from django.contrib.auth import authenticate
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .models import Doctor  # Import the Doctor model instead
+
+logger = logging.getLogger(__name__)
+ist_timezone = pytz.timezone('Asia/Kolkata')
+
+
+logger = logging.getLogger(__name__)
+
+@csrf_exempt
+def doctor_login(request):
+    if request.method != 'POST':
+        return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=400)
+
+    try:
+        data = json.loads(request.body)
+        email = data.get('email')
+        password = data.get('password')
+    except json.JSONDecodeError:
+        return JsonResponse({'msg': 'Invalid JSON', 'status': 400}, status=400)
+
+    logger.info(f"Attempting login for email: {email}")
+
+    # Authenticate the doctor using email and password
+    user = authenticate(request, email=email, password=password)
+
+    if user is not None and hasattr(user, 'is_doctor') and user.is_doctor:
+        # Access the Doctor model directly
+        try:
+            doctor = Doctor.objects.get(user=user)
+            specialty = doctor.specialty
+            contact_info = doctor.contact_info
+        except Doctor.DoesNotExist:
+            return JsonResponse({'status': 400, 'msg': 'Doctor not found'}, status=400)
+
+        # Create token with doctor's information
+        token = create_doctor_token(
+            user.id,
+            user.email,
+            f"{user.first_name} {user.last_name}",
+            user.is_admin,
+            specialty,
+            contact_info
+        )
+        return JsonResponse({'status': 200, 'msg': 'Doctor Login Successfully', 'token': token}, status=200)
+    else:
+        return JsonResponse({'status': 400, 'msg': 'Check your email or password!!'}, status=400)
+
+
+
+
+from django.contrib.auth import get_user_model
+@csrf_exempt
+def doctor_registration_view(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        email = data.get('email')
+        password = data.get('password')
+        first_name = data.get('first_name')
+        last_name = data.get('last_name')
+        specialty = data.get('specialty')
+        contact_info = data.get('contact_info')  # This will store the phone number
+        location = data.get('location')
+
+        # Basic validation
+        if not email or not password or not first_name or not last_name or not specialty or not contact_info:
+            return JsonResponse({"error": "All fields are required"}, status=400)
+
+        # Get the custom user model
+        User = get_user_model()
+
+        # Check if the email already exists
+        if User.objects.filter(email=email).exists():
+            return JsonResponse({"error": "Email already exists"}, status=400)
+
+        try:
+            # Create a new doctor
+            user = User.objects.create_doctor(
+                email=email,
+                password=password,
+                first_name=first_name,
+                last_name=last_name,
+                specialty=specialty,
+                contact_info=contact_info,  # Pass the contact info
+                location=location
+            )
+
+            return JsonResponse({
+                "message": "Doctor registration successful!",
+                "user_id": user.id,
+            }, status=201)
+
+        except ValidationError as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+    return JsonResponse({"error": "Method not allowed"}, status=405)
+
+
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from .models import Doctor
+from django.contrib.auth.decorators import login_required
+import json
+
+@login_required
+def doctor_profile(request):
+    doctor = get_object_or_404(Doctor, user=request.user)
+
+    if request.method == 'GET':
+        data = {
+            'first_name': doctor.first_name,
+            'last_name': doctor.last_name,
+            'specialty': doctor.specialty,
+            'contact_info': doctor.contact_info,
+            'location': doctor.location,
+        }
+        return JsonResponse(data, status=200)
+
+    elif request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            # Update doctor fields
+            doctor.first_name = data.get('first_name', doctor.first_name)
+            doctor.last_name = data.get('last_name', doctor.last_name)
+            doctor.specialty = data.get('specialty', doctor.specialty)
+            doctor.contact_info = data.get('contact_info', doctor.contact_info)
+            doctor.location = data.get('location', doctor.location)
+            doctor.save()
+
+            return JsonResponse({'message': 'Profile updated successfully'}, status=200)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+
+    return JsonResponse({'error': 'Method not allowed'}, status=405)

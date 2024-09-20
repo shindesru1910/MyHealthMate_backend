@@ -4,34 +4,86 @@ from django.contrib.auth.models import(BaseUserManager, AbstractBaseUser)
 from django.contrib.auth.models import User
 from django.forms import ValidationError
 
+# class CustomUserManager(BaseUserManager):
+#     def create_user(self,phone,email=None,password=None,address=None):
+#         # c
+#         if not email:
+#             raise ValueError('Users must have an email address')
+#         if not phone:
+#             raise ValueError('Users must have a phone number')
+        
+#         user = self.model(
+#             email = email
+#         )
+#         user.set_password(password)
+#         user.save(using=self._db)
+        
+#         return user
+    
+#     def create_doctor(self, email, password, first_name, last_name, specialty, contact_info, location):
+#         # Create user with doctor flag
+#         user = self.create_user(email=email, password=password)
+#         user.is_doctor = True  # Set the user as a doctor
+#         user.save(using=self._db)
+
+#         # Create a corresponding Doctor profile
+#         doctor = Doctor.objects.create(
+#             user=user,
+#             first_name=first_name,
+#             last_name=last_name,
+#             specialty=specialty,
+#             contact_info=contact_info,
+#             location=location
+#         )
+#         return user
+
+#     def create_superuser(self, phone, password):
+#         user = self.model(
+#             phone=phone,
+
+#         )
+        
+#         user.set_password(password)
+#         user.save(using=self._db)
+#         return user
+    
 class CustomUserManager(BaseUserManager):
-    def create_user(self,phone,email=None,password=None,address=None):
-        # c
+    def create_user(self, email=None, password=None):
         if not email:
             raise ValueError('Users must have an email address')
-        if not phone:
-            raise ValueError('Users must have a phone number')
         
-        user = self.model(
-            email = email
-        )
+        user = self.model(email=email)
         user.set_password(password)
         user.save(using=self._db)
         
-        return user
-
-    def create_superuser(self, phone, password):
-        user = self.model(
-            phone=phone,
-
-        )
-        
-        user.set_password(password)
-        user.save(using=self._db)
         return user
     
+    def create_doctor(self, email, password, first_name, last_name, specialty, contact_info, location):
+        # Create user with doctor flag
+        user = self.create_user(email=email, password=password)
+        user.is_doctor = True  # Set the user as a doctor
+        user.save(using=self._db)
+
+        # Create a corresponding Doctor profile
+        doctor = Doctor.objects.create(
+            user=user,
+            first_name=first_name,
+            last_name=last_name,
+            specialty=specialty,
+            contact_info=contact_info,  # Use contact_info to store phone number
+            location=location
+        )
+        return user
+
+    def create_superuser(self, email, password):
+        user = self.model(email=email)
+        user.set_password(password)
+        user.is_superuser = True
+        user.save(using=self._db)
+        return user
+
 class User(AbstractBaseUser):
-    phone = models.BigIntegerField(null=False)
+    phone = models.BigIntegerField(null=True)
     email = models.EmailField(max_length=50,unique=True)
     first_name = models.CharField(max_length=50,null=True)
     last_name = models.CharField(max_length=50,null= True)
@@ -117,6 +169,7 @@ class ExercisePlan(models.Model):
 
 
 class Doctor(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     specialty = models.CharField(max_length=100)

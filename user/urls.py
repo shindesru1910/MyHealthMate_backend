@@ -107,4 +107,8 @@ urlpatterns = [
     path('save-health-data/', views.save_health_data, name='save_health_data'),
     path('fetch-health-data/', views.fetch_health_data, name='fetch_health_data'),
 
+    path('doctor/register/', views.doctor_registration_view, name='doctor_register'),
+    path('doctor/login/', views.doctor_login, name='doctor_login'),
+    path('api/doctor/profile/', views.doctor_profile, name='doctor_login'),
+
     ] 
