@@ -110,5 +110,6 @@ urlpatterns = [
     path('doctor/register/', views.doctor_registration_view, name='doctor_register'),
     path('doctor/login/', views.doctor_login, name='doctor_login'),
     path('api/doctor/profile/', views.doctor_profile, name='doctor_login'),
+    path('api/doctor/<int:doctor_id>/patients-reports/', views.doctor_patients_and_reports, name='doctor_patients_and_reports'),
 
     ] 

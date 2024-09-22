@@ -194,7 +194,8 @@ class HealthRecommendation(models.Model):
 class HealthReport(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     report_name = models.CharField(max_length=255)
-    report_file = models.CharField(max_length=255)
+    # report_file = models.CharField(max_length=255)
+    report_file = models.FileField(upload_to='reports/')
     date = models.DateTimeField(auto_now_add=True)
 
 # New Appointment class to store appointment data

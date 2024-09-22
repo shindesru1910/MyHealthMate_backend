@@ -3903,3 +3903,111 @@ def doctor_profile(request):
             return JsonResponse({'error': str(e)}, status=400)
 
     return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+
+
+# @csrf_exempt
+# def doctor_patients_and_reports(request, doctor_id):
+#     try:
+#         # Fetch the doctor based on the provided doctor_id (assume doctor is in Doctor model)
+#         doctor = Doctor.objects.get(user__id=doctor_id)
+
+#         # Fetch the appointments for this doctor
+#         appointments = Appointment.objects.filter(doctor=doctor)
+#         patient_ids = appointments.values_list('user_id', flat=True)
+
+#         # Fetch the user (patients) details and their health reports
+#         patients_data = []
+#         for patient_id in patient_ids:
+#             user = User.objects.get(id=patient_id)
+#             user_profile = UserProfile.objects.get(user=user)
+#             health_reports = HealthReport.objects.filter(user=user)
+
+#             # Gather the patient's information
+#             patient_info = {
+#                 'first_name': user.first_name,
+#                 'last_name': user.last_name,
+#                 'email': user.email,
+#                 'phone': user.phone,
+#                 'date_of_birth': user.date_of_birth,
+#                 'gender': user.gender,
+#                 'weight': user_profile.weight,
+#                 'height': user_profile.height,
+#                 'activity_level': user_profile.activity_level,
+#                 'dietary_preferences': user_profile.dietary_preferences,
+#                 'health_conditions': user_profile.health_conditions,
+#                 'medical_history': user_profile.medical_history,
+#                 'health_goals': user_profile.health_goals,
+#                 'membership_status': user_profile.membership_status,
+#                 'reports': list(health_reports.values('report_name', 'report_file', 'date')),
+#             }
+
+#             patients_data.append(patient_info)
+
+#         return JsonResponse({'patients': patients_data}, status=200)
+
+#     except Doctor.DoesNotExist:
+#         return JsonResponse({'error': 'Doctor not found'}, status=404)
+
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .models import HealthReport, Appointment, User, UserProfile, Doctor
+
+@csrf_exempt
+def doctor_patients_and_reports(request, doctor_id):
+    if request.method == 'GET':
+        try:
+            # Fetch the doctor based on the provided doctor_id
+            doctor = Doctor.objects.get(user__id=doctor_id)
+
+            # Fetch the appointments for this doctor
+            appointments = Appointment.objects.filter(doctor=doctor)
+            patient_ids = appointments.values_list('user_id', flat=True)
+
+            # Fetch user (patients) details and their health reports
+            patients_data = []
+            for patient_id in patient_ids:
+                user = User.objects.get(id=patient_id)
+                user_profile = UserProfile.objects.get(user=user)
+                health_reports = HealthReport.objects.filter(user=user)
+
+                # Gather the patient's information
+                patient_info = {
+                    'id': user.id,  # Include patient ID for navigation if needed
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
+                    'email': user.email,
+                    'phone': user.phone,
+                    'date_of_birth': user.date_of_birth,
+                    'gender': user.gender,
+                    'weight': user_profile.weight,
+                    'height': user_profile.height,
+                    'activity_level': user_profile.activity_level,
+                    'dietary_preferences': user_profile.dietary_preferences,
+                    'health_conditions': user_profile.health_conditions,
+                    'medical_history': user_profile.medical_history,
+                    'health_goals': user_profile.health_goals,
+                    'membership_status': user_profile.membership_status,
+                    'reports': [
+                        {
+                            'report_name': report.report_name,
+                            'report_file': report.report_file.url,  # Get URL for downloading
+                            'upload_date': report.date.strftime('%Y-%m-%d %H:%M:%S'),
+                        }
+                        for report in health_reports
+                    ],
+                }
+
+                patients_data.append(patient_info)
+
+            return JsonResponse({'patients': patients_data}, status=200)
+
+        except Doctor.DoesNotExist:
+            return JsonResponse({'error': 'Doctor not found'}, status=404)
+        except User.DoesNotExist:
+            return JsonResponse({'error': 'User not found'}, status=404)
+        except UserProfile.DoesNotExist:
+            return JsonResponse({'error': 'User profile not found'}, status=404)
+
+    return JsonResponse({"error": "Invalid request method."}, status=400)
