@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .bold {
+            font-weight: bold;
+        }
+        .email-content {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e0e0e0;
+        }
+        .header {
+            text-align: center;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f4f4f4;
+            margin-bottom: 20px;
+        }
+        .footer {
+            text-align: center;
+            padding-top: 10px;
+            border-top: 2px solid #f4f4f4;
+            margin-top: 20px;
+        }
+        .details {
+            margin: 20px 0;
+        }
+        .details span {
+            display: block;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 style="color:red">Appointment Cancellation</h1>
+        </div>
+        <h2 style="color:purple">Dear {{ name }},</h2>
+        <h3 class="email-content">Your appointment has been canceled.</h3>
+        <p class="email-content">We’re sorry to inform you that your scheduled appointment has been canceled as per your request. Please review the canceled appointment details below:</p>
+        <div class="details email-content">
+            <h3 class="bold">Canceled Appointment Details:</h3>
+            <span class="bold">Date: {{ date }}</span>
+            <span class="bold">Time Slot: {{ time_slot }}</span>
+            <span class="bold">Doctor: {{ doctor.first_name }} {{ doctor.last_name }}</span>
+            <span class="bold">Specialty: {{ specialty }}</span>
+            <span class="bold">Phone: {{ phone }}</span>
+        </div>
+        <p class="email-content">If you would like to reschedule, please feel free to contact us or visit our website.</p>
+        <p class="email-content">We apologize for any inconvenience this may cause, and we hope to assist you with your health needs in the future.</p>
+        <div class="footer email-content">
+            <p>Best Regards,<br>Your Health Service Team</p>
+        </div>
+    </div>
+</body>
+</html>

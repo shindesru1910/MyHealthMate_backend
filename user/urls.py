@@ -10,6 +10,7 @@ from django.conf.urls.static import static
 urlpatterns = [
     # path('',views.user,name='user'),
     path('login',views.login,name='login'),
+    path('send-email', views.register_user, name='register_user'),
     
     #
     # path('accounts/login/', auth_views.LoginView.as_view(), name='login'),
@@ -105,5 +106,10 @@ urlpatterns = [
 
     path('save-health-data/', views.save_health_data, name='save_health_data'),
     path('fetch-health-data/', views.fetch_health_data, name='fetch_health_data'),
+
+    path('doctor/register/', views.doctor_registration_view, name='doctor_register'),
+    path('doctor/login/', views.doctor_login, name='doctor_login'),
+    path('api/doctor/profile/', views.doctor_profile, name='doctor_login'),
+    path('api/doctor/<int:doctor_id>/patients-reports/', views.doctor_patients_and_reports, name='doctor_patients_and_reports'),
 
     ] 

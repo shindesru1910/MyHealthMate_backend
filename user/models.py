@@ -4,40 +4,93 @@ from django.contrib.auth.models import(BaseUserManager, AbstractBaseUser)
 from django.contrib.auth.models import User
 from django.forms import ValidationError
 
+# class CustomUserManager(BaseUserManager):
+#     def create_user(self,phone,email=None,password=None,address=None):
+#         # c
+#         if not email:
+#             raise ValueError('Users must have an email address')
+#         if not phone:
+#             raise ValueError('Users must have a phone number')
+        
+#         user = self.model(
+#             email = email
+#         )
+#         user.set_password(password)
+#         user.save(using=self._db)
+        
+#         return user
+    
+#     def create_doctor(self, email, password, first_name, last_name, specialty, contact_info, location):
+#         # Create user with doctor flag
+#         user = self.create_user(email=email, password=password)
+#         user.is_doctor = True  # Set the user as a doctor
+#         user.save(using=self._db)
+
+#         # Create a corresponding Doctor profile
+#         doctor = Doctor.objects.create(
+#             user=user,
+#             first_name=first_name,
+#             last_name=last_name,
+#             specialty=specialty,
+#             contact_info=contact_info,
+#             location=location
+#         )
+#         return user
+
+#     def create_superuser(self, phone, password):
+#         user = self.model(
+#             phone=phone,
+
+#         )
+        
+#         user.set_password(password)
+#         user.save(using=self._db)
+#         return user
+    
 class CustomUserManager(BaseUserManager):
-    def create_user(self,phone,email=None,password=None,address=None):
-        # c
+    def create_user(self, email=None, password=None):
         if not email:
             raise ValueError('Users must have an email address')
-        if not phone:
-            raise ValueError('Users must have a phone number')
         
-        user = self.model(
-            email = email
-        )
+        user = self.model(email=email)
         user.set_password(password)
         user.save(using=self._db)
         
-        return user
-
-    def create_superuser(self, phone, password):
-        user = self.model(
-            phone=phone,
-
-        )
-        
-        user.set_password(password)
-        user.save(using=self._db)
         return user
     
+    def create_doctor(self, email, password, first_name, last_name, specialty, contact_info, location):
+        # Create user with doctor flag
+        user = self.create_user(email=email, password=password)
+        user.is_doctor = True  # Set the user as a doctor
+        user.save(using=self._db)
+
+        # Create a corresponding Doctor profile
+        doctor = Doctor.objects.create(
+            user=user,
+            first_name=first_name,
+            last_name=last_name,
+            specialty=specialty,
+            contact_info=contact_info,  # Use contact_info to store phone number
+            location=location
+        )
+        return user
+
+    def create_superuser(self, email, password):
+        user = self.model(email=email)
+        user.set_password(password)
+        user.is_superuser = True
+        user.save(using=self._db)
+        return user
+
 class User(AbstractBaseUser):
-    phone = models.BigIntegerField(null=False)
+    phone = models.BigIntegerField(null=True)
     email = models.EmailField(max_length=50,unique=True)
     first_name = models.CharField(max_length=50,null=True)
     last_name = models.CharField(max_length=50,null= True)
     date_of_birth = models.DateField(null=True,blank=True)
     gender = models.CharField(max_length=6,null=True, choices=[('male', 'Male'), ('female', 'Female'), ('other', 'Other')])
     is_admin = models.BooleanField(default=False)
+    is_doctor = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -95,22 +148,6 @@ class UserProfile(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
-# class HeartRateData(models.Model):
-#     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='heart_rate_data')
-#     date = models.DateField()
-#     heart_rate = models.IntegerField()
-
-# class BloodPressureData(models.Model):
-#     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='blood_pressure_data')
-#     date = models.DateField()
-#     systolic = models.IntegerField()
-#     diastolic = models.IntegerField()
-
-# class StepCountData(models.Model):
-#     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='step_count_data')
-#     date = models.DateField()
-#     steps = models.IntegerField()
-
 
 class Profile(models.Model):
     user = models.OneToOneField(User,on_delete=models.CASCADE)
@@ -132,12 +169,13 @@ class ExercisePlan(models.Model):
 
 
 class Doctor(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     specialty = models.CharField(max_length=100)
     contact_info = models.CharField(max_length=255)
-    reviews = models.TextField(blank=True, null=True)
-    location = models.CharField(max_length=255)
+    # reviews = models.TextField(blank=True, null=True)
+    location = models.CharField(max_length=255,blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -156,7 +194,8 @@ class HealthRecommendation(models.Model):
 class HealthReport(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     report_name = models.CharField(max_length=255)
-    report_file = models.CharField(max_length=255)
+    # report_file = models.CharField(max_length=255)
+    report_file = models.FileField(upload_to='reports/')
     date = models.DateTimeField(auto_now_add=True)
 
 # New Appointment class to store appointment data
@@ -259,5 +298,7 @@ class HealthData(models.Model):
     
     def __str__(self):
         return f"{self.user.username} - {self.date}"
+
+# new models
   
 # Create your models here.
