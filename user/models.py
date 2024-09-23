@@ -168,6 +168,7 @@ class ExercisePlan(models.Model):
     suitable_for = models.TextField(null=False,blank=True)  # JSON field or text to describe suitability
 
 
+# doctor models
 class Doctor(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     first_name = models.CharField(max_length=50)
