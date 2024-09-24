@@ -3970,64 +3970,18 @@ def doctor_patients_and_reports(request, doctor_id):
     return JsonResponse({"error": "Invalid request method."}, status=400)
 
 
-# from django.http import JsonResponse
-# from django.views.decorators.csrf import csrf_exempt
-# from django.views.decorators.http import require_http_methods
-# import json
-# from .models import Doctor
-
-# @csrf_exempt  # Use this only if you have CSRF issues; otherwise, remove it for security.
-# @require_http_methods(["GET", "PUT"])
-# def doctor_detail_view(request, doctor_id):
-#     try:
-#         doctor = Doctor.objects.get(id=doctor_id)
-        
-#         if request.method == "GET":
-#             data = {
-#                 'first_name': doctor.first_name,
-#                 'last_name': doctor.last_name,
-#                 'specialty': doctor.specialty,
-#                 'contact_info': doctor.contact_info,
-#                 'location': doctor.location,
-#             }
-#             return JsonResponse(data)
-
-#         elif request.method == "PUT":
-#             # Assuming the request body contains JSON data
-#             body_unicode = request.body.decode('utf-8')
-#             body_data = json.loads(body_unicode)
-
-#             # Update doctor fields based on incoming data
-#             doctor.first_name = body_data.get('first_name', doctor.first_name)
-#             doctor.last_name = body_data.get('last_name', doctor.last_name)
-#             doctor.specialty = body_data.get('specialty', doctor.specialty)
-#             doctor.contact_info = body_data.get('contact_info', doctor.contact_info)
-#             doctor.location = body_data.get('location', doctor.location)
-#             doctor.save()
-
-#             return JsonResponse({'message': 'Profile updated successfully'})
-
-#     except Doctor.DoesNotExist:
-#         return JsonResponse({'error': 'Doctor not found'}, status=404)
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 import json
-import jwt
 from .models import Doctor
 
-@csrf_exempt
+@csrf_exempt  # Use this only if you have CSRF issues; otherwise, remove it for security.
 @require_http_methods(["GET", "PUT"])
-def doctor_detail_view(request):
-    # Assuming you have a way to extract the token from the request (e.g., headers)
-    token = request.META.get('HTTP_AUTHORIZATION').split(' ')[1]  # Assuming Bearer token
+def doctor_detail_view(request, doctor_id):
     try:
-        decoded_token = jwt.decode(token, 'srushti', algorithms=['HS256'])
-        doctor_id = decoded_token['doctor_id']  # Use this for reference
-
-        # Fetch the actual doctor from the database
         doctor = Doctor.objects.get(id=doctor_id)
-
+        
         if request.method == "GET":
             data = {
                 'first_name': doctor.first_name,
@@ -4039,6 +3993,7 @@ def doctor_detail_view(request):
             return JsonResponse(data)
 
         elif request.method == "PUT":
+            # Assuming the request body contains JSON data
             body_unicode = request.body.decode('utf-8')
             body_data = json.loads(body_unicode)
 
@@ -4052,12 +4007,59 @@ def doctor_detail_view(request):
 
             return JsonResponse({'message': 'Profile updated successfully'})
 
-    except jwt.ExpiredSignatureError:
-        return JsonResponse({'error': 'Token has expired'}, status=401)
-    except jwt.InvalidTokenError:
-        return JsonResponse({'error': 'Invalid token'}, status=401)
     except Doctor.DoesNotExist:
         return JsonResponse({'error': 'Doctor not found'}, status=404)
+
+
+# from django.http import JsonResponse
+# from django.views.decorators.csrf import csrf_exempt
+# from django.views.decorators.http import require_http_methods
+# import json
+# import jwt
+# from .models import Doctor
+
+# @csrf_exempt
+# @require_http_methods(["GET", "PUT"])
+# def doctor_detail_view(request):
+#     # Assuming you have a way to extract the token from the request (e.g., headers)
+#     token = request.META.get('HTTP_AUTHORIZATION').split(' ')[1]  # Assuming Bearer token
+#     try:
+#         decoded_token = jwt.decode(token, 'srushti', algorithms=['HS256'])
+#         doctor_id = decoded_token['doctor_id']  # Use this for reference
+
+#         # Fetch the actual doctor from the database
+#         doctor = Doctor.objects.get(id=doctor_id)
+
+#         if request.method == "GET":
+#             data = {
+#                 'first_name': doctor.first_name,
+#                 'last_name': doctor.last_name,
+#                 'specialty': doctor.specialty,
+#                 'contact_info': doctor.contact_info,
+#                 'location': doctor.location,
+#             }
+#             return JsonResponse(data)
+
+#         elif request.method == "PUT":
+#             body_unicode = request.body.decode('utf-8')
+#             body_data = json.loads(body_unicode)
+
+#             # Update doctor fields based on incoming data
+#             doctor.first_name = body_data.get('first_name', doctor.first_name)
+#             doctor.last_name = body_data.get('last_name', doctor.last_name)
+#             doctor.specialty = body_data.get('specialty', doctor.specialty)
+#             doctor.contact_info = body_data.get('contact_info', doctor.contact_info)
+#             doctor.location = body_data.get('location', doctor.location)
+#             doctor.save()
+
+#             return JsonResponse({'message': 'Profile updated successfully'})
+
+#     except jwt.ExpiredSignatureError:
+#         return JsonResponse({'error': 'Token has expired'}, status=401)
+#     except jwt.InvalidTokenError:
+#         return JsonResponse({'error': 'Invalid token'}, status=401)
+#     except Doctor.DoesNotExist:
+#         return JsonResponse({'error': 'Doctor not found'}, status=404)
 
 
 #appointments associated with the doctor making the request.
