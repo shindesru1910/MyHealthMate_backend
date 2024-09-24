@@ -29,19 +29,6 @@ def create_doctor_token(id, email, name, is_admin, specialty, contact_info):
         'iat': datetime.datetime.now()
     }, 'srushti', algorithm='HS256')
 
-# def create_doctor_token(user_id, email, first_name, last_name, is_admin, specialty, contact_info, doctor_id):
-#     doctorname = f"{first_name or ''} {last_name or ''}".strip()
-#     return jwt.encode({
-#         'doctor_id': doctor_id,  # Use the actual doctor ID from the Doctor table
-#         'doctoremail': email,
-#         'doctorname': doctorname,
-#         'is_admin': is_admin,
-#         'specialty': specialty,
-#         'contact_info': contact_info,
-#         'exp': datetime.datetime.now() + datetime.timedelta(days=7),
-#         'iat': datetime.datetime.now()
-#     }, 'srushti', algorithm='HS256')
-
 
 
 
