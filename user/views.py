@@ -3806,7 +3806,7 @@ def doctor_login(request):
         # Create token with doctor's information
         token = create_doctor_token(
             user.id,
-            doctor_id,
+            doctor_id,  # Use the doctor ID instead of user ID,
             user.email,
             f"{user.first_name} {user.last_name}",
             user.is_admin,

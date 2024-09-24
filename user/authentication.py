@@ -17,9 +17,11 @@ def create_token(id, email,name,is_admin,activity_level,health_goals,dietary_pre
         'iat': datetime.datetime.now()
     }, 'srushti', algorithm='HS256')
 
-def create_doctor_token( user_id,doctor_id,email, name, is_admin, specialty, contact_info):
+
+
+def create_doctor_token(user_id,doctor_id, email, name, is_admin, specialty, contact_info):
     return jwt.encode({
-        'user_id': user_id,
+        'user_id' : user_id,
         'doctor_id': doctor_id,
         'doctoremail': email,
         'doctorname': name,
@@ -29,9 +31,6 @@ def create_doctor_token( user_id,doctor_id,email, name, is_admin, specialty, con
         'exp': datetime.datetime.now() + datetime.timedelta(days=7),
         'iat': datetime.datetime.now()
     }, 'srushti', algorithm='HS256')
-
-
-
 
 
 def decode_token(token):
