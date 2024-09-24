@@ -4054,3 +4054,31 @@ def doctor_detail_view(request):
         return JsonResponse({'error': 'Invalid token'}, status=401)
     except Doctor.DoesNotExist:
         return JsonResponse({'error': 'Doctor not found'}, status=404)
+
+
+#appointments associated with the doctor making the request.
+@csrf_exempt
+def get_doctor_appointments(request, doctor_id):
+    if request.method != 'GET':
+        return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=400)
+
+    # Fetch appointments for the doctor
+    appointments = Appointment.objects.filter(doctor__id=doctor_id)
+
+    appointment_data = [
+        {
+            'user': appointment.user.first_name + ' ' + appointment.user.last_name,
+            'phone': appointment.phone,
+            'specialty': appointment.specialty,
+            'appointment_date': appointment.appointment_date,
+            'time_slot': appointment.time_slot,
+            'status': appointment.status,
+            'message': appointment.message,
+            'created_at': appointment.created_at,
+        } for appointment in appointments
+    ]
+
+    return JsonResponse({
+        'status': 200,
+        'data': appointment_data
+    })

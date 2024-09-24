@@ -17,6 +17,8 @@ def create_token(id, email,name,is_admin,activity_level,health_goals,dietary_pre
         'iat': datetime.datetime.now()
     }, 'srushti', algorithm='HS256')
 
+
+
 def create_doctor_token(id, email, name, is_admin, specialty, contact_info):
     return jwt.encode({
         'doctor_id': id,
@@ -45,9 +47,7 @@ def create_doctor_token(id, email, name, is_admin, specialty, contact_info):
 
 
 
-#for decoding the token
-# SECRET_KEY = 'srushti'  
-# ALGORITHM = 'HS256'
+
 def decode_token(token):
     try:
         payload = jwt.decode(token, 'srushti', algorithm='HS256')
