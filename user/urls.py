@@ -112,4 +112,7 @@ urlpatterns = [
     path('api/doctor/<int:doctor_id>/', views.doctor_detail_view, name='doctor_detail'),
     path('api/doctor/<int:doctor_id>/patients-reports/', views.doctor_patients_and_reports, name='doctor_patients_and_reports'),
 
+    path('api/doctor/<int:doctor_id>/appointments/', views.get_doctor_appointments, name='doctor_appointments'),
+
+
     ] 
