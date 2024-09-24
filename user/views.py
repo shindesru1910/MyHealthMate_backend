@@ -3797,6 +3797,7 @@ def doctor_login(request):
         # Access the Doctor model directly
         try:
             doctor = Doctor.objects.get(user=user)
+            doctor_id = doctor.id # Retrieve doctor ID from the Doctor table
             specialty = doctor.specialty
             contact_info = doctor.contact_info
         except Doctor.DoesNotExist:
@@ -3805,6 +3806,7 @@ def doctor_login(request):
         # Create token with doctor's information
         token = create_doctor_token(
             user.id,
+            doctor_id,  # Use the doctor ID instead of user ID,
             user.email,
             f"{user.first_name} {user.last_name}",
             user.is_admin,
@@ -3922,108 +3924,64 @@ def doctor_patients_and_reports(request, doctor_id):
             # Fetch user (patients) details and their health reports
             patients_data = []
             for patient_id in patient_ids:
-                user = User.objects.get(id=patient_id)
-                user_profile = UserProfile.objects.get(user=user)
-                health_reports = HealthReport.objects.filter(user=user)
+                try:
+                    user = User.objects.get(id=patient_id)
+                    user_profile = UserProfile.objects.get(user=user)
+                    health_reports = HealthReport.objects.filter(user=user)
 
-                # Gather the patient's information
-                patient_info = {
-                    'id': user.id,  # Include patient ID for navigation if needed
-                    'first_name': user.first_name,
-                    'last_name': user.last_name,
-                    'email': user.email,
-                    'phone': user.phone,
-                    'date_of_birth': user.date_of_birth,
-                    'gender': user.gender,
-                    'weight': user_profile.weight,
-                    'height': user_profile.height,
-                    'activity_level': user_profile.activity_level,
-                    'dietary_preferences': user_profile.dietary_preferences,
-                    'health_conditions': user_profile.health_conditions,
-                    'medical_history': user_profile.medical_history,
-                    'health_goals': user_profile.health_goals,
-                    'membership_status': user_profile.membership_status,
-                    'reports': [
-                        {
-                            'report_name': report.report_name,
-                            'report_file': report.report_file.url,  # Get URL for downloading
-                            'upload_date': report.date.strftime('%Y-%m-%d %H:%M:%S'),
-                        }
-                        for report in health_reports
-                    ],
-                }
+                    # Gather the patient's information
+                    patient_info = {
+                        'id': user.id,  # Include patient ID for navigation if needed
+                        'first_name': user.first_name,
+                        'last_name': user.last_name,
+                        'email': user.email,
+                        'phone': user.phone,
+                        'date_of_birth': user.date_of_birth,
+                        'gender': user.gender,
+                        'weight': user_profile.weight,
+                        'height': user_profile.height,
+                        'activity_level': user_profile.activity_level,
+                        'dietary_preferences': user_profile.dietary_preferences,
+                        'health_conditions': user_profile.health_conditions,
+                        'medical_history': user_profile.medical_history,
+                        'health_goals': user_profile.health_goals,
+                        'membership_status': user_profile.membership_status,
+                        'reports': [
+                            {
+                                'report_name': report.report_name,
+                                'report_file': report.report_file.url,  # Get URL for downloading
+                                'upload_date': report.date.strftime('%Y-%m-%d %H:%M:%S'),
+                            }
+                            for report in health_reports
+                        ],
+                    }
+                    patients_data.append(patient_info)
 
-                patients_data.append(patient_info)
+                except User.DoesNotExist:
+                    continue  # Skip this patient if not found
+                except UserProfile.DoesNotExist:
+                    continue  # Skip this patient if profile not found
 
             return JsonResponse({'patients': patients_data}, status=200)
 
         except Doctor.DoesNotExist:
             return JsonResponse({'error': 'Doctor not found'}, status=404)
-        except User.DoesNotExist:
-            return JsonResponse({'error': 'User not found'}, status=404)
-        except UserProfile.DoesNotExist:
-            return JsonResponse({'error': 'User profile not found'}, status=404)
 
     return JsonResponse({"error": "Invalid request method."}, status=400)
 
-# from django.http import JsonResponse
-# from django.views.decorators.csrf import csrf_exempt
-# from django.views.decorators.http import require_http_methods
-# import json
-# from .models import Doctor
 
-# @csrf_exempt  # Use this only if you have CSRF issues; otherwise, remove it for security.
-# @require_http_methods(["GET", "PUT"])
-# def doctor_detail_view(request, doctor_id):
-#     try:
-#         doctor = Doctor.objects.get(id=doctor_id)
-        
-#         if request.method == "GET":
-#             data = {
-#                 'first_name': doctor.first_name,
-#                 'last_name': doctor.last_name,
-#                 'specialty': doctor.specialty,
-#                 'contact_info': doctor.contact_info,
-#                 'location': doctor.location,
-#             }
-#             return JsonResponse(data)
-
-#         elif request.method == "PUT":
-#             # Assuming the request body contains JSON data
-#             body_unicode = request.body.decode('utf-8')
-#             body_data = json.loads(body_unicode)
-
-#             # Update doctor fields based on incoming data
-#             doctor.first_name = body_data.get('first_name', doctor.first_name)
-#             doctor.last_name = body_data.get('last_name', doctor.last_name)
-#             doctor.specialty = body_data.get('specialty', doctor.specialty)
-#             doctor.contact_info = body_data.get('contact_info', doctor.contact_info)
-#             doctor.location = body_data.get('location', doctor.location)
-#             doctor.save()
-
-#             return JsonResponse({'message': 'Profile updated successfully'})
-
-#     except Doctor.DoesNotExist:
-#         return JsonResponse({'error': 'Doctor not found'}, status=404)
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 import json
-import jwt
 from .models import Doctor
 
-@csrf_exempt
+@csrf_exempt  # Use this only if you have CSRF issues; otherwise, remove it for security.
 @require_http_methods(["GET", "PUT"])
-def doctor_detail_view(request):
-    # Assuming you have a way to extract the token from the request (e.g., headers)
-    token = request.META.get('HTTP_AUTHORIZATION').split(' ')[1]  # Assuming Bearer token
+def doctor_detail_view(request, doctor_id):
     try:
-        decoded_token = jwt.decode(token, 'srushti', algorithms=['HS256'])
-        doctor_id = decoded_token['doctor_id']  # Use this for reference
-
-        # Fetch the actual doctor from the database
         doctor = Doctor.objects.get(id=doctor_id)
-
+        
         if request.method == "GET":
             data = {
                 'first_name': doctor.first_name,
@@ -4035,6 +3993,7 @@ def doctor_detail_view(request):
             return JsonResponse(data)
 
         elif request.method == "PUT":
+            # Assuming the request body contains JSON data
             body_unicode = request.body.decode('utf-8')
             body_data = json.loads(body_unicode)
 
@@ -4048,9 +4007,84 @@ def doctor_detail_view(request):
 
             return JsonResponse({'message': 'Profile updated successfully'})
 
-    except jwt.ExpiredSignatureError:
-        return JsonResponse({'error': 'Token has expired'}, status=401)
-    except jwt.InvalidTokenError:
-        return JsonResponse({'error': 'Invalid token'}, status=401)
     except Doctor.DoesNotExist:
         return JsonResponse({'error': 'Doctor not found'}, status=404)
+
+
+# from django.http import JsonResponse
+# from django.views.decorators.csrf import csrf_exempt
+# from django.views.decorators.http import require_http_methods
+# import json
+# import jwt
+# from .models import Doctor
+
+# @csrf_exempt
+# @require_http_methods(["GET", "PUT"])
+# def doctor_detail_view(request):
+#     # Assuming you have a way to extract the token from the request (e.g., headers)
+#     token = request.META.get('HTTP_AUTHORIZATION').split(' ')[1]  # Assuming Bearer token
+#     try:
+#         decoded_token = jwt.decode(token, 'srushti', algorithms=['HS256'])
+#         doctor_id = decoded_token['doctor_id']  # Use this for reference
+
+#         # Fetch the actual doctor from the database
+#         doctor = Doctor.objects.get(id=doctor_id)
+
+#         if request.method == "GET":
+#             data = {
+#                 'first_name': doctor.first_name,
+#                 'last_name': doctor.last_name,
+#                 'specialty': doctor.specialty,
+#                 'contact_info': doctor.contact_info,
+#                 'location': doctor.location,
+#             }
+#             return JsonResponse(data)
+
+#         elif request.method == "PUT":
+#             body_unicode = request.body.decode('utf-8')
+#             body_data = json.loads(body_unicode)
+
+#             # Update doctor fields based on incoming data
+#             doctor.first_name = body_data.get('first_name', doctor.first_name)
+#             doctor.last_name = body_data.get('last_name', doctor.last_name)
+#             doctor.specialty = body_data.get('specialty', doctor.specialty)
+#             doctor.contact_info = body_data.get('contact_info', doctor.contact_info)
+#             doctor.location = body_data.get('location', doctor.location)
+#             doctor.save()
+
+#             return JsonResponse({'message': 'Profile updated successfully'})
+
+#     except jwt.ExpiredSignatureError:
+#         return JsonResponse({'error': 'Token has expired'}, status=401)
+#     except jwt.InvalidTokenError:
+#         return JsonResponse({'error': 'Invalid token'}, status=401)
+#     except Doctor.DoesNotExist:
+#         return JsonResponse({'error': 'Doctor not found'}, status=404)
+
+
+#appointments associated with the doctor making the request.
+@csrf_exempt
+def get_doctor_appointments(request, doctor_id):
+    if request.method != 'GET':
+        return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=400)
+
+    # Fetch appointments for the doctor
+    appointments = Appointment.objects.filter(doctor__id=doctor_id)
+
+    appointment_data = [
+        {
+            'user': appointment.user.first_name + ' ' + appointment.user.last_name,
+            'phone': appointment.phone,
+            'specialty': appointment.specialty,
+            'appointment_date': appointment.appointment_date,
+            'time_slot': appointment.time_slot,
+            'status': appointment.status,
+            'message': appointment.message,
+            'created_at': appointment.created_at,
+        } for appointment in appointments
+    ]
+
+    return JsonResponse({
+        'status': 200,
+        'data': appointment_data
+    })
