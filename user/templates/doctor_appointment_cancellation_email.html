@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointment Cancelled</title>
+</head>
+<body>
+    <h2>Dear {{ name }},</h2>
+    <p>We regret to inform you that your appointment with Dr. {{ doctor.first_name }} {{ doctor.last_name }} (Specialty: {{ specialty }}) on {{ date }} at {{ time_slot }} has been cancelled.</p>
+    <p>If you have any questions, feel free to contact us at {{ phone }}.</p>
+    <p>Thank you for understanding,</p>
+    <p>The MyHealthMate Team</p>
+</body>
+</html>

@@ -4073,6 +4073,7 @@ def get_doctor_appointments(request, doctor_id):
 
     appointment_data = [
         {
+            'id': appointment.id, 
             'user': appointment.user.first_name + ' ' + appointment.user.last_name,
             'phone': appointment.phone,
             'specialty': appointment.specialty,
@@ -4088,3 +4089,70 @@ def get_doctor_appointments(request, doctor_id):
         'status': 200,
         'data': appointment_data
     })
+
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from .models import Appointment
+
+
+@csrf_exempt
+def doctor_delete_appointment(request):
+    if request.method != 'POST':
+        return JsonResponse({'msg': 'Invalid Request', 'status': 403}, status=403)
+
+    try:
+        # Retrieve appointment ID from POST data
+        # id = request.POST.get('id')
+        body = json.loads(request.body)  # Load the JSON body
+        appointment_id = body.get('id')  # Get 'id' from the JSON data
+        print(f"Received appointment ID for cancellation: {id}")  # Log for debugging
+
+        # Fetch the appointment using the provided ID
+        # appointment = Appointment.objects.get(id=id)
+        appointment = Appointment.objects.get(id=appointment_id)
+
+
+        # Gather details for email content
+        user_email = appointment.user.email
+        appointment_date = appointment.appointment_date.strftime('%Y-%m-%d')
+        time_slot = appointment.time_slot
+        doctor_name = f"{appointment.doctor.first_name} {appointment.doctor.last_name}"
+        specialty = appointment.specialty
+        phone = appointment.phone
+
+        # Delete the appointment
+        appointment.delete()
+
+        # Render email content with dynamic data
+        html_content = render_to_string('doctor_appointment_cancellation_email.html', {
+            'name': appointment.user.first_name,
+            'date': appointment_date,
+            'time_slot': time_slot,
+            'doctor': {'first_name': appointment.doctor.first_name, 'last_name': appointment.doctor.last_name},
+            'specialty': specialty,
+            'phone': phone
+        })
+
+        # Set email subject and sender/receiver
+        subject = 'Appointment Cancelled by Doctor'
+        from_email = 'myhealthmate2002@gmail.com'
+        to = [user_email]
+
+        # Create and send the email
+        email = EmailMultiAlternatives(subject, '', from_email, to)
+        email.attach_alternative(html_content, "text/html")
+        email.send()
+
+        # Return success response
+        return JsonResponse({'msg': 'Appointment cancelled and email sent', 'status': 200}, status=200)
+
+    except Appointment.DoesNotExist:
+        return JsonResponse({'msg': 'Appointment not found', 'status': 404}, status=404)
+
+    except Exception as e:
+        print(f"Error during cancellation: {e}")  # Log the error for debugging
+        return JsonResponse({'msg': str(e), 'status': 500}, status=500)
+
