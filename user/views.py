@@ -4156,3 +4156,4 @@ def doctor_delete_appointment(request):
         print(f"Error during cancellation: {e}")  # Log the error for debugging
         return JsonResponse({'msg': str(e), 'status': 500}, status=500)
 
+ 
