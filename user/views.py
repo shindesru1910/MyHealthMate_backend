@@ -4156,3 +4156,59 @@ def doctor_delete_appointment(request):
         print(f"Error during cancellation: {e}")  # Log the error for debugging
         return JsonResponse({'msg': str(e), 'status': 500}, status=500)
 
+# views.py
+
+from django.db.models import Count
+from django.utils import timezone
+from datetime import timedelta
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from .models import Appointment
+
+# Total unique patients
+def get_total_patients(doctor_id):
+    total_patients = Appointment.objects.filter(doctor_id=doctor_id).values('user').distinct().count()
+    return total_patients
+
+# Weekly and monthly appointments
+def get_appointments(doctor_id):
+    today = timezone.now().date()
+    start_of_week = today - timedelta(days=today.weekday())  # Monday of the current week
+    start_of_month = today.replace(day=1)  # 1st day of the month
+
+    weekly_appointments = Appointment.objects.filter(
+        doctor_id=doctor_id,
+        appointment_date__gte=start_of_week
+    ).count()
+
+    monthly_appointments = Appointment.objects.filter(
+        doctor_id=doctor_id,
+        appointment_date__gte=start_of_month
+    ).count()
+
+    return {
+        "weekly_appointments": weekly_appointments,
+        "monthly_appointments": monthly_appointments
+    }
+
+# Appointment status breakdown
+def get_appointment_status_breakdown(doctor_id):
+    status_breakdown = Appointment.objects.filter(doctor_id=doctor_id).values('status').annotate(count=Count('status'))
+    return status_breakdown
+
+# views.py
+
+@api_view(['GET'])
+def doctor_report(request, doctor_id):
+    total_patients = get_total_patients(doctor_id)
+    appointment_counts = get_appointments(doctor_id)
+    status_breakdown = get_appointment_status_breakdown(doctor_id)
+
+    report_data = {
+        "total_patients": total_patients,
+        "weekly_appointments": appointment_counts['weekly_appointments'],
+        "monthly_appointments": appointment_counts['monthly_appointments'],
+        "status_breakdown": status_breakdown
+    }
+
+    return Response(report_data)
