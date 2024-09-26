@@ -4073,6 +4073,7 @@ def get_doctor_appointments(request, doctor_id):
 
     appointment_data = [
         {
+            'id': appointment.id, 
             'user': appointment.user.first_name + ' ' + appointment.user.last_name,
             'phone': appointment.phone,
             'specialty': appointment.specialty,
@@ -4104,11 +4105,15 @@ def doctor_delete_appointment(request):
 
     try:
         # Retrieve appointment ID from POST data
-        id = request.POST.get('id')
+        # id = request.POST.get('id')
+        body = json.loads(request.body)  # Load the JSON body
+        appointment_id = body.get('id')  # Get 'id' from the JSON data
         print(f"Received appointment ID for cancellation: {id}")  # Log for debugging
 
         # Fetch the appointment using the provided ID
-        appointment = Appointment.objects.get(id=id)
+        # appointment = Appointment.objects.get(id=id)
+        appointment = Appointment.objects.get(id=appointment_id)
+
 
         # Gather details for email content
         user_email = appointment.user.email
@@ -4150,3 +4155,4 @@ def doctor_delete_appointment(request):
     except Exception as e:
         print(f"Error during cancellation: {e}")  # Log the error for debugging
         return JsonResponse({'msg': str(e), 'status': 500}, status=500)
+
