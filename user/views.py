@@ -4156,14 +4156,14 @@ def doctor_delete_appointment(request):
         print(f"Error during cancellation: {e}")  # Log the error for debugging
         return JsonResponse({'msg': str(e), 'status': 500}, status=500)
 
-# views.py
 
+
+from django.http import JsonResponse
 from django.db.models import Count
 from django.utils import timezone
 from datetime import timedelta
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from .models import Appointment
+from django.shortcuts import get_object_or_404
+from .models import Appointment  # Adjust the import based on your project structure
 
 # Total unique patients
 def get_total_patients(doctor_id):
@@ -4196,19 +4196,21 @@ def get_appointment_status_breakdown(doctor_id):
     status_breakdown = Appointment.objects.filter(doctor_id=doctor_id).values('status').annotate(count=Count('status'))
     return status_breakdown
 
-# views.py
-
-@api_view(['GET'])
+# Standard Django view for the report
+@csrf_exempt
 def doctor_report(request, doctor_id):
-    total_patients = get_total_patients(doctor_id)
-    appointment_counts = get_appointments(doctor_id)
-    status_breakdown = get_appointment_status_breakdown(doctor_id)
+    if request.method == 'GET':
+        total_patients = get_total_patients(doctor_id)
+        appointment_counts = get_appointments(doctor_id)
+        status_breakdown = get_appointment_status_breakdown(doctor_id)
 
-    report_data = {
-        "total_patients": total_patients,
-        "weekly_appointments": appointment_counts['weekly_appointments'],
-        "monthly_appointments": appointment_counts['monthly_appointments'],
-        "status_breakdown": status_breakdown
-    }
+        report_data = {
+            "total_patients": total_patients,
+            "weekly_appointments": appointment_counts['weekly_appointments'],
+            "monthly_appointments": appointment_counts['monthly_appointments'],
+            "status_breakdown": list(status_breakdown),  # Convert to list if needed
+        }
 
-    return Response(report_data)
+        return JsonResponse(report_data)
+    else:
+        return JsonResponse({"error": "Invalid request method"}, status=400)
