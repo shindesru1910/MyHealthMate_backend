@@ -3763,6 +3763,9 @@ def register_user(request):
             return JsonResponse({'status': 400, 'msg': 'Invalid JSON data'})
     return JsonResponse({'status': 400, 'msg': 'Invalid request'})
 
+
+
+#Doctor Module
 import logging
 import pytz
 from django.contrib.auth import authenticate
@@ -4214,3 +4217,65 @@ def doctor_report(request, doctor_id):
         return JsonResponse(report_data)
     else:
         return JsonResponse({"error": "Invalid request method"}, status=400)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#this API works from the backend
+from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
+from .models import Doctor, Appointment
+from django.utils import timezone
+
+@csrf_exempt
+def get_report(request, doctor_id):
+    try:
+        doctor = get_object_or_404(Doctor, id=doctor_id)
+
+        # Use the correct field for filtering appointments
+        start_date = timezone.now().replace(day=1)  # First day of the month
+        
+        # Get the count of unique patients who took appointments this month
+        patients_count = Appointment.objects.filter(doctor=doctor, appointment_date__gte=start_date)\
+            .values('user').distinct().count()
+
+        # Get appointment data for each patient
+        appointments_data = []
+        appointments = Appointment.objects.filter(doctor=doctor)
+
+        for appointment in appointments:
+            patient = appointment.user  # Assuming 'user' refers to the patient
+            patient_name = f"{patient.first_name} {patient.last_name}"
+
+            # Count total appointments and appointments this month for each patient
+            total_appointments = appointments.filter(user=patient).count()
+            appointments_this_month = appointments.filter(user=patient, appointment_date__gte=start_date).count()
+
+            appointments_data.append({
+                'patientId': patient.id,
+                'patientName': patient_name,
+                'totalAppointments': total_appointments,
+                'appointmentsThisMonth': appointments_this_month,
+            })
+
+        # Return the data as a JSON response
+        return JsonResponse({
+            'patientsCount': patients_count,
+            'appointmentsData': appointments_data,
+        })
+    except Exception as e:
+        return JsonResponse({'error': 'Internal Server Error', 'details': str(e)}, status=500)
