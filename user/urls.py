@@ -114,7 +114,7 @@ urlpatterns = [
 
     path('api/doctor/<int:doctor_id>/appointments/', views.get_doctor_appointments, name='doctor_appointments'),
     path('doctor-delete-appointment', views.doctor_delete_appointment, name='doctor_delete_appointment'),
-    path('api/doctor/reports/<int:doctor_id>/', views.doctor_report, name='doctor_report'),
+    # path('api/doctor/reports/<int:doctor_id>/', views.doctor_report, name='doctor_report'),
 
 
     #this API works from the backend
