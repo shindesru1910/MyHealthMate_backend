@@ -3763,6 +3763,9 @@ def register_user(request):
             return JsonResponse({'status': 400, 'msg': 'Invalid JSON data'})
     return JsonResponse({'status': 400, 'msg': 'Invalid request'})
 
+
+
+#Doctor Module
 import logging
 import pytz
 from django.contrib.auth import authenticate
@@ -4214,3 +4217,171 @@ def doctor_report(request, doctor_id):
         return JsonResponse(report_data)
     else:
         return JsonResponse({"error": "Invalid request method"}, status=400)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#this API works from the backend
+
+# from django.shortcuts import get_object_or_404
+# from django.http import JsonResponse
+# from .models import Doctor, Appointment
+# from django.utils import timezone
+# from django.views.decorators.csrf import csrf_exempt
+
+# @csrf_exempt
+# def get_report(request, doctor_id):
+#     try:
+#         doctor = get_object_or_404(Doctor, id=doctor_id)
+
+#         # Start date for the current month
+#         start_date = timezone.now().replace(day=1)
+
+#         # Get the count of unique patients who took appointments this month
+#         patients_count = Appointment.objects.filter(doctor=doctor, appointment_date__gte=start_date)\
+#             .values('user').distinct().count()
+
+#         # Prepare a dictionary to aggregate appointments by patient
+#         appointments_data = {}
+
+#         # Get all appointments for the doctor
+#         appointments = Appointment.objects.filter(doctor=doctor)
+
+#         for appointment in appointments:
+#             patient = appointment.user  # Assuming 'user' refers to the patient
+#             patient_name = f"{patient.first_name} {patient.last_name}"
+#             patient_id = patient.id
+
+#             # If the patient is already in the dictionary, update their counts
+#             if patient_id in appointments_data:
+#                 appointments_data[patient_id]['totalAppointments'] += 1
+#                 if appointment.appointment_date >= start_date:
+#                     appointments_data[patient_id]['appointmentsThisMonth'] += 1
+#             else:
+#                 # If the patient is not in the dictionary, add a new entry
+#                 appointments_data[patient_id] = {
+#                     'patientId': patient_id,
+#                     'patientName': patient_name,
+#                     'totalAppointments': 1,
+#                     'appointmentsThisMonth': 1 if appointment.appointment_date >= start_date else 0,
+#                 }
+
+#         # Convert the dictionary to a list for the JSON response
+#         appointments_data_list = list(appointments_data.values())
+
+#         # Return the data as a JSON response
+#         return JsonResponse({
+#             'patientsCount': patients_count,
+#             'appointmentsData': appointments_data_list,
+#         })
+
+#     except Exception as e:
+#         return JsonResponse({'error': 'Internal Server Error', 'details': str(e)}, status=500)
+
+
+
+from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
+from .models import Doctor, Appointment
+from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
+from datetime import timedelta
+
+@csrf_exempt
+def get_report(request, doctor_id):
+    try:
+        doctor = get_object_or_404(Doctor, id=doctor_id)
+
+        # Get the time frame from the request (default is 'monthly')
+        time_frame = request.GET.get('timeFrame', 'monthly')
+
+        # Calculate the start date based on the selected time frame
+        now = timezone.now()
+        if time_frame == 'weekly':
+            start_date = now - timedelta(weeks=1)
+        elif time_frame == 'yearly':
+            start_date = now.replace(month=1, day=1)
+        else:  # Default is 'monthly'
+            start_date = now.replace(day=1)
+
+        # Get the count of unique patients who took appointments in the selected time frame
+        patients_count = Appointment.objects.filter(doctor=doctor, appointment_date__gte=start_date)\
+            .values('user').distinct().count()
+
+        # Prepare a dictionary to aggregate appointments by patient
+        appointments_data = {}
+
+        # Get all appointments for the doctor
+        all_appointments = Appointment.objects.filter(doctor=doctor)
+        total_appointments = all_appointments.count()  # Count total appointments
+
+        # Get appointments in the selected time frame
+        appointments_in_time_frame = Appointment.objects.filter(doctor=doctor, appointment_date__gte=start_date)
+
+        # Build lists for patients and appointments
+        patients = []
+        appointments = []
+
+        for appointment in all_appointments:
+            patient = appointment.user  # Assuming 'user' refers to the patient
+            patient_name = f"{patient.first_name} {patient.last_name}"
+            patient_id = patient.id
+
+            # If the patient is already in the dictionary, update their counts
+            if patient_id in appointments_data:
+                appointments_data[patient_id]['totalAppointments'] += 1
+                if appointment.appointment_date >= start_date:
+                    appointments_data[patient_id]['appointmentsThisTimeFrame'] += 1
+            else:
+                # If the patient is not in the dictionary, add a new entry
+                appointments_data[patient_id] = {
+                    'patientId': patient_id,
+                    'patientName': patient_name,
+                    'totalAppointments': 1,
+                    'appointmentsThisTimeFrame': 1 if appointment.appointment_date >= start_date else 0,
+                }
+
+        # Convert the dictionary to a list for the JSON response
+        appointments_data_list = list(appointments_data.values())
+
+        # Get all distinct patients for the doctor
+        distinct_patients = Appointment.objects.filter(doctor=doctor).values('user__id', 'user__first_name', 'user__last_name').distinct()
+        for patient in distinct_patients:
+            patients.append({
+                'patientId': patient['user__id'],
+                'patientName': f"{patient['user__first_name']} {patient['user__last_name']}",
+            })
+
+        # Get all appointments within the selected time frame
+        for appointment in appointments_in_time_frame:
+            appointments.append({
+                'appointmentId': appointment.id,
+                'patientName': f"{appointment.user.first_name} {appointment.user.last_name}",
+                'appointmentDate': appointment.appointment_date.strftime('%Y-%m-%d %H:%M'),
+            })
+
+        # Return the data as a JSON response including totalAppointments and timeFrame-related data
+        return JsonResponse({
+            'patientsCount': patients_count,
+            'totalAppointments': total_appointments,
+            'appointmentsData': appointments_data_list,
+            'patients': patients,  # List of all patients
+            'appointments': appointments,  # List of appointments in the selected time frame
+        })
+
+    except Exception as e:
+        return JsonResponse({'error': 'Internal Server Error', 'details': str(e)}, status=500)
